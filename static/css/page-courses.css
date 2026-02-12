@@ -1,0 +1,278 @@
+/* page-courses.css
+   Original courses page styles with scale-safety tweaks so it doesn't zoom too large
+*/
+
+/* container width — match site .container */
+.container {
+  max-width: 1200px; /* slightly narrower to match visual reference */
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
+/* Hero */
+/* hero as CSS background (full-bleed cover) */
+.hero {
+  position: relative;
+  height: clamp(420px, 55vh, 700px);
+  overflow: hidden;
+
+  /* background image settings */
+  background-size: cover;          /* fill area while preserving aspect */
+  background-position: center;     /* keep subject centered */
+  background-repeat: no-repeat;
+  background-attachment: scroll;    /* safer for some mobile browsers */
+}
+
+/* overlay stays same */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0,0,0,0.28);
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; /* keep subject visible and avoid zooming-left/right */
+  display: block;
+}
+
+
+/* Keep hero content constrained to left area */
+.hero-content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; /* left aligned like original */
+  text-align: left;
+  padding: 48px 1rem;
+  max-width: 760px; /* ensure line-length and scaling look like reference */
+}
+
+/* Responsive, scale-safe hero typography */
+.hero-content h1 {
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.05;
+  /* clamp to keep sizes visually balanced and prevent huge 96px titles */
+  font-size: clamp(34px, 6vw, 64px);
+  letter-spacing: -0.02em;
+}
+
+.hero-content p {
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  margin: 0;
+  font-size: clamp(15px, 2.2vw, 20px);
+  max-width: 880px;
+}
+
+/* teachers-students layout */
+.section { padding: 56px 0; }
+.teachers-students {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 56px;
+  margin-bottom: 40px;
+  align-items: start;
+}
+@media (min-width: 768px) {
+  .teachers-students { grid-template-columns: 1fr 1fr; gap: 80px; }
+}
+
+.teacher-student-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* smaller illustration above the card */
+.teacher-illustration {
+  width: 140px;
+  height: auto;
+  margin-bottom: 18px;
+  object-fit: contain;
+}
+
+/* card that contains icon + label */
+.teacher-student-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+}
+
+.teacher-student-card img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.teacher-student-card h2 {
+  color: #FC8621;
+  font-weight: 700;
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  margin: 0;
+}
+
+/* Ready section */
+.ready-section {
+  background-color: #FC8621;
+  color: #fff;
+  text-align: center;
+  padding: 48px 0;
+}
+.ready-section h2 {
+  font-weight: 700;
+  font-size: clamp(22px, 3.2vw, 40px);
+  margin-bottom: 8px;
+}
+.ready-section p {
+  font-weight: 400;
+  font-size: clamp(14px, 2vw, 20px);
+  margin-bottom: 18px;
+}
+.get-started-box {
+  display: inline-block;
+  background: #fff;
+  border-radius: 20px;
+  padding: 10px 26px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  color: #FC8621;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Virtual preview */
+.virtual-preview {
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 22px;
+  padding: 28px;
+  background-color: rgba(217,217,217,0.02);
+  text-align: center;
+}
+.virtual-preview h2 { font-size: clamp(18px, 2.2vw, 26px); margin-bottom: 12px; color: #000; }
+.virtual-preview p { font-size: clamp(14px, 1.6vw, 18px); margin-bottom: 20px; color: #222; }
+
+.demo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+@media (min-width: 640px) {
+  .demo-buttons { flex-direction: row; }
+}
+
+.demo-btn {
+  padding: 12px 26px;
+  font-size: 16px;
+  border-radius: 18px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.demo-btn-primary { background: #fff; color: #000; border: 1px solid rgba(0,0,0,0.08); }
+.demo-btn-secondary { background: #C24914; color: #fff; }
+
+/* courses grid & cards */
+.courses-heading {
+  color: #000;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+@media (min-width: 768px) { .courses-grid { grid-template-columns: repeat(2,1fr); } }
+@media (min-width: 1024px) { .courses-grid { grid-template-columns: repeat(3,1fr); } }
+
+.course-card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.course-card h3 { font-size: 16px; margin-bottom: 6px; color: #000; }
+.course-card p { font-size: 13px; color: #333; margin: 0 0 8px 0; }
+
+.course-card-footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:auto;
+}
+.course-duration { font-size: 13px; color: #333; }
+
+.course-card-buttons { display:flex; gap:10px; align-items:center; }
+.course-btn { padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor:pointer; border: none; }
+.course-btn-details { background:#F5F5F5; color:#000; border:1px solid rgba(0,0,0,0.06); }
+.course-btn-enroll { background:#FC8621; color:#fff; font-weight:700; }
+.course-btn-enroll:hover { background:#C24914; }
+
+/* small responsive tweaks */
+@media (max-width: 520px) {
+  .hero { height: 420px; }
+  .hero-content { padding: 24px 1rem; }
+  .teacher-illustration { width: 120px; }
+  .teacher-student-card { padding: 14px; }
+  .course-card { padding: 14px; }
+}
+/* ==== Hero override to match original Courses design ==== */
+.hero {
+  height: 720px !important;        /* desktop height like your design */
+  min-height: 720px !important;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: 520px !important;      /* mobile/tablet height */
+    min-height: 520px !important;
+  }
+}
+
+/* show the full top portion of the image (face + abacus) */
+.hero-bg {
+  object-fit: cover !important;
+  object-position: center top !important;
+}
+/* keep tile layout when using <a> */
+.teacher-student-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.teacher-student-link:focus, .teacher-student-link:hover {
+  text-decoration: none;
+  outline: none;
+}

@@ -1,0 +1,90 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Lecture Notes - EMESYS{% endblock %}
+{% block header %}Lecture Note{% endblock %}
+{% block subtitle %}Download Notes you want.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/raise_query.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Query Form Section -->
+<div class="content-area">
+  <div class="query-form">
+    <h2>Lecture Notes</h2>
+
+    <form method="POST" enctype="multipart/form-data" action="{% url 'generate_notes' %}">
+      {% csrf_token %}
+
+      <!-- Query Text Area -->
+      <div class="query-textarea">
+        <textarea name="query_text" placeholder="Type the video UPL here"></textarea>
+      </div>
+
+      <div class="file-upload" style="position: relative;">
+        <!-- Display Area -->
+        <div id="file-name-display" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <img
+            id="upload-icon"
+            src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5ff2b16603afdf049a4bf545be0d5d447a16d79"
+            alt="Upload Icon"
+            style="width: 40px; margin-bottom: 10px;"
+          />
+          <h3 style="margin: 0;">Upload your document</h3>
+          <p style="margin: 2px;">Drag & Drop or Click To Select</p>
+          <p style="margin: 2px;">PDF, DOC, DOCX, PNG, JPG, JPEG formats supported</p>
+        </div>
+
+        <!-- Actual input field styled to overlay transparently -->
+        <input type="file"
+              name="query_file"
+              id="file-upload"
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              onchange="updateFileName(this)"
+              style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;" />
+      </div>
+
+
+
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="generateBtn" type="submit" class="btn btn-submit">
+            Generate
+        </button>
+        <div id="loadingSpinner" style="display:none; text-align:center;">
+            <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." style="width:40px;"/>
+        </div>
+    </div>
+    </form>
+  </div>
+  <script>
+    function updateFileName(input) {
+      const fileName = input.files[0]?.name;
+      if (fileName) {
+        const displayDiv = document.getElementById('file-name-display');
+        displayDiv.innerHTML = `
+          <h3 style="margin: 0; color: #0073e6; text-align: center;">
+            ${fileName}
+          </h3>
+        `;
+      }
+    }
+  </script>
+  <script>
+    document.querySelector("form").addEventListener("submit", function() {
+        const btn = document.getElementById("generateBtn");
+        const spinner = document.getElementById("loadingSpinner");
+
+        btn.style.display = "none";     // hide button
+        spinner.style.display = "block"; // show spinner
+    });
+    </script>
+
+
+</div>
+
+{% endblock %}

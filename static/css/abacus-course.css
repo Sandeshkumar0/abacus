@@ -1,0 +1,10 @@
+/* small extracted styles from your Abacus page */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Poppins', sans-serif; color: #000; background: #fff; }
+html { scroll-behavior: smooth; }
+
+/* simple responsive hero spacing */
+#home { padding-top: 3rem; padding-bottom: 3rem; }
+@media(min-width:1024px) { #home { padding-top: 6rem; padding-bottom: 6rem; } }
+
+/* add any further custom rules extracted from your uploaded Abacus file */

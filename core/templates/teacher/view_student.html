@@ -1,0 +1,229 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}View Student - {{ student.user.full_name }}{% endblock %}
+{% block header %}Student Details{% endblock %}
+{% block subtitle %}View student information and performance{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-image">
+            {% if student.profile_picture %}
+            <img src="{{ student.profile_picture.url }}" alt="{{ student.user.full_name }}">
+            {% else %}
+            <div class="placeholder-avatar">{{ student.user.full_name|slice:":1"|upper }}</div>
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1>{{ student.user.full_name }}</h1>
+            <p class="roll-number">Roll Number: {{ student.roll_number }}</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'edit_student' student.user.id %}" class="btn btn-primary">Edit Student</a>
+            <a href="{% url 'student_list' %}" class="btn btn-secondary">Back to List</a>
+        </div>
+    </div>
+
+    <div class="profile-details">
+        <div class="detail-section">
+            <h2>Personal Information</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Full Name:</label>
+                    <span>{{ student.user.full_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Email:</label>
+                    <span>{{ student.user.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Phone:</label>
+                    <span>{{ student.phone }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Class:</label>
+                    <span>{{ student.student_class }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Date of Birth:</label>
+                    <span>{{ student.dob|date:"F d, Y"|default:"Not provided" }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Roll Number:</label>
+                    <span>{{ student.roll_number }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h2>Academic Performance</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_assignments }}</div>
+                    <div class="stat-label">Assignments Submitted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_exams }}</div>
+                    <div class="stat-label">Exams Attempted</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .profile-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-image img,
+    .placeholder-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .placeholder-avatar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-info h1 {
+        margin: 0 0 0.5rem 0;
+        color: #1e40af;
+        font-size: 2rem;
+    }
+
+    .roll-number {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .profile-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .profile-details {
+        display: grid;
+        gap: 2rem;
+    }
+
+    .detail-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-section h2 {
+        margin: 0 0 1.5rem 0;
+        color: #1e40af;
+        font-size: 1.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .detail-item label {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .detail-item span {
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+</style>
+{% endblock %}

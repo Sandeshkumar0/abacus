@@ -1,0 +1,736 @@
+/* the ENTIRE original CSS block — paste this verbatim into static/css/page-home.css */
+
+/* ********** BEGIN original styles ********** */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', -apple-system, Roboto, Helvetica, sans-serif;
+    background-color: #ffffff;
+    color: #000000;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #FC8621 0%, #FF9D4D 100%);
+    padding: 3rem 2rem;
+    overflow: hidden;
+}
+
+.hero-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.hero-text {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.hero p {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.hero-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 500px;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border-radius: 0.375rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary {
+    background-color: white;
+    color: #FC8621;
+}
+
+.btn-primary:hover {
+    background-color: #f3f4f6;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hero img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1024px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+    }
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    .hero-buttons {
+        flex-direction: row;
+    }
+}
+
+/* Features Section */
+.features {
+    padding: 4rem 2rem;
+    background-color: white;
+}
+
+.features-grid {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.feature-icon svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.feature-icon.orange {
+    background: linear-gradient(135deg, #FFAA00 0%, #FF9D4D 100%);
+}
+
+.feature-icon.blue {
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+}
+
+.feature-icon.pink {
+    background: linear-gradient(135deg, #F472B6 0%, #FF9D4D 100%);
+}
+
+.feature-card h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+}
+
+.feature-card p {
+    font-size: 1.125rem;
+    color: #4b5563;
+}
+
+/* Courses Section */
+.courses {
+    padding: 4rem 2rem;
+    background-color: #f9fafb;
+}
+
+.courses-container {
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.courses h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.course-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.course-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.course-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.course-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.course-card p {
+    font-size: 1.125rem;
+    color: #4b5563;
+}
+
+.course-duration {
+    font-size: 1rem;
+    color: #1f2937;
+}
+
+.course-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-outline {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #000;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-weight: 400;
+    transition: background-color 0.3s;
+}
+
+.btn-outline:hover {
+    background-color: #f3f4f6;
+}
+
+.btn-enroll {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    background-color: #FC8621;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-weight: 400;
+    transition: background-color 0.3s;
+}
+
+.btn-enroll:hover {
+    background-color: #E67A1C;
+}
+
+/* Newsletter Section */
+.newsletter {
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #FEF3E8 0%, #FFE8CC 100%);
+}
+
+.newsletter-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.newsletter-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.newsletter h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+textarea::placeholder {
+    color: #9ca3af;
+}
+
+.btn-subscribe {
+    background-color: #B84C1E;
+    color: white;
+    padding: 0.75rem 3rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-subscribe:hover {
+    background-color: #A03D15;
+}
+
+.newsletter img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 1024px) {
+    .newsletter-content {
+        grid-template-columns: 1fr;
+    }
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+/* Franchise Section */
+.franchise {
+    padding: 4rem 2rem;
+    background-color: white;
+}
+
+.franchise-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+}
+
+.franchise-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.franchise h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.franchise-list {
+    list-style: none;
+    padding: 0;
+}
+
+.franchise-list li {
+    font-size: 1.125rem;
+    color: #374151;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.franchise-list li::before {
+    content: "•";
+    color: #FC8621;
+    font-weight: 700;
+}
+
+.btn-franchise {
+    background-color: #FC8621;
+    color: white;
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1.125rem;
+    align-self: flex-start;
+    transition: background-color 0.3s;
+}
+
+.btn-franchise:hover {
+    background-color: #E67A1C;
+}
+
+.franchise-form {
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 2rem;
+}
+
+.franchise-form h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.franchise-form input,
+.franchise-form textarea {
+    width: 100%;
+    margin-bottom: 1.25rem;
+}
+
+.franchise-form textarea {
+    resize: none;
+    min-height: 150px;
+}
+
+.btn-submit {
+    width: 100%;
+    background-color: #FC8621;
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1.125rem;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #E67A1C;
+}
+
+@media (max-width: 1024px) {
+    .franchise-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Testimonials Section */
+.testimonials {
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+}
+
+.testimonials-container {
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.testimonials h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.testimonial-card {
+    max-width: 896px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    position: relative;
+}
+
+.stars {
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.star {
+    width: 24px;
+    height: 24px;
+    color: #FBBF24;
+}
+
+.quote {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.quote p {
+    font-size: 1.5rem;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.author {
+    text-align: center;
+}
+
+.author-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.author-role {
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #FC8621;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: background-color 0.3s;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-arrow:hover {
+    background-color: #E67A1C;
+}
+
+.nav-arrow.left {
+    left: -30px;
+}
+
+.nav-arrow.right {
+    right: -30px;
+}
+
+/* Footer */
+footer {
+    background-color: #f3f4f6;
+    border-top: 1px solid #e5e7eb;
+    padding: 3rem 2rem;
+}
+
+.footer-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.footer-section h4 {
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.footer-logo {
+    height: 40px;
+    width: auto;
+    margin-bottom: 1.5rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.social-btn:hover {
+    border-color: #FC8621;
+    color: #FC8621;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.contact-info p {
+    font-size: 0.95rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.contact-info a {
+    color: #374151;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.contact-info a:hover {
+    color: #FC8621;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+}
+/* ===Header disabled =====
+header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header-content {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+nav a, nav button {
+    text-decoration: none;
+    color: #111827;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+nav a:hover, nav button:hover {
+    color: #FC8621;
+}
+
+.contact-btn {
+    background-color: #FC8621;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-btn:hover {
+    background-color: #E67A1C;
+}
+
+@media (max-width: 1024px) {
+    nav {
+        display: none;
+    }
+    .contact-btn {
+        display: none;
+    }
+}
+*/
+/* ********** END original styles ********** */
+
+
+/* === Fix: keep "Start learning" anchor identical to original button ===
+   Put this at the end of static/css/page-home.css
+*/
+.hero-buttons a.btn,
+.hero-buttons a.btn.btn-primary {
+  text-decoration: none;        /* remove underline */
+  display: inline-flex;         /* allow vertical+horizontal centering */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 2rem;           /* match .btn sizing */
+  min-width: 220px;             /* preserves original button width */
+  border-radius: 0.375rem;
+  box-shadow: none;
+  line-height: 1;               /* avoid vertical misalignment */
+}
+
+/* keep hover/active behavior consistent with .btn-primary */
+.hero-buttons a.btn.btn-primary:hover {
+  background-color: #f3f4f6;
+}
+
+/* accessibility: remove default focus outline only if you add a visible focus style.
+   Here we keep browser outline but you can style it if you want:
+*/
+.hero-buttons a.btn:focus {
+  outline: 3px solid rgba(59,130,246,0.2);
+  outline-offset: 2px;
+}

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Check Failed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            text-align: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .reason {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .reason strong {
+            color: #856404;
+        }
+
+        .solutions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .solutions h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .solution-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .solution-item h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .solution-item p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .solution-item code {
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #e83e8c;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .info {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .info p {
+            color: #0c5460;
+            font-size: 14px;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon">🔒</div>
+        <h1>Security Check Failed</h1>
+        <p class="subtitle">CSRF verification failed. Request aborted.</p>
+
+        {% if reason %}
+        <div class="reason">
+            <strong>Reason:</strong> {{ reason }}
+        </div>
+        {% endif %}
+
+        <div class="solutions">
+            <h2>🛠️ How to Fix This</h2>
+
+            <div class="solution-item">
+                <h3>✅ Solution 1: Refresh the Page</h3>
+                <p>Press <code>Ctrl + Shift + R</code> (Windows/Linux) or <code>Cmd + Shift + R</code> (Mac) to hard
+                    refresh the page and get a new security token.</p>
+            </div>
+
+            <div class="solution-item">
+                <h3>🍪 Solution 2: Clear Browser Cookies</h3>
+                <p>Press <code>Ctrl + Shift + Delete</code>, select "Cookies and other site data", then click "Clear
+                    data". After that, refresh the page.</p>
+            </div>
+
+            <div class="solution-item">
+                <h3>🔄 Solution 3: Close and Reopen Browser</h3>
+                <p>Close all browser windows completely, then reopen the browser and navigate to the login page again.
+                </p>
+            </div>
+
+            <div class="solution-item">
+                <h3>🕵️ Solution 4: Try Incognito Mode</h3>
+                <p>Open an incognito/private browsing window and try accessing the site again. This helps identify if
+                    browser extensions are causing issues.</p>
+            </div>
+        </div>
+
+        <div class="info">
+            <p><strong>ℹ️ Why did this happen?</strong> This security check protects you from malicious websites trying
+                to perform actions on your behalf. It usually happens when your browser's security token expires or gets
+                cleared.</p>
+        </div>
+
+        <div class="buttons">
+            <a href="javascript:location.reload(true)" class="btn btn-primary">🔄 Refresh Page</a>
+            <a href="/" class="btn btn-secondary">🏠 Go to Homepage</a>
+        </div>
+    </div>
+</body>
+
+</html>

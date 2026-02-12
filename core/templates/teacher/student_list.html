@@ -1,0 +1,261 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Student List - EMESYS{% endblock %}
+{% block header %}{% endblock %}
+{% block subtitle %}{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/list.css' %}" />
+
+<div class="header-content">
+  <div class="title-section">
+    <h1>Emesys Student Management</h1>
+    <p>Education Management</p>
+  </div>
+  <div class="button-group">
+    <button class="btn btn-primary" onclick="openAddStudentModal()">Add Student</button>
+    <a href="{% url 'export_students_csv' %}" class="btn btn-secondary">Export list</a>
+  </div>
+</div>
+
+<!-- Student Table -->
+<div class="student-table">
+  <!-- Table Header -->
+  <div class="table-header table-row">
+    <div class="table-cell">Roll No:</div>
+    <div class="table-cell">Name</div>
+    <div class="table-cell">Email</div>
+    <div class="table-cell">Actions</div>
+  </div>
+
+  <!-- Table Rows -->
+  {% for student in students %}
+  <div class="table-row">
+    <div class="table-cell">{{ student.roll_number }}</div>
+    <div class="table-cell">{{ student.user.full_name }}</div>
+    <div class="table-cell">{{ student.user.email }}</div>
+    <div class="table-cell">
+      <div class="action-buttons">
+        <a href="{% url 'view_student' student.user.id %}" class="btn-table">View</a>
+        <a href="{% url 'edit_student' student.user.id %}" class="btn-table">Edit</a>
+        <button class="btn-table delete"
+          onclick="deleteStudent({{ student.user.id }}, '{{ student.user.full_name }}')">Delete</button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="table-row">
+    <div class="table-cell" colspan="4" style="text-align: center; padding: 2rem;">
+      No students found. Click "Add Student" to add your first student.
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="pagination">
+  <div class="pagination-info">Showing 1–{{ students|length }} Students</div>
+  <div class="pagination-controls">
+    <button class="pagination-btn" disabled>Previous</button>
+    <div class="pagination-numbers">
+      <button class="page-number active">1</button>
+    </div>
+    <button class="pagination-btn" disabled>Next</button>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeAddStudentModal()">&times;</span>
+    <h2>Add New Student</h2>
+    <form id="addStudentForm">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number *</label>
+        <input type="tel" id="phone" name="phone" required>
+      </div>
+      <div class="form-group">
+        <label for="student_class">Class *</label>
+        <input type="text" id="student_class" name="student_class" placeholder="e.g., 10th Grade" required>
+      </div>
+      <div class="form-group">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" name="dob">
+      </div>
+      <div class="form-group">
+        <label for="password">Password (default: student123)</label>
+        <input type="password" id="password" name="password" placeholder="student123">
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Student</button>
+        <button type="button" class="btn btn-secondary" onclick="closeAddStudentModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .close {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+  }
+
+  .close:hover {
+    color: #333;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .form-actions button {
+    flex: 1;
+  }
+</style>
+
+<script>
+  function openAddStudentModal() {
+    document.getElementById('addStudentModal').style.display = 'flex';
+  }
+
+  function closeAddStudentModal() {
+    document.getElementById('addStudentModal').style.display = 'none';
+    document.getElementById('addStudentForm').reset();
+  }
+
+  // Handle form submission
+  document.getElementById('addStudentForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    try {
+      const response = await fetch('{% url "add_student" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        alert('Student added successfully! Roll Number: ' + data.roll_number);
+        closeAddStudentModal();
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    } catch (error) {
+      alert('An error occurred. Please try again.');
+      console.error('Error:', error);
+    }
+  });
+
+  // Delete student function
+  async function deleteStudent(studentId, studentName) {
+    if (!confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
+      return;
+    }
+
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    try {
+      const response = await fetch(`/dashboard/teacher/students/${studentId}/delete/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        alert('Student deleted successfully!');
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    } catch (error) {
+      alert('An error occurred. Please try again.');
+      console.error('Error:', error);
+    }
+  }
+
+  // Close modal when clicking outside
+  window.onclick = function (event) {
+    const modal = document.getElementById('addStudentModal');
+    if (event.target === modal) {
+      closeAddStudentModal();
+    }
+  }
+</script>
+{% endblock %}

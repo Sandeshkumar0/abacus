@@ -1,0 +1,191 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Give Test & Exam - EMESYS{% endblock %}
+{% block header %}Give Test & Exam{% endblock %}
+{% block subtitle %}View and attempt your assigned tests and exams{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/give_test.css' %}" />
+<link rel="stylesheet" href="{% static 'portal/css/remarks.css' %}">
+<style>
+  .attempt-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  }
+  .attempt-btn:hover {
+    background: linear-gradient(135deg, #1e40af, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.4);
+  }
+  .download-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.download-btn:hover {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Give Test &amp; Exam</h1>
+
+  <!-- Completed Tests -->
+{% if completed_exams %}
+<div class="stack">
+  {% for exam in completed_exams %}
+  <div class="card">
+    <!-- Exam Header -->
+    <div class="row exam-header" onclick="toggleAnswers('{{ exam.id }}')">
+      <span style="font-weight:600;color:#1f2937">{{ exam.title }}</span>
+      <div class="row">
+        <span class="score">{{ exam.obtained }}/{{ exam.total_marks }}</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             class="arrow-icon" id="arrow-{{ exam.id }}">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Hidden Answers Section -->
+    <div class="answer-cards-outer" id="answers-{{ exam.id }}" style="display:none; margin-top:16px;">
+      <div class="answer-cards">
+        {% for answer in exam.student_answers %}
+        <div class="answer-card">
+          <div class="section-header">
+            <div class="section-number">{{ forloop.counter }}</div>
+            <span class="section-label">{{ answer.question.text }}</span>
+          </div>
+
+          {% if answer.question.latex %}
+          <div class="equation-wrapper" style="display:flex; justify-content:center;">
+            <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ answer.question.latex|urlencode }}" alt="LaTeX Equation">
+          </div>
+          {% endif %}
+
+          <div class="section-header">
+            <span class="section-label">Your Answer</span>
+            <div class="status-badges">
+              {% if answer.remarks %}
+                <div class="badge badge-graded">Graded</div>
+                <div class="badge badge-reviewed">Reviewed</div>
+              {% else %}
+                <div class="badge badge-pending">Pending Review</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="content-box answer-box">
+            <p class="content-text">{{ answer.answer_text }}</p>
+          </div>
+
+          <div class="section-title">
+            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/301ca081dab835bebc2a2e6ec9ad9f8e422e7a71?width=50"
+                 alt="Commentary" class="commentary-icon"/>
+            <span class="section-label">Remarks From Teacher</span>
+          </div>
+
+          <div class="content-box remarks-box">
+            <p class="content-text remarks-text">
+              {{ answer.remarks|default:"Remarks will appear here once reviewed." }}
+            </p>
+            <p class="content-text teacher-name">
+              {{ answer.question.exam.teacher_name.get_full_name|default:"Awaiting Review" }}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Download Button -->
+      <div style="text-align:right; margin-top:16px;">
+        <a href="{% url 'download_exam_answer_pdf' exam.id %}" class="download-btn">
+          ⬇ Download Answers
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+
+  <!-- Divider -->
+  <div class="divider">
+    <span class="pill">New Tests Below</span>
+  </div>
+
+  <!-- New Tests -->
+  <div class="card">
+    <h2 style="text-align:center;margin:0 0 24px;font-size:22px;color:#1f2937;font-weight:800">
+      New Tests
+    </h2>
+
+    {% if new_exams %}
+      {% for exam in new_exams %}
+      <div class="dashed card" style="padding:16px;margin-bottom:24px">
+        <div class="row">
+          <span style="font-weight:600;color:#1f2937">{{ exam.title }}</span>
+        </div>
+        <div class="grid" style="padding-top:8px">
+          <div>
+            <label>Due Date:</label>
+            <span>{{ exam.due_date|date:"Y-m-d H:i" }}</span>
+          </div>
+          <div>
+            <label>Total Marks:</label>
+            <span>{{ exam.total_marks }}</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:right">
+          <a href="{% url 'attempt_exam' exam.id %}" class="attempt-btn">
+            Attempt
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="text-align:center;color:#6b7280">No new tests available.</p>
+    {% endif %}
+  </div>
+</div>
+<script>
+function toggleAnswers(examId) {
+  const section = document.getElementById("answers-" + examId);
+  const arrow = document.getElementById("arrow-" + examId);
+
+  if (section.style.display === "none") {
+    section.style.display = "block";
+    arrow.style.transform = "rotate(180deg)";
+  } else {
+    section.style.display = "none";
+    arrow.style.transform = "rotate(0deg)";
+  }
+}
+</script>
+
+{% endblock %}

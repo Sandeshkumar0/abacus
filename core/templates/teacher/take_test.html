@@ -1,0 +1,324 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Take Test & Exam - EMESYS{% endblock %}
+
+{% block header %}
+Take Test & Exam
+{% endblock %}
+
+{% block subtitle %}
+Create and schedule exams for students
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .gradient-blue {
+    background: linear-gradient(to right, #1d4ed8, #3b82f6);
+    color: white;
+  }
+
+  .gradient-yellow {
+    background: linear-gradient(to right, #fbbf24, #f59e0b);
+    color: black;
+  }
+
+  .gradient-yellow:hover {
+    background: linear-gradient(to right, #facc15, #eab308);
+  }
+
+  .delete-btn {
+    background: linear-gradient(to right, #ef4444, #dc2626);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+{% endblock %}
+
+{% block content %}
+<section class="flex-1 p-8 space-y-6">
+  <!-- Exam Details -->
+  <div class="bg-white rounded-3xl p-8 shadow-sm">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2">Enter Exam Heading</label>
+        <input id="examHeading" type="text" placeholder="Enter Exam Title"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2">Due Date &amp; Time</label>
+        <input id="dueDate" type="text" placeholder="Pick date & time"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2">Total Marks</label>
+        <input id="totalMarks" type="text" value="100"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Question -->
+  <div class="bg-white rounded-3xl p-8 shadow-sm">
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">Add Question</h2>
+
+    <div class="mb-6">
+      <label class="block text-gray-700 font-semibold mb-2">Question Text</label>
+      <textarea id="questionText" rows="4" placeholder="Type your question here..."
+        class="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-bluePrimary resize-none"></textarea>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 mb-6">
+      <div class="flex-1">
+        <label class="block text-gray-700 font-semibold mb-2">Upload Document</label>
+        <label
+          class="gradient-yellow px-8 py-3 rounded-full font-semibold text-base shadow-md transition-all cursor-pointer text-center inline-block">
+          Upload
+          <input id="fileInput" type="file" accept=".pdf,image/*,.doc,.docx" class="hidden">
+        </label>
+        <p id="fileName" class="text-sm text-gray-500 mt-2"></p>
+      </div>
+      <div class="lg:w-32">
+        <label class="block text-gray-700 font-semibold mb-2">Marks</label>
+        <input id="marks" type="text" value="100"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
+      </div>
+    </div>
+
+    <!-- Equation Editor -->
+    <section class="bg-white-100 p-0">
+      <h2 class="text-lg font-semibold">Equation Editor</h2>
+      <div class="flex flex-col gap-6 bg-white px-6 py-8 rounded-b-[16px] shadow border border-gray-200">
+        <div class="rounded-xl border-2 border-dashed border-[#bcdffb] bg-[#f8faff] p-4 mb-4" style="min-height:250px;">
+          <div id="history" class="mb-2"></div>
+          <div id="toolbar" class="mb-2"></div>
+          <div id="latexInput"
+            style="min-height: 100px; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 12px;">
+          </div>
+          <div id="equation-output" class="mt-4 text-center">
+            <img id="output" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-end">
+      <button id="addQuestionBtn" type="button"
+        class="gradient-blue px-10 py-3 rounded-full font-semibold text-lg shadow-md transition-all">
+        Add Question
+      </button>
+      <button id="assignTestBtn" type="button"
+        class="gradient-yellow px-10 py-3 rounded-full font-semibold text-lg shadow-md transition-all">
+        Assign Test
+      </button>
+    </div>
+  </div>
+
+  <!-- Existing Exams List -->
+  {% if exams %}
+  <div class="bg-white rounded-3xl p-8 shadow-sm">
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">📋 Previously Created Exams</h2>
+    <div class="space-y-4">
+      {% for exam in exams %}
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+        <div class="flex justify-between items-start">
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-gray-800">{{ exam.title }}</h3>
+            <div class="mt-3 space-y-2 text-sm text-gray-600">
+              <p>📅 <strong>Due Date:</strong> {{ exam.due_date|date:"M d, Y - h:i A" }}</p>
+              <p>📊 <strong>Total Marks:</strong> {{ exam.total_marks }}</p>
+              <p>❓ <strong>Questions:</strong> {{ exam.questions.count }}</p>
+              <p>📝 <strong>Created:</strong> {{ exam.created_at|date:"M d, Y" }}</p>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            {% if exam.is_expired %}
+              <span class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold text-sm">
+                Expired
+              </span>
+            {% else %}
+              <span class="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold text-sm">
+                Active
+              </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Preview -->
+  <div class="bg-white rounded-3xl p-8 shadow-sm">
+    <h2 class="text-xl font-semibold text-gray-800 mb-6">Preview</h2>
+    <div id="previewArea" class="space-y-4">
+      <p class="text-gray-400">No questions added yet.</p>
+    </div>
+  </div>
+</section>
+
+<script src="https://editor.codecogs.com/eqneditor.api.min.js" crossorigin="anonymous"></script>
+<script type="text/javascript">
+  // Init editor
+  const latexEditor = new EqEditor.TextArea('latexInput')
+    .addToolbar(new EqEditor.Toolbar('toolbar'), true)
+    .addOutput(new EqEditor.Output('output'));
+
+  let questions = [];
+  let uploadedFile = null;
+  const previewArea = document.getElementById("previewArea");
+  const fileInput = document.getElementById("fileInput");
+  const fileNameDisplay = document.getElementById("fileName");
+
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadedFile = file;
+      fileNameDisplay.textContent = "📂 " + file.name;
+    }
+  });
+
+  function renderPreview() {
+    if (questions.length === 0) {
+      previewArea.innerHTML = `<p class="text-gray-400">No questions added yet.</p>`;
+      return;
+    }
+    previewArea.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "bg-gray-100 rounded-2xl p-6 border border-gray-300 flex justify-between items-start";
+      qDiv.innerHTML = `
+      <div>
+        <h3 class="font-semibold text-gray-800">Question No: ${idx + 1}</h3>
+        <p class="text-gray-700 mt-2">${q.text}</p>
+        ${q.equation ? `<img src="${q.equation}" class="mt-2"/>` : ""}
+        ${q.file ? (
+          q.file.type.startsWith("image/")
+            ? `<img src="${q.file.url}" class="mt-2 max-h-40"/>`
+            : `<a href="${q.file.url}" target="_blank" class="text-sm text-blue-600 underline">📎 ${q.file.name}</a>`
+        ) : ""}
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <div class="bg-yellowButton text-black font-semibold px-4 py-2 rounded-lg">${q.marks} Marks</div>
+        <button class="delete-btn" onclick="deleteQuestion(${idx})">Delete</button>
+      </div>
+    `;
+      previewArea.appendChild(qDiv);
+    });
+  }
+
+
+  function deleteQuestion(index) {
+    questions.splice(index, 1);
+    renderPreview();
+  }
+
+  document.getElementById("addQuestionBtn").addEventListener("click", () => {
+    const text = document.getElementById("questionText").value.trim();
+    const marks = document.getElementById("marks").value.trim();
+
+    // ✅ Extract both LaTeX code & rendered image
+    const latexCode = document.getElementById("latexInput").innerText.trim();
+    const equationImg = document.getElementById("output").src;
+
+    if (!text && !latexCode && (!equationImg || equationImg === window.location.href) && !uploadedFile) {
+      alert("Please enter a question, equation, or upload a file.");
+      return;
+    }
+
+    let fileData = null;
+    if (uploadedFile) {
+      fileData = {
+        name: uploadedFile.name,
+        type: uploadedFile.type,
+        url: URL.createObjectURL(uploadedFile),
+        blob: uploadedFile   // ✅ keep the actual File object
+      };
+    }
+
+
+    questions.push({
+      text,
+      marks,
+      latex: latexCode || "",
+      equation: (equationImg && equationImg !== window.location.href) ? equationImg : null,
+      file: fileData
+    });
+
+    // Reset inputs
+    document.getElementById("questionText").value = "";
+    document.getElementById("marks").value = "100";
+    document.getElementById("output").src = "";
+    document.getElementById("latexInput").innerText = "";
+    fileInput.value = "";
+    fileNameDisplay.textContent = "";
+    uploadedFile = null;
+
+    renderPreview();
+  });
+
+
+  document.getElementById("assignTestBtn").addEventListener("click", () => {
+    const examHeading = document.getElementById("examHeading").value.trim();
+    const dueDate = document.getElementById("dueDate").value.trim();
+    const totalMarks = document.getElementById("totalMarks").value.trim();
+
+    if (!examHeading || !dueDate || !totalMarks || questions.length === 0) {
+      alert("⚠️ Please fill in all details and add at least one question.");
+      return;
+    }
+
+    const csrfToken = "{{ csrf_token }}";
+    const formData = new FormData();
+    formData.append("examHeading", examHeading);
+    formData.append("dueDate", dueDate);
+    formData.append("totalMarks", totalMarks);
+
+    // Attach questions JSON
+    questions.forEach((q, idx) => {
+      formData.append("questions[]", JSON.stringify({
+        text: q.text,
+        latex: q.latex,
+        marks: q.marks
+      }));
+
+      // Attach file if exists
+      if (q.file && q.file.blob) {
+        formData.append(`question_file_${idx}`, q.file.blob, q.file.name);
+      }
+    });
+
+    fetch("{% url 'create_exam' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrfToken
+      },
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === "success") {
+          alert("✅ Exam created successfully!");
+          window.location.reload();
+        } else {
+          alert("❌ Failed to create exam.");
+        }
+      });
+  });
+</script>
+
+<script>
+  flatpickr("#dueDate", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    minDate: "today"
+  });
+</script>
+
+{% endblock %}

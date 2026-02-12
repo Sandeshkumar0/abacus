@@ -1,0 +1,170 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Respond to Queries - Emesys{% endblock %}
+{% block header %}Respond to Queries{% endblock %}
+{% block subtitle %}Answer student queries assigned to you{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/respond.css' %}">
+<style>
+  .query-block {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); /* ✅ subtle shadow */
+    margin-bottom: 30px;
+  }
+
+  .query-block h2 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #2c3e50;
+  }
+
+  .meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+
+  .meta input {
+    flex: 1;
+    padding: 10px;
+    font-size: 0.95em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+  }
+
+  .query-text {
+    font-size: 1em;
+    background-color: #eef2f7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 100px;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    margin-bottom: 20px;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 15px;
+  }
+
+  .generate-btn {
+    background-color: #f1c40f;
+    color: #2c3e50;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .generate-btn:hover {
+    background-color: #d4ac0d;
+  }
+
+  .submit-btn {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background-color: #2980b9;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6">
+  <div class="grid gap-6">
+    {% for query in queries %}
+    <div class="query-block">
+      <h2>Query</h2>
+
+      <div class="meta">
+        <input type="text" value="{{ query.student_name }}" readonly />
+        <input type="text" value="{{ query.roll_number }}" readonly />
+      </div>
+
+      <div class="query-text">{{ query.query_text }}</div>
+
+      {% if query.query_image %}
+      <div class="mb-4">
+        <a href="{{ query.query_image }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+          View Attachment
+        </a>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'respond_queries' %}">
+        {% csrf_token %}
+        <input type="hidden" name="query_id" value="{{ query.id }}">
+        <textarea name="response" placeholder="Type your answer here...."></textarea>
+        <div class="button-group">
+          <button type="button" class="generate-btn" data-query-id="{{ query.id }}">Generate Answer</button>
+          <button type="submit" class="submit-btn">Submit</button>
+        </div>
+      </form>
+    </div>
+    {% empty %}
+    <div class="text-center text-gray-600 mt-8">No pending queries to respond to.</div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+document.querySelectorAll(".generate-btn").forEach(btn => {
+  btn.addEventListener("click", function() {
+    const queryBlock = this.closest(".query-block");
+    const textarea = queryBlock.querySelector("textarea");
+    const queryId = this.getAttribute("data-query-id");
+    const queryText = queryBlock.querySelector(".query-text").innerText;
+    const attachment = queryBlock.querySelector("a")?.getAttribute("href") || "";
+
+    textarea.value = "⏳ Generating answer...";
+
+    fetch("{% url 'generate_answer_query' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        "question": queryText + (attachment ? `\nAttachment: ${attachment}` : "")
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.answer) {
+        textarea.value = data.answer;
+      } else {
+        textarea.value = "⚠️ Error: " + (data.error || "No answer generated.");
+      }
+    })
+    .catch(err => {
+      textarea.value = "⚠️ Failed to contact AI service.";
+      console.error(err);
+    });
+  });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMESYS – Teacher Login</title>
+
+  <!-- Tailwind (utility classes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Inter font (optional) -->
+  <link rel="preconnect" href="https://fonts.bunny.net" />
+  <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+  <style>
+    html {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen bg-gray-50 flex">
+
+  <!-- Left illustration (desktop only) -->
+  <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-12 bg-white relative">
+    <!-- EMESYS logo -->
+    <a href="{% url 'home' %}">
+      <img src="{% static 'portal/Logo.png' %}" alt="Emesys Logo"
+        class="absolute left-8 top-8 h-24 cursor-pointer hover:opacity-80 transition-opacity" />
+    </a>
+    <!-- Teacher illustration -->
+    <img
+      src="https://cdn.builder.io/api/v1/image/assets%2Fa0b9894449db45ad8d5ec0ecaff21601%2Ffc8d54ba6e2844558c9551484aa2e6d1?format=webp&width=800"
+      alt="Teacher illustration" class="max-w-md w-full h-auto object-contain" />
+  </div>
+
+  <!-- Right side (form) -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 relative overflow-hidden">
+    <!-- Decorative blue wave -->
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-75"
+      style="background-image:url('https://cdn.builder.io/api/v1/image/assets%2Fa0b9894449db45ad8d5ec0ecaff21601%2F86eb1127f0954247bddf853fb3b87531?format=webp&width=800')">
+    </div>
+
+    <div class="w-full max-w-md space-y-8 relative z-10">
+
+
+      <!-- Login card -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-blue-600 mb-2">Teacher Login</h1>
+          <p class="text-gray-600">Please login to continue to your account.</p>
+          {% if error %}
+          <p class="text-red-600 text-sm font-medium mb-4">{{ error }}</p>
+          {% endif %}
+        </div>
+
+        <form method="POST" action="{% url 'teacher_login' %}" class="space-y-6">
+          {% csrf_token %}
+
+          <!-- Email -->
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
+            <input id="email" type="email" name="email" placeholder="Enter Email"
+              class="pl-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
+              required />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <div class="relative">
+              <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
+              <input id="password" type="password" name="password" placeholder="Password"
+                class="pl-12 pr-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
+                required />
+              <button type="button" id="toggle-pass"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label="Toggle password visibility">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <div class="text-right mt-1">
+              <a href="#" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">Forgot Password?</a>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit"
+            class="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200">
+            Log in
+          </button>
+
+          <!-- Keep me logged in -->
+          <label for="keep" class="flex items-center space-x-2 cursor-pointer select-none">
+            <input id="keep" type="checkbox" class="rounded border-gray-300 accent-blue-600" />
+            <span class="text-sm text-gray-600">Keep me logged in</span>
+          </label>
+
+          <!-- Account link -->
+          <p class="text-center text-sm text-gray-600 pt-2">
+            Don't Have an Account?
+            <a href="{% url 'teacher_signup' %}"
+              class="text-blue-600 hover:text-blue-700 hover:underline font-medium">Create New Account</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Behaviour scripts -->
+  <script>
+    // Replace <i data-lucide="..."> with SVGs
+    lucide.createIcons();
+
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('toggle-pass');
+    let showPass = false;
+
+    toggleBtn.addEventListener('click', () => {
+      showPass = !showPass;
+      passwordInput.type = showPass ? 'text' : 'password';
+      toggleBtn.innerHTML = '';               // clear old icon
+      toggleBtn.insertAdjacentHTML('beforeend',
+        `<i data-lucide="${showPass ? 'eye-off' : 'eye'}"></i>`);
+      lucide.createIcons({ icons: ['eye', 'eye-off'] });
+    });
+
+  </script>
+</body>
+
+</html>

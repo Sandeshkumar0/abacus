@@ -1,0 +1,99 @@
+<!-- templates/emails/franchise_inquiry.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Franchise Inquiry</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background:#f3f3f5;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" style="padding:30px 10px;">
+        <!-- Outer card -->
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08);">
+          <!-- Header with logo -->
+          <tr>
+            <td style="background:#ffffff; padding:22px 30px; text-align:left;">
+              <!-- Replace the src with your logo static path or absolute CDN URL -->
+              <img src="cid:logo" alt="{{ company_name }}" width="160" style="display:block; border:0;">
+            </td>
+          </tr>
+
+          <!-- Hero band -->
+          <tr>
+            <td style="background:linear-gradient(90deg,#F3F25B 0%,#FC8621 50%,#F3F25B 100%); padding:18px 30px; text-align:center;">
+              <h1 style="margin:0; font-size:20px; color:#fff;">Thank you for your interest in {{ company_name }} Franchise</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:22px 30px;">
+              <p style="margin:0 0 12px 0; color:#333; font-size:15px;">
+                Hello {{ fullName }},
+              </p>
+
+              <p style="margin:0 0 18px 0; color:#555; font-size:14px;">
+                Thank you for submitting an inquiry. Below are the details we received:
+              </p>
+
+              <!-- Details box -->
+              <table width="100%" cellpadding="8" cellspacing="0" role="presentation" style="border:1px solid #eee; border-radius:8px;">
+                <tr>
+                  <td style="font-weight:600; width:160px; color:#333">Full name</td>
+                  <td style="color:#555">{{ fullName }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333">Email</td>
+                  <td style="color:#555">{{ email }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333">Phone</td>
+                  <td style="color:#555">{{ phone }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333">City</td>
+                  <td style="color:#555">{{ city }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333">Experience</td>
+                  <td style="color:#555">{{ businessExperience }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333">Investment</td>
+                  <td style="color:#555">{{ investmentCapacity }}</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:600; color:#333; vertical-align:top;">Message</td>
+                  <td style="color:#555">{{ additionalMessage|linebreaksbr }}</td>
+                </tr>
+              </table>
+
+              <div style="text-align:center; margin-top:20px;">
+                <!-- CTA: placeholder - update href later -->
+                <a href="{{ cta_url }}" style="display:inline-block; background:#FC8621; color:#fff; text-decoration:none; padding:12px 22px; border-radius:8px; font-weight:700;">
+                  Learn more about franchise
+                </a>
+              </div>
+
+              <p style="margin:22px 0 0 0; color:#777; font-size:12px;">
+                We’ll review your request and someone from our franchise team will contact you within 2 business days.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#fafafa; padding:16px 30px; color:#777; font-size:12px; text-align:center;">
+              <div style="margin-bottom:8px;">{{ company_name }} • {{ company_address }}</div>
+              <div>If you didn't submit this request, please ignore this email or write to {{ support_email }}</div>
+            </td>
+          </tr>
+        </table>
+        <!-- end outer -->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

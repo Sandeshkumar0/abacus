@@ -1,0 +1,43 @@
+<!-- Notification Bell Widget -->
+<div class="notification-widget" style="position: relative; display: inline-block;">
+    <div class="notification-bell" id="notification-bell" onclick="toggleNotifications()">
+        🔔
+        <span id="notification-badge">0</span>
+        <span id="connection-status" class="disconnected"></span>
+    </div>
+
+    <div class="notifications-dropdown" id="notifications-dropdown">
+        <div class="notifications-header">
+            <h3>Notifications</h3>
+            <button class="mark-all-read" onclick="markAllRead()">Mark all as read</button>
+        </div>
+        <div id="notifications-list">
+            <p class="no-notifications">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleNotifications() {
+        const dropdown = document.getElementById('notifications-dropdown');
+        dropdown.classList.toggle('show');
+
+        if (dropdown.classList.contains('show')) {
+            window.notificationManager.fetchNotifications();
+        }
+    }
+
+    function markAllRead() {
+        window.notificationManager.markAllAsRead();
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (event) {
+        const widget = document.querySelector('.notification-widget');
+        const dropdown = document.getElementById('notifications-dropdown');
+
+        if (!widget.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>

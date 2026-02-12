@@ -1,0 +1,146 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - EMESYS{% endblock %}
+{% block header %}Edit Profile{% endblock %}
+{% block subtitle %}Update your profile information{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+
+<style>
+    main.px-6.pt-6.pb-0 {
+        padding: 0 !important;
+    }
+
+    .edit-form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #1e40af;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .current-image {
+        margin-top: 0.5rem;
+        border-radius: 12px;
+        max-width: 200px;
+        border: 3px solid #e5e7eb;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1e40af;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+</style>
+
+<div class="edit-form-container">
+    <h1 class="page-title"> Edit Your Profile</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Profile Picture -->
+        <div class="form-group">
+            <label for="profile_picture"> Profile Picture</label>
+            {% if teacher.profile_picture %}
+            <div>
+                <img src="{{ teacher.profile_picture.url }}" alt="Current Profile" class="current-image" />
+                <p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.9rem;">Current profile picture</p>
+            </div>
+            {% endif %}
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*" />
+            <p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.85rem;">
+                Recommended: Square image, at least 400x400px
+            </p>
+        </div>
+
+        <!-- Office Location -->
+        <div class="form-group">
+            <label for="office_location"> Office Location</label>
+            <input type="text" id="office_location" name="office_location" value="{{ teacher.office_location }}"
+                placeholder="e.g., Room 204, Computer Science Building" />
+        </div>
+
+        <!-- Office Hours -->
+        <div class="form-group">
+            <label for="office_hours"> Office Hours</label>
+            <input type="text" id="office_hours" name="office_hours" value="{{ teacher.office_hours }}"
+                placeholder="e.g., Monday-Friday, 2:00PM-4:00PM" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{% url 'teacher_profile' %}" class="btn btn-secondary"> Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

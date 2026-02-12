@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Online Class Registration - AbacusMaster</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/online-registration.css' %}">
+</head>
+<body>
+  <header class="header-content">
+    <a href="/" class="logo"><img src="https://cdn.builder.io/api/v1/image/assets%2F50f155...27?format=webp&width=800" alt="Emesys"></a>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#franchise">Franchise</a>
+      <a href="#contact" class="contact-btn">Contact us</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" style="background-image: url('https://cdn.builder.io/...');">
+      <div class="hero-content">
+        <h1>ONLINE CLASS REGISTRATION</h1>
+      </div>
+    </section>
+
+    <div class="form-container">
+      <form id="registrationForm" method="post" action="">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group"><input type="text" name="firstName" placeholder="First name of Student" required></div>
+          <div class="form-group"><input type="text" name="lastName" placeholder="Lastname" required></div>
+          <div class="form-group"><input type="text" name="dateOfBirth" placeholder="Date of birth" required></div>
+          <!-- ... rest of the form fields ... -->
+          <div class="button-container">
+            <button type="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section"><h3>AbacusMaster</h3><p>Learn Abacus ...</p></div>
+      <div class="footer-section"><h3>Quick Links</h3></div>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/online-registration.js' %}"></script>
+</body>
+</html>

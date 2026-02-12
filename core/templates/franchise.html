@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AbacusMaster Franchise - Emesys{% endblock %}
+
+{# Tailwind is required by the original markup (keeps classes working exactly as in original) #}
+{% block head %}
+  <script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/page-franchise.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- NOTE: Navbar and Footer are provided by base.html. The page content below is unchanged from the original body. -->
+
+    <!-- Hero Section
+         Changed to use a background-image on the section so the whole hero image displays correctly
+         (fills width with cover positioning) instead of being half-cut by an <img> with forced height.
+    -->
+    <section id="franchise-hero" class="relative overflow-hidden min-h-screen">
+        <!-- dark overlay -->
+        <div class="absolute inset-0 hero-overlay"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 flex flex-col items-center justify-center text-center py-10 min-h-screen">
+            <h1 class="text-white font-poppins text-5xl md:text-6xl lg:text-[64px] font-semibold mb-6 leading-tight">Franchise Opportunity</h1>
+            <p class="text-white text-center font-poppins text-xl md:text-2xl font-semibold mb-8 max-w-[780px]">Build your own successful AbacusMaster franchise and become part of a growing educational network</p>
+            <button class="bg-white text-black font-poppins text-xl md:text-2xl font-semibold px-8 md:px-12 py-4 md:py-5 rounded-[40px] shadow-2xl hover:shadow-xl transition-shadow">Start Your Abacus Training Center - Get FREE Kit</button>
+        </div>
+    </section>
+
+    <!-- Why Choose Section -->
+    <section class="py-16 md:py-20">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-black font-poppins text-3xl md:text-4xl lg:text-5xl font-semibold text-center mb-16">Why Choose AbacusMaster Franchise?</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Proven Business Model -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/22693b888cd64253cca5c743ef6ddca7128404ac?width=90" alt="Growth" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Proven Business Model</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Established and tested franchise system with consistent growth</p>
+                </div>
+
+                <!-- Comprehensive Training -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/62607d7e78ce5be6534b65b0aca437d20f4b7446?width=90" alt="Training" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Comprehensive Training</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Complete training program for staff and management</p>
+                </div>
+
+                <!-- Global Support -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/da3f48f91c1209a60716dd874490985277b88b90?width=90" alt="Worldwide" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Global Support</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Ongoing support and marketing assistance from headquarters</p>
+                </div>
+
+                <!-- Brand Recognition -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/4cf6f769d81ebc792dd08caea4907c3aa097b061?width=90" alt="Trophy" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Brand Recognition</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Join a trusted brand with strong market presence</p>
+                </div>
+
+                <!-- Revenue Streams -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/563d1340830fcb6a2f48450cb6e0ab0b9167390e?width=90" alt="Salary" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Revenue Streams</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Multiple income sources from courses, certifications, and events</p>
+                </div>
+
+                <!-- Quality Assurance -->
+                <div class="bg-white rounded-[30px] shadow-md p-6 border border-gray-100">
+                    <div class="flex items-start gap-4 mb-4">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/f440db2d10fd99b518ae34239e09b28e5f890f53?width=90" alt="Badge" class="w-11 h-11">
+                        <h3 class="text-black font-poppins text-2xl font-semibold">Quality Assurance</h3>
+                    </div>
+                    <p class="text-black text-center font-poppins text-2xl">Standardized curriculum and quality control measures</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Franchise Requirements Section -->
+    <section class="py-16 bg-gray-50/30">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-black font-poppins text-3xl md:text-4xl lg:text-5xl font-semibold text-center mb-12">Franchise Requirements</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Initial Investment -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Initial Investment</h3>
+                    <div class="flex items-center gap-2">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/b08257d749f1c8c00114afa61626f8ae41d717a1?width=70" alt="Rupee" class="w-9 h-9">
+                        <p class="text-black font-poppins text-3xl md:text-4xl">50,000 -</p>
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/b08257d749f1c8c00114afa61626f8ae41d717a1?width=70" alt="Rupee" class="w-9 h-9">
+                        <p class="text-black font-poppins text-3xl md:text-4xl">150,000</p>
+                    </div>
+                </div>
+
+                <!-- Franchise Fee -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Franchise Fee</h3>
+                    <div class="flex items-center gap-2">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/b08257d749f1c8c00114afa61626f8ae41d717a1?width=70" alt="Rupee" class="w-9 h-9">
+                        <p class="text-black font-poppins text-3xl md:text-4xl">15,000</p>
+                    </div>
+                </div>
+
+                <!-- Working Capital -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Working Capital</h3>
+                    <div class="flex items-center gap-2">
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/b08257d749f1c8c00114afa61626f8ae41d717a1?width=70" alt="Rupee" class="w-9 h-9">
+                        <p class="text-black font-poppins text-3xl md:text-4xl">20,000 -</p>
+                        <img src="https://api.builder.io/api/v1/image/assets/TEMP/b08257d749f1c8c00114afa61626f8ae41d717a1?width=70" alt="Rupee" class="w-9 h-9">
+                        <p class="text-black font-poppins text-3xl md:text-4xl">50,000</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Location Size -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Location Size</h3>
+                    <p class="text-black font-poppins text-3xl md:text-4xl">1,000 - 2,000 sq ft</p>
+                </div>
+
+                <!-- Staff Required -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Staff Required</h3>
+                    <p class="text-black font-poppins text-3xl md:text-4xl">3-5 trained instructors</p>
+                </div>
+
+                <!-- Break-even Period -->
+                <div class="bg-white rounded-[10px] shadow-md p-8 border border-gray-100">
+                    <h3 class="text-black font-poppins text-3xl md:text-4xl font-bold mb-4">Break-even Period</h3>
+                    <p class="text-black font-poppins text-3xl md:text-4xl">12 - 18 months</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Section -->
+    <!-- ADDED: id="franchise-inquiry" so links to /franchise/#franchise-inquiry will land here -->
+    <section class="py-16 md:py-20" id="franchise-inquiry">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-black font-poppins text-3xl md:text-4xl lg:text-5xl font-bold text-center mb-4">Interested in Franchising?</h2>
+            <p class="text-black font-poppins text-xl md:text-2xl text-center mb-12">Fill out the form below and our franchise team will contact you with more information</p>
+
+            <div class="bg-white rounded-[20px] shadow-lg p-8 md:p-12">
+                <form id="franchiseForm" method="post" class="space-y-8">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Full Name -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">Full Name *</label>
+                            <input type="text" name="fullName" placeholder="Your Name" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins placeholder:text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">Email *</label>
+                            <input type="email" name="email" placeholder="Your @email.com" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins placeholder:text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20">
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">Phone Number *</label>
+                            <input type="tel" name="phone" placeholder="+1 (555) 000 - 0000" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins placeholder:text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20">
+                        </div>
+
+                        <!-- City/Region -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">City/Region *</label>
+                            <input type="text" name="city" placeholder="Your city" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins placeholder:text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20">
+                        </div>
+
+                        <!-- Business Experience -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">Business Experience *</label>
+                            <div class="relative">
+                                <select name="businessExperience" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20 appearance-none">
+                                    <option value="">Select Experience level</option>
+                                    <option value="beginner">Beginner (0-2 years)</option>
+                                    <option value="intermediate">Intermediate (3-5 years)</option>
+                                    <option value="experienced">Experienced (5+ years)</option>
+                                </select>
+                                <img src="https://api.builder.io/api/v1/image/assets/TEMP/393477b86ef1eb56e2d2631ad5c0f40b5ee79c41?width=70" alt="Down arrow" class="absolute right-6 top-1/2 -translate-y-1/2 w-9 h-9 pointer-events-none">
+                            </div>
+                        </div>
+
+                        <!-- Investment Capacity -->
+                        <div>
+                            <label class="text-black font-poppins text-2xl font-bold mb-3 block">Investment Capacity *</label>
+                            <select name="investmentCapacity" required class="w-full h-[72px] rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 text-2xl font-poppins text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20 appearance-none">
+                                <option value="">Select investment range</option>
+                                <option value="50k-100k">₹50,000 - ₹100,000</option>
+                                <option value="100k-150k">₹100,000 - ₹150,000</option>
+                                <option value="150k+">₹150,000+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Additional Message -->
+                    <div>
+                        <label class="text-black font-poppins text-2xl font-bold mb-3 block">Additional Message</label>
+                        <textarea name="additionalMessage" placeholder="Tell about your interest in franchise.." rows="5" class="w-full rounded-[15px] border border-black/25 bg-[#FFFBFB]/85 px-6 py-4 text-2xl font-poppins placeholder:text-black/45 focus:outline-none focus:border-[#FC8621] focus:ring-2 focus:ring-[#FC8621]/20 resize-none"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center">
+                        <button type="submit" class="bg-[#FC8621] text-white font-poppins text-3xl md:text-4xl font-bold px-12 py-6 rounded-[20px] hover:bg-[#e07619] transition-colors shadow-md flex items-center gap-4">
+                            <img src="https://api.builder.io/api/v1/image/assets/TEMP/e14f45bb0dad878d427de3ba45d4ccf4f4fab079?width=110" alt="Navigation" class="w-14 h-14">
+                            Submit Inquiry
+                        </button>
+                    </div>
+                    {% if success %}
+                    <div class="bg-green-50 border border-green-200 text-green-800 rounded p-4 mb-4">
+                        Thank you — we sent a confirmation email to your inbox. Our franchise team will contact you soon.
+                    </div>
+                    {% endif %}
+
+                    {% if errors %}
+                    <div class="bg-red-50 border border-red-200 text-red-800 rounded p-4 mb-4">
+                        <ul>
+                        {% for err in errors %}
+                            <li>{{ err }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <!-- small padding bottom to avoid the large empty band -->
+    <section class="relative py-12 overflow-hidden" id="franchise-brochure">
+        <div class="absolute inset-0 brochure-gradient"></div>
+        <div class="relative max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-white font-poppins text-4xl md:text-5xl lg:text-6xl font-bold mb-8 drop-shadow-md">Ready to Start Your Journey?</h2>
+            <p class="text-white font-poppins text-2xl md:text-3xl font-bold mb-8">Join our network of successful franchise partners and make a difference in education</p>
+            <button class="bg-white text-black/90 font-poppins text-2xl md:text-4xl font-bold px-12 py-6 rounded-[20px] shadow-xl hover:shadow-2xl transition-shadow flex items-center gap-4 mx-auto">
+                <img src="https://api.builder.io/api/v1/image/assets/TEMP/21231be693db4fe0743d487005d39f148b12720a?width=110" alt="Download arrow" class="w-14 h-14">
+                Download Frachise Brochure
+            </button>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/franchise.js' %}"></script>
+{% endblock %}

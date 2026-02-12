@@ -1,0 +1,61 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Student List - EMESYS{% endblock %}
+{% block header %}{% endblock %}
+{% block subtitle %}{% endblock %}
+{% block page_header %}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/list.css' %}" />
+
+<div class="header-content">
+  <div class="title-section">
+    <h1>Emesys Student Management</h1>
+    <p>Education Management</p>
+  </div>
+  <div class="button-group">
+    <button class="btn btn-primary">Add Student</button>
+    <button class="btn btn-secondary">Export list</button>
+  </div>
+</div>
+
+<!-- Student Table -->
+<div class="student-table">
+  <!-- Table Header -->
+  <div class="table-header table-row">
+    <div class="table-cell">Roll No:</div>
+    <div class="table-cell">Name</div>
+    <div class="table-cell">Email</div>
+    <div class="table-cell">Actions</div>
+  </div>
+
+  <!-- Table Rows -->
+  {% for student in students %}
+  <div class="table-row">
+    <div class="table-cell">{{ student.roll_number }}</div>
+    <div class="table-cell">{{ student.user.full_name }}</div>
+    <div class="table-cell">{{ student.user.email }}</div>
+    <div class="table-cell">
+      <div class="action-buttons">
+        <button class="btn-table">View</button>
+        <button class="btn-table">Edit</button>
+        <button class="btn-table delete">Delete</button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="pagination">
+  <div class="pagination-info">Showing 1–{{ students|length }} Students</div>
+  <div class="pagination-controls">
+    <button class="pagination-btn" disabled>Previous</button>
+    <div class="pagination-numbers">
+      <button class="page-number active">1</button>
+    </div>
+    <button class="pagination-btn" disabled>Next</button>
+  </div>
+</div>
+{% endblock %}

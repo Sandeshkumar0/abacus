@@ -1,0 +1,179 @@
+* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+          "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        background-color: #f9fafb;
+        color: #020817;
+      }
+
+      .dashboard-container {
+        display: flex;
+        height: 100vh;
+      }
+      /* Main Content Styles */
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 0 0px;
+        height: 110px;
+        font-weight: 800;
+      }
+
+      .header-title {
+        color: rgba(6, 86, 165, 1);
+        font-size: 38px;
+        font-weight: 700;
+        line-height: 32px;
+        margin: 10px;
+      }
+
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        margin-left: 0px;
+        font-size: 14px;
+        color: #8289a7;
+        margin : 10px;
+      }
+
+      .breadcrumb-item {
+        font-weight: 500;
+        margin-left: 4px;
+      }
+
+      .breadcrumb-separator {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+        stroke: currentColor;
+      }
+
+      /* Content Area Styles */
+      .content-area {
+        flex: 1;
+        overflow-y: auto;
+        background: linear-gradient(135deg, #b1d8ff, #6a8299);
+        padding: 38px;
+      }
+
+      .queries-container {
+        /* max-width: 1024px; */
+        margin: 0 auto;
+      }
+
+      .query-card {
+        background-color: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .query-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .query-indicator {
+        display: flex;
+        align-items: center;
+      }
+
+      .green-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #10b981;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .query-meta {
+        display: flex;
+        gap: 32px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+
+      .question-text {
+        background-color: #f8fafc;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+        color: #64748b;
+      }
+
+      .answer-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        resize: none;
+        margin-bottom: 24px;
+        font-family: inherit;
+      }
+
+      .answer-textarea:focus {
+        outline: none;
+        border-color: #0a5adb;
+        box-shadow: 0 0 0 1px #0a5adb;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 8px 24px;
+        border-radius: 24px;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .btn-generate {
+        background-color: #fbbf24;
+        color: #1f2937;
+      }
+
+      .btn-generate:hover {
+        background-color: #f59e0b;
+      }
+
+      .btn-submit {
+        background-color: #0a5adb;
+        color: white;
+      }
+
+      .btn-submit:hover {
+        background-color: #1e40af;
+      }
+
+      .continuation {
+        text-align: center;
+        color: white;
+        font-size: 14px;
+        margin-top: 16px;
+      }

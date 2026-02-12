@@ -1,0 +1,66 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Profile - EMESYS{% endblock %}
+{% block header %}Profile{% endblock %}
+{% block subtitle %}Your Comprehensive Educational Management Platform{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+
+<style>
+  main.px-6.pt-6.pb-0 {
+    padding: 0 !important;
+  }
+</style>
+
+<div class="profile-bg-gradient">
+  <div class="profile-card-outer">
+    <div class="profile-card no-radius">
+      <div class="profile-image-center">
+        <img src="https://cdn.builder.io/api/v1/assets/185b1526784f45f38850732c89cdf58b/smiling-young-brunette-caucasian-man-isolated-pink-wall-with-copy-space-aa89d3?format=webp&width=800" alt="Profile" />
+      </div>
+      <table class="profile-details-table">
+        <tr>
+          <td class="label">Name</td>
+          <td class="value">{{ teacher.user.full_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Aadhaar</td>
+          <td class="value">{{ teacher.aadhar_id }}</td>
+        </tr>
+        <tr>
+          <td class="label">Email</td>
+          <td class="value">{{ teacher.user.email }}</td>
+        </tr>
+        <tr>
+          <td class="label">Ph. no.</td>
+          <td class="value">{{ teacher.phone }}</td>
+        </tr>
+      </table>
+
+      <div class="contact-section-title">Contact Details</div>
+      <div class="contact-box">
+        <table class="contact-table">
+          <tr>
+            <td>Email:</td>
+            <td class="value">{{ teacher.user.email }}</td>
+          </tr>
+          <tr>
+            <td>Phone:</td>
+            <td class="value">{{ teacher.phone }}</td>
+          </tr>
+          <tr>
+            <td>Office:</td>
+            <td class="value">Room 204, Computer Science Building</td>
+          </tr>
+          <tr>
+            <td>Office Hours:</td>
+            <td class="value">Monday-Friday, 2:00PM-4:00PM</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

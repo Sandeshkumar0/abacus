@@ -1,0 +1,691 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Assign Questions - EMESYS{% endblock %}
+
+{% block header %}Assign Question{% endblock %}
+
+{% block subtitle %}Create and assign questions to students{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/assign_question.css' %}" />
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+<script src="https://editor.codecogs.com/eqneditor.api.min.js" crossorigin="anonymous"></script>
+
+<style>
+  .math-field {
+    border: 1px dashed #ccc;
+    padding: 14px;
+    border-radius: 12px;
+    background-color: #f8faff;
+    width: 100%;
+    font-size: 1.3rem;
+  }
+  /* small style for the insert example button */
+  .insert-example {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+  }
+  /* Generated answer styling */
+.answer-content {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color: #0b1724;
+  line-height: 1.6;
+  font-size: 15px;
+}
+.answer-header {
+  background:#10b981; /* green */
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px 8px 0 0;
+  font-weight:700;
+  margin-bottom: 8px;
+}
+.answer-card {
+  border-radius: 10px;
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(12,40,70,0.06);
+}
+.answer-step {
+  font-weight: 700;
+  color: #0a58ca;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.answer-paragraph {
+  margin: 8px 0;
+  color: #253142;
+}
+.answer-math {
+  text-align: center;
+  margin: 14px 0;
+  font-size: 1.35rem; /* makes display math larger */
+}
+.answer-final {
+  margin-top: 14px;
+  padding: 12px;
+  background: #f1f8ff;
+  border-left: 4px solid #0a58ca;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+</style>
+
+<form method="POST" enctype="multipart/form-data" class="space-y-6">
+  {% csrf_token %}
+  <input type="hidden" name="latex_equation" id="latex-equation" />
+
+  <!-- Write or Upload Section -->
+  <section class="bg-white shadow-sm border border-gray-200 left-blue-border rounded-2xl p-0 flex flex-col gap-0" style="border-left: 6px solid #004f9f; border-top-left-radius: 18px; border-bottom-left-radius: 18px;">
+    <div class="flex flex-col lg:flex-row gap-0 w-full">
+      <div class="flex-1 flex flex-col justify-center p-8">
+        <label class="text-lg font-semibold text-gray-800 mb-2">
+          Space to Write Question <span class="font-bold text-[#2196f3]">OR</span>
+        </label>
+        <textarea name="description" placeholder="Space to Write Question"
+          class="w-full h-32 p-6 border-2 border-dashed border-[#bcdffb] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 text-gray-700 text-lg"></textarea>
+      </div>
+      <div class="flex flex-col items-center justify-center min-w-[180px] max-w-[200px] pr-8 pt-8">
+        <div class="dotted-border rounded-xl flex flex-col items-center justify-center p-4 w-full bg-white">
+          <label class="cursor-pointer flex flex-col items-center">
+            <span class="gradient-yellow px-8 py-2 rounded-full font-semibold text-base mb-2 text-center">Upload</span>
+            <input type="file" class="hidden" name="image" onchange="showFileName(this)">
+            <span id="file-name" class="text-gray-400 text-sm text-center">Upload Question File here</span>
+          </label>
+        </div>
+        <div class="mt-6">
+          <label class="block text-lg font-semibold text-gray-800 mb-2">Due Date</label>
+          <input type="datetime-local" name="due_date"
+                 class="w-full p-3 border-2 border-dashed border-[#bcdffb] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 text-gray-700 text-lg"
+                 required>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Equation Editor -->
+  <section class="bg-white-100 p-0">
+    <div class="bg-[#2196f3] text-white px-6 py-4 rounded-t-[18px] w-full" style="display:flex; align-items:center; justify-content:space-between;">
+      <h2 class="text-lg font-semibold">Equation Editor</h2>
+      <!-- Insert Example helper -->
+      <div style="display:flex; align-items:center;">
+        <button type="button" id="insertExampleBtn" class="insert-example">Insert example integral</button>
+      </div>
+    </div>
+    <div class="flex flex-col gap-6 bg-white px-6 py-8 rounded-b-[16px] shadow border border-gray-200">
+      <div class="rounded-xl border-2 border-dashed border-[#bcdffb] bg-[#f8faff] p-4 mb-4" style="min-height:250px;">
+        <div id="history" class="mb-2"></div>
+        <div id="toolbar" class="mb-2"></div>
+        <div id="latexInput" style="min-height: 100px; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 12px;"></div>
+        <div id="equation-output" class="mt-4 text-center">
+          <img id="output" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <div class="flex gap-6 mt-2">
+    <button type="submit"
+      class="gradient-blue px-10 py-3 rounded-full font-semibold text-lg shadow-md transition-all">Assign</button>
+
+    <button type="button" id="generateBtn"
+      class="gradient-yellow px-10 py-3 rounded-full font-semibold text-lg shadow-md transition-all">
+      Generate Answer
+    </button>
+  </div>
+
+  <!-- Generated Answer Section -->
+  <div class="bg-gray-100 p-0 rounded-2xl shadow-sm border border-gray-200 mt-4">
+    <div class="bg-green-500 px-8 py-4 rounded-t-2xl">
+      <h3 class="text-lg font-semibold text-white">Generated Answer</h3>
+    </div>
+    <div class="bg-white p-8 rounded-t-[12px] rounded-b-2xl -mt-2" id="answerBox">
+      <p class="text-gray-400">Click "Generate Answer" to see the solution here...</p>
+    </div>
+  </div>
+
+  <!-- Download PDF -->
+  <div class="mt-4">
+    <button type="button" id="downloadBtn"
+      class="px-10 py-3 rounded-full font-semibold text-lg shadow-md transition-all"
+      style="background: linear-gradient(90deg, #ff9a9e, #fad0c4); color:white;">
+      Download
+    </button>
+  </div>
+
+</form>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function () {
+  const MAX_EDITOR_INIT_ATTEMPTS = 8;
+  const INIT_RETRY_DELAY_MS = 200;
+
+  let editor = null;
+  window._eqEditorInstance = null;
+
+  // Inject minimal CSS for the formatted answer
+  (function injectAnswerStyles(){
+    const css = `
+    .answer-content {
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: #0b1724;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    .answer-card {
+      border-radius: 10px;
+      background: #fff;
+      padding: 18px;
+      box-shadow: 0 6px 18px rgba(12,40,70,0.06);
+    }
+    .answer-step {
+      font-weight: 700;
+      color: #0a58ca;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+    .answer-paragraph {
+      margin: 8px 0;
+      color: #253142;
+      font-size: 14.5px;
+    }
+    .answer-math {
+      text-align: center;
+      margin: 14px 0;
+      font-size: 1.35rem;
+    }
+    .answer-final {
+      margin-top: 14px;
+      padding: 12px;
+      background: #f1f8ff;
+      border-left: 4px solid #0a58ca;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .answer-list {
+      margin: 6px 0 12px 20px;
+    }
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+  })();
+
+  // try to create the editor with retries (handles slow script load)
+  let initAttempts = 0;
+  function tryInitEditor() {
+    initAttempts++;
+    try {
+      if (typeof EqEditor !== 'undefined' && typeof EqEditor.TextArea === 'function') {
+        editor = new EqEditor.TextArea('latexInput')
+          .addToolbar(new EqEditor.Toolbar('toolbar'), true)
+          .addOutput(new EqEditor.Output('output'));
+        window._eqEditorInstance = editor;
+        console.info('EqEditor initialized:', editor);
+        return;
+      }
+    } catch (err) {
+      console.debug('EqEditor init attempt failed:', err);
+    }
+    if (initAttempts < MAX_EDITOR_INIT_ATTEMPTS) {
+      setTimeout(tryInitEditor, INIT_RETRY_DELAY_MS);
+    } else {
+      console.warn('EqEditor not available after retries. window._eqEditorInstance may be null.');
+    }
+  }
+  tryInitEditor();
+
+  // DOM refs
+  const form = document.querySelector('form');
+  const latexInputHidden = document.getElementById('latex-equation');
+  const textArea = document.querySelector("textarea[name='description']");
+  const answerBox = document.getElementById("answerBox");
+  const generateBtn = document.getElementById("generateBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+  const insertExampleBtn = document.getElementById("insertExampleBtn");
+
+  // pattern for detecting commands-only like "\int" or "\sum"
+  const incompleteCommandRE = /^\s*\\[a-zA-Z]+\s*$/;
+  const latexLikeRE = /\\|frac|sqrt|\^|_|{|}|\\left|\\right/;
+
+  // deep-inspection helper: search object properties recursively for a string that looks like LaTeX
+  function findLatexInObject(obj, depth = 0, visited = new Set()) {
+    if (!obj || typeof obj !== 'object' || depth > 3) return null;
+    if (visited.has(obj)) return null;
+    visited.add(obj);
+    try {
+      for (const k in obj) {
+        try {
+          const v = obj[k];
+          if (!v) continue;
+          if (typeof v === 'string') {
+            if (latexLikeRE.test(v) && v.length > 1) return v;
+          } else if (typeof v === 'object') {
+            const found = findLatexInObject(v, depth + 1, visited);
+            if (found) return found;
+          }
+        } catch (inner) { /* ignore property read errors */ }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  }
+
+  // Try multiple strategies to extract LaTeX (IMPROVED)
+  function extractLatex() {
+    // 0) Check the rendered output image first (Codecogs-style)
+    try {
+      const img = document.getElementById('output');
+      if (img && img.src) {
+        try {
+          const src = img.src;
+          const qIdx = src.indexOf('latex');
+          if (qIdx !== -1) {
+            const lastEq = src.lastIndexOf('?');
+            let encoded = null;
+            if (lastEq !== -1 && lastEq < src.length - 1) {
+              encoded = src.substring(lastEq + 1);
+            } else {
+              encoded = src.substring(qIdx);
+            }
+            if (encoded) {
+              try {
+                encoded = encoded.replace(/^.*?=/, '');
+                const decoded = decodeURIComponent(encoded).trim();
+                if (decoded && decoded.length > 0) {
+                  console.debug('extractLatex: from output img src (decoded)');
+                  console.debug('raw from img.src:', decoded);
+                  return decoded;
+                }
+              } catch (e) {
+                console.debug('extractLatex: decode attempt failed', e);
+              }
+            }
+          }
+          const alt = img.getAttribute && img.getAttribute('alt');
+          if (alt && alt.trim()) {
+            console.debug('extractLatex: from output img alt');
+            return alt.trim();
+          }
+        } catch (e) {
+          console.debug('extractLatex: issue reading output img', e);
+        }
+      }
+    } catch (e) {
+      console.debug('extractLatex: output image check threw', e);
+    }
+
+    // 1) Preferred editor methods (if editor instance exists)
+    try {
+      if (editor) {
+        if (typeof editor.getCode === 'function') {
+          const v = editor.getCode();
+          if (v && v.trim()) { console.debug('extractLatex: editor.getCode()'); return v.trim(); }
+        }
+        if (typeof editor.getLatex === 'function') {
+          const v = editor.getLatex();
+          if (v && v.trim()) { console.debug('extractLatex: editor.getLatex()'); return v.trim(); }
+        }
+        if (typeof editor.getText === 'function') {
+          const v = editor.getText();
+          if (v && v.trim()) { console.debug('extractLatex: editor.getText()'); return v.trim(); }
+        }
+        if (editor.textarea && typeof editor.textarea.value === 'string' && editor.textarea.value.trim()) {
+          console.debug('extractLatex: editor.textarea.value');
+          return editor.textarea.value.trim();
+        }
+      }
+    } catch (e) {
+      console.debug('extractLatex: editor extraction threw', e);
+    }
+
+    // 2) DOM-based extraction inside #latexInput
+    try {
+      const container = document.getElementById('latexInput');
+      if (container) {
+        const ta = container.querySelector('textarea, input');
+        if (ta && typeof ta.value === 'string' && ta.value.trim()) {
+          console.debug('extractLatex: DOM textarea/input inside container');
+          return ta.value.trim();
+        }
+        const ce = container.querySelector('[contenteditable="true"], [contenteditable="plaintext-only"]');
+        if (ce) {
+          const text = (ce.innerText || ce.textContent || '').trim();
+          if (text) { console.debug('extractLatex: contenteditable inside container'); return text; }
+        }
+        const pre = container.querySelector('pre, code, .latex, .eqn-text, .math-tex');
+        if (pre) {
+          const t = (pre.innerText || pre.textContent || '').trim();
+          if (t) { console.debug('extractLatex: fallback element inside container'); return t; }
+        }
+      }
+    } catch (e) {
+      console.debug('extractLatex: DOM fallback threw', e);
+    }
+
+    // 3) Reflectively inspect the editor instance for LaTeX-like strings (deep search)
+    try {
+      const inst = window._eqEditorInstance || editor;
+      if (inst) {
+        const found = findLatexInObject(inst);
+        if (found) { console.debug('extractLatex: found via deep inspection of editor instance'); return found.trim(); }
+      }
+    } catch (e) {
+      console.debug('extractLatex: deep inspection threw', e);
+    }
+
+    console.warn('extractLatex: no LaTeX found. Inspect window._eqEditorInstance and #latexInput in console.');
+    return '';
+  }
+
+  // Insert Example helper
+  if (insertExampleBtn) {
+    insertExampleBtn.addEventListener('click', function () {
+      const example = "\\int_{0}^{1} x^2 \\, dx";
+      try {
+        if (editor) {
+          if (typeof editor.setCode === 'function') { editor.setCode(example); console.info('Inserted example via editor.setCode()'); return; }
+          if (typeof editor.setLatex === 'function') { editor.setLatex(example); console.info('Inserted example via editor.setLatex()'); return; }
+          if (typeof editor.setText === 'function') { editor.setText(example); console.info('Inserted example via editor.setText()'); return; }
+        }
+      } catch (e) { /* ignore */ }
+
+      try {
+        const container = document.getElementById('latexInput');
+        if (container) {
+          const ta = container.querySelector('textarea, input');
+          if (ta) { ta.value = example; console.info('Inserted example into DOM <textarea|input>'); return; }
+          const ce = container.querySelector('[contenteditable="true"], [contenteditable="plaintext-only"]');
+          if (ce) { ce.innerText = example; console.info('Inserted example into contenteditable'); return; }
+          const pre = document.createElement('pre');
+          pre.textContent = example;
+          container.appendChild(pre);
+          console.info('Inserted example into container as <pre>');
+        }
+      } catch (e) { console.warn('Could not insert example into editor DOM', e); }
+    });
+  }
+
+  // -------------------------
+  // Formatting helpers
+  // -------------------------
+  function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // detect if every non-empty line in array starts with a list marker
+  function isListBlock(lines) {
+    for (let ln of lines) {
+      if (!ln.trim()) continue;
+      if (!/^\s*(?:[-*+]|[0-9]+[.)])\s+/.test(ln)) return false;
+    }
+    return true;
+  }
+
+  // remove leading list markers and trim then clean inline marks
+  function cleanListItem(line) {
+    return cleanInline(line.replace(/^\s*(?:[-*+]|[0-9]+[.)])\s+/, '').trim());
+  }
+
+  // remove inline **bold** and *italics* markers (simple)
+  function cleanInline(s) {
+    if (!s) return '';
+    // keep backslashes for LaTeX (we will not remove backslashes)
+    // but remove markdown bold/italic
+    s = s.replace(/\*\*(.*?)\*\*/g, '$1'); // bold
+    s = s.replace(/\*(.*?)\*/g, '$1');     // italic
+    // remove stray backtick blocks if any
+    s = s.replace(/`{1,3}(.+?)`{1,3}/g, '$1');
+    return s;
+  }
+
+  // format raw model text into safe HTML with lists, headings, math blocks
+  function formatModelAnswer(raw) {
+    if (!raw) return '<div class="answer-paragraph">No answer returned.</div>';
+
+    // Normalize newlines
+    raw = raw.replace(/\r\n/g, '\n').trim();
+
+    // Some models output markdown bullets with leading spaces — keep them as lines
+    const lines = raw.split('\n');
+
+    // Group into blocks separated by empty lines
+    const blocks = [];
+    let cur = [];
+    lines.forEach(line => {
+      if (line.trim() === '') {
+        if (cur.length) { blocks.push(cur); cur = []; }
+      } else {
+        cur.push(line);
+      }
+    });
+    if (cur.length) blocks.push(cur);
+
+    let html = '';
+
+    for (const blockLines of blocks) {
+      // If block is list-like (every non-empty line starts with bullet/number) -> render list
+      if (isListBlock(blockLines)) {
+        // Determine ordered or unordered by first non-empty line
+        const first = blockLines.find(l => l.trim());
+        const isOrdered = /^\s*[0-9]+[.)]\s+/.test(first);
+        html += isOrdered ? '<ol class="answer-list">' : '<ul class="answer-list">';
+        for (const ln of blockLines) {
+          if (!ln.trim()) continue;
+          html += '<li>' + escapeHtml(cleanListItem(ln)) + '</li>';
+        }
+        html += isOrdered ? '</ol>' : '</ul>';
+        continue;
+      }
+
+      // If block contains a single line and that line is a "Step" heading like "Step: Light Absorption:" or "Step 1: Identify..."
+      if (blockLines.length === 1) {
+        const single = blockLines[0].trim();
+        // Step headings: "Step:" "Step 1:" or "Step 1: Identify the ..." or "Step: Light Absorption:"
+        let m = single.match(/^Step\s*(\d+)?\s*[:\-]\s*(.*)$/i);
+        if (!m) m = single.match(/^Step\s*[:]\s*(.*)$/i);
+        if (m) {
+          const headingText = (m[2] || m[1] || '').trim() || single;
+          // If headingText contains another colon at end, remove it
+          const cleanHeading = headingText.replace(/:$/, '').trim();
+          html += `<div class="answer-step">${escapeHtml(cleanHeading)}</div>`;
+          continue;
+        }
+      }
+
+      // Detect Final Answer block if first line starts with "Final Answer"
+      if (/^Final Answer[:\s]/i.test(blockLines[0].trim())) {
+        // everything after the label is final answer text
+        const rest = blockLines.join(' ').replace(/^Final Answer[:\s]*/i, '').trim();
+        html += `<div class="answer-paragraph">Final Answer:</div><div class="answer-final">${escapeHtml(cleanInline(rest))}</div>`;
+        continue;
+      }
+
+      // Detect display math blocks if the block contains \[...\] or starts/ends with LaTeX tokens
+      const blockText = blockLines.join(' ').trim();
+
+      // If the block contains explicit \[ ... \] markers (model may include) -> render as display math
+      const displayMatch = blockText.match(/\\\[((?:.|\n)*?)\\\]/s);
+      if (displayMatch) {
+        const mathInner = displayMatch[1].trim();
+        html += `<div class="answer-math">\\[${mathInner}\\]</div>`;
+        // include surrounding text if any
+        const surrounding = blockText.replace(displayMatch[0], '').trim();
+        if (surrounding) html += `<div class="answer-paragraph">${escapeHtml(cleanInline(surrounding))}</div>`;
+        continue;
+      }
+
+      // If block contains strong LaTeX tokens, render centered math (but also escape html around it)
+      if (latexLikeRE.test(blockText)) {
+        // Use raw (do not escape backslashes), but still strip stray markdown markers
+        const cleaned = cleanInline(blockText);
+        html += `<div class="answer-math">\\[${cleaned}\\]</div>`;
+        continue;
+      }
+
+      // Otherwise regular paragraph: join lines, remove inline ** and * markup
+      const joined = blockLines.map(l => l.trim()).join(' ');
+      const cleanedParagraph = cleanInline(joined);
+      html += `<div class="answer-paragraph">${escapeHtml(cleanedParagraph)}</div>`;
+    }
+
+    return html;
+  }
+
+  // -------------------------
+  // GENERATE button
+  // -------------------------
+  if (generateBtn) {
+    generateBtn.addEventListener('click', async function () {
+      // Grab text + latex once
+      const textQuestion = (textArea && textArea.value) ? textArea.value.trim() : "";
+      const extracted = extractLatex().trim(); // single extraction result used everywhere
+
+      // Show debug extraction result
+      answerBox.innerHTML = "<div class='text-sm text-gray-600 mb-3'>Debug: extracted LaTeX (what will be sent)</div>"
+        + "<pre class='whitespace-pre-wrap text-xs text-gray-500 p-3 border rounded' style='max-height:200px;overflow:auto;'>"
+        + (escapeHtml(extracted) || '(empty)') + "</pre>";
+
+      // Build the final question payload
+      let fullQuestion = textQuestion;
+      if (extracted) {
+        fullQuestion += (fullQuestion ? "\n\n" : "") + "LaTeX Equation:\n" + extracted;
+      }
+
+      if (!fullQuestion.trim()) {
+        alert("⚠️ Please type a question or equation first!");
+        return;
+      }
+
+      // Detect and block single-command LaTeX like "\int" or "\sum"
+      if (extracted && incompleteCommandRE.test(extracted)) {
+        answerBox.innerHTML = "<p class='text-red-500'>⚠️ The equation looks incomplete (" + escapeHtml(extracted) + "). Please include the integrand and limits (e.g. \\int_0^1 x^2 dx).</p>";
+        return;
+      }
+
+      // Disable button to prevent duplicate clicks
+      generateBtn.disabled = true;
+      generateBtn.classList.add('opacity-50');
+
+      // show generating message (replace the debug UI)
+      answerBox.innerHTML = "<p class='text-gray-500 italic'>⏳ Generating answer...</p>";
+
+      // Prepare POST using FormData
+      const formData = new FormData();
+      formData.append('question', fullQuestion);
+
+      // CSRF token
+      const csrfEl = document.querySelector("[name=csrfmiddlewaretoken]");
+      const csrfToken = csrfEl ? csrfEl.value : null;
+
+      try {
+        const resp = await fetch("{% url 'generate_answer_assign' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": csrfToken || ""
+          },
+          body: formData
+        });
+
+        if (!resp.ok) throw new Error(`Network error: ${resp.status} ${resp.statusText}`);
+
+        let data;
+        try {
+          data = await resp.json();
+        } catch (parseErr) {
+          throw new Error("Server returned invalid JSON.");
+        }
+
+        // prefer data.answer; data.received is debug echo (if you still have it)
+        const rawModelText = (data && data.answer) ? data.answer : (data && data.received) ? data.received : (data && data.error) ? data.error : '';
+
+        // Format and insert into DOM
+        const formatted = formatModelAnswer(rawModelText);
+        answerBox.innerHTML = `<div class="answer-card"><div class="answer-content">${formatted}</div></div>`;
+
+        // Ask MathJax to typeset the inserted content
+        if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+          MathJax.typesetPromise([answerBox]).catch(function(err){ console.error('MathJax typeset error:', err); });
+        } else {
+          console.warn('MathJax not found; math will not be rendered until MathJax is loaded.');
+        }
+      } catch (err) {
+        console.error('Fetch/generate error:', err);
+        answerBox.innerHTML = "<p class='text-red-500'>❌ An error occurred while generating the answer: " + escapeHtml(err.message || String(err)) + "</p>";
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.classList.remove('opacity-50');
+      }
+    });
+  }
+
+  // DOWNLOAD button (unchanged logic)
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", function () {
+      let content = answerBox.innerText.trim();
+
+      if (!content || content.includes('Click "Generate Answer"')) {
+        alert("⚠️ No generated answer available to download.");
+        return;
+      }
+
+      const csrfEl = document.querySelector("[name=csrfmiddlewaretoken]");
+      const csrfToken = csrfEl ? csrfEl.value : null;
+
+      const data = new FormData();
+      data.append('content', content);
+
+      fetch("{% url 'download_pdf' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken || "" },
+        body: data
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network error");
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Generated_Answer.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("❌ Error downloading PDF");
+      });
+    });
+  }
+});
+</script>
+
+<script>
+function showFileName(input) {
+  if (input.files && input.files[0]) {
+    document.getElementById("file-name").textContent = input.files[0].name;
+  }
+}
+</script>
+{% endblock %}

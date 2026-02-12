@@ -1,0 +1,216 @@
+/* Real-time Notification Styles */
+
+/* Notification Bell Icon */
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+    font-size: 24px;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.notification-bell:hover {
+    color: #007bff;
+}
+
+#notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    display: none;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Toast Notifications */
+.notification-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: white;
+    border-left: 4px solid #007bff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    min-width: 300px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+.notification-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toast-header strong {
+    color: #333;
+    font-size: 14px;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.toast-close:hover {
+    color: #333;
+}
+
+.toast-body {
+    padding: 12px 15px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Notification Dropdown */
+.notifications-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 350px;
+    max-height: 500px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+}
+
+.notifications-dropdown.show {
+    display: block;
+}
+
+.notifications-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notifications-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.mark-all-read {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.mark-all-read:hover {
+    text-decoration: underline;
+}
+
+#notifications-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.notification-item:hover {
+    background: #f8f9fa;
+}
+
+.notification-item.unread {
+    background: #e7f3ff;
+}
+
+.notification-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 80%;
+    background: #007bff;
+}
+
+.notification-content strong {
+    display: block;
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.notification-content p {
+    margin: 0 0 5px 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.notification-content small {
+    color: #999;
+    font-size: 12px;
+}
+
+.notification-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.notification-link:hover {
+    text-decoration: underline;
+}
+
+.no-notifications {
+    padding: 40px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}
+
+/* Connection Status Indicator */
+#connection-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+#connection-status.connected {
+    background: #28a745;
+    box-shadow: 0 0 4px #28a745;
+}
+
+#connection-status.disconnected {
+    background: #dc3545;
+}

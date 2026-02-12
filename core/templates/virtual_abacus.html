@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Online Abacus Simulator - EMESYS{% endblock %}
+
+{% block page_css %}
+  <link rel="stylesheet" href="{% static 'css/page-virtual_abacus.css' %}">
+{% endblock %}
+
+{% block content %}
+  <!-- Main Content (taken from original file, without header/footer) -->
+  <div class="main-wrapper">
+    <!-- Hero Section with Abacus Simulator -->
+    <section class="hero" id="abacus">
+      <div class="container">
+        <h1>Online Abacus Simulator</h1>
+
+        <div class="simulator-wrapper">
+          <!-- Controls -->
+          <div class="simulator-controls">
+            <div class="control-group">
+              <label for="mode">Mode:</label>
+              <select id="mode">
+                <option>Decimal (Base 10)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="columns">Columns:</label>
+              <input type="number" id="columns" min="13" max="13" value="13">
+            </div>
+
+            <span class="control-hint">Click beads to move them.</span>
+
+            <div class="button-group">
+              <button class="btn btn-reset" onclick="resetAbacus()">Reset</button>
+              <button class="btn btn-random" onclick="setRandomNumber()">Random Number</button>
+            </div>
+          </div>
+
+          <!-- Abacus Visualization -->
+          <div class="abacus-container">
+            <div class="abacus" id="abacusDisplay"></div>
+          </div>
+
+          <!-- Value Display -->
+          <div class="value-section">
+            <div class="value-display">
+              <span class="value-label">Value:</span>
+              <span class="value-number" id="valueDisplay">0</span>
+            </div>
+            <p class="value-tip">
+              Tip: Rightmost column is the ones place, then tens, hundreds, and so on.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="info-section">
+      <div class="container">
+        <h2>Learn How to Use the Abacus with EMESYS</h2>
+        <div class="info-content">
+          <p>
+            The abacus is one of the oldest and most effective tools for developing strong mathematical skills.
+            At EMESYS, we make learning the abacus simple, engaging, and fun for every child.
+            Our approach focuses on building confidence, accuracy, and a strong foundation in mental math.
+          </p>
+          <p>
+            With guided practice, children learn to visualize numbers, strengthen their memory, and solve problems faster.
+            Our sessions encourage active learning, helping students stay focused and motivated. By mastering bead movements
+            and mental visualization techniques, children gradually progress from basic calculations to advanced problem-solving with ease.
+          </p>
+          <p>
+            At EMESYS, we believe every child has the potential to excel in math — our abacus program is designed to unlock
+            that potential through consistent practice, interactive activities, and personalized support.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <div class="container">
+        <div class="features-grid">
+          <div class="feature-card classes">
+            <div class="feature-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                </path>
+              </svg>
+            </div>
+            <h3>Abacus Online Classes</h3>
+          </div>
+
+          <div class="feature-card stories">
+            <div class="feature-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
+                </path>
+              </svg>
+            </div>
+            <h3>Abacus Success Stories</h3>
+          </div>
+
+          <div class="feature-card tutoring">
+            <div class="feature-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                </path>
+              </svg>
+            </div>
+            <h3>Abacus Tutoring</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/virtual_abacus.js' %}"></script>
+{% endblock %}

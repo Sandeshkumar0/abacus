@@ -1,0 +1,45 @@
+from django.urls import path
+from . import views  # make sure this exists
+
+urlpatterns = [
+    path('student/profile/', views.student_profile, name='student_profile'),
+    path('student/profile/edit/', views.student_profile_edit, name='student_profile_edit'),
+    path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('student/view-assign/',views.student_assign, name='student_assign'),
+    path('student/raise-query/', views.raise_query, name='raise_query'),
+    path('student/view-remarks/', views.view_remarks, name='view_remarks'),
+    path('student/submit-answer/', views.submit_answer, name='submit_answer'),
+    path('student/download-answer/<int:question_id>/', views.download_answer_pdf, name='download_answer_pdf'),
+    path('student/view-responses/', views.view_responded_queries, name='view_responded_queries'),
+    path('student/lecture-notes/', views.lecture_notes, name='lecture_notes'),
+    path('student/lecture-notes/generate/', views.generate_notes, name='generate_notes'),
+    path("teacher/download-pdf/", views.download_pdf, name="download_pdf"),
+    path("student/exams/<int:exam_id>/questions/", views.get_exam_questions, name="get_exam_questions"),
+    path("student/exams/<int:exam_id>/attempt/", views.attempt_exam, name="attempt_exam"),
+    path("student/exams/<int:exam_id>/download/", views.download_exam_answer_pdf, name="download_exam_pdf"),
+    path(
+        "student/download-exam/<int:exam_id>/",
+        views.download_exam_answer_pdf,
+        name="download_exam_answer_pdf"
+    ),
+    path("teacher/generate-answer-assign/", views.generate_answer_assign, name="generate_answer_assign"),
+    path("teacher/generate-answer-query/", views.generate_answer_query, name="generate_answer_query"),
+    path("teacher/generate-remark-feedback/", views.generate_remark_feedback, name="generate_remark_feedback"),
+    path('student/give-test/', views.give_test, name='give_test'),
+    path('teacher/give-remarks/', views.give_remarks, name='give_remarks'),
+    path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+    path('teacher/assign/', views.assign_questions, name='assign_questions'),
+    path('teacher/profile/', views.teacher_profile, name='teacher_profile'),
+    path('teacher/profile/edit/', views.teacher_profile_edit, name='teacher_profile_edit'),
+    path('teacher/students/', views.student_list, name='student_list'),
+    path('teacher/students/add/', views.add_student, name='add_student'),
+    path('teacher/students/<int:student_id>/view/', views.view_student, name='view_student'),
+    path('teacher/students/<int:student_id>/edit/', views.edit_student, name='edit_student'),
+    path('teacher/students/<int:student_id>/delete/', views.delete_student, name='delete_student'),
+    path('teacher/students/export/', views.export_students_csv, name='export_students_csv'),
+    path('teacher/queries/', views.respond_queries, name='respond_queries'),
+    path('teacher/take-test/', views.take_test, name='take_test'),
+    path("teacher/create-exam/", views.create_exam, name="create_exam"),
+
+]
+ 

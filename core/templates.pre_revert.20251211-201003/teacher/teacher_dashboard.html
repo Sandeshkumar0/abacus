@@ -1,0 +1,85 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block title %}Teacher Dashboard - EMESYS{% endblock %}
+
+{% block content %}
+  <!-- Quick Overview Section -->
+  <div class="bg-white rounded-xl p-6 mb-6 border-l-8 shadow-xs" style="border-color: #0656a5;">
+    <h2 class="text-2xl font-semibold text-blue-600 mb-2">Quick Overview</h2>
+    <p class="text-sm text-gray-600 leading-relaxed">
+      Access all your educational management tools from the central board,
+      monitor student progress, manage assignments, and streamline your
+      teaching workflow.
+    </p>
+  </div>
+
+  <!-- Statistics Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl shadow-xs border-t-8 text-center overflow-hidden" style="border-color: #0656a5;">
+      <div class="pt-6 pb-6 px-6">
+        <div class="text-3xl font-bold text-blue-600 mb-2">156</div>
+        <div class="text-sm font-semibold text-blue-600">Total Teachers</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-xs border-t-8 text-center overflow-hidden" style="border-color: #0656a5;">
+      <div class="pt-6 pb-6 px-6">
+        <div class="text-3xl font-bold text-blue-600 mb-2">24</div>
+        <div class="text-sm font-semibold text-blue-600">Active Assignments</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-xs border-t-8 text-center overflow-hidden" style="border-color: #0656a5;">
+      <div class="pt-6 pb-6 px-6">
+        <div class="text-3xl font-bold text-blue-600 mb-2">12</div>
+        <div class="text-sm font-semibold text-blue-600">Pending Queries</div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-xs border-t-8 text-center overflow-hidden" style="border-color: #0656a5;">
+      <div class="pt-6 pb-6 px-6">
+        <div class="text-3xl font-bold text-blue-600 mb-2">8</div>
+        <div class="text-sm font-semibold text-blue-600">Upcoming Tests</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Content Area -->
+  <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Activities -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-xs">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-blue-600 mb-4">Recent Activity</h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span class="text-sm text-gray-700">New assignment submitted by John Doe</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span class="text-sm text-gray-700">Query resolved for Mathematics</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <span class="text-sm text-gray-700">Upcoming test scheduled for next week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-xs">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-blue-600 mb-4">Quick Actions</h3>
+        <div class="space-y-3">
+          <button class="w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+            Create New Assignment
+          </button>
+          <button class="w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+            View Student Progress
+          </button>
+          <button class="w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+            Schedule Test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

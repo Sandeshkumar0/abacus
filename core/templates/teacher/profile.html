@@ -1,0 +1,99 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Profile - EMESYS{% endblock %}
+{% block header %}Profile{% endblock %}
+{% block subtitle %}Your Comprehensive Educational Management Platform{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+
+<style>
+  main.px-6.pt-6.pb-0 {
+    padding: 0 !important;
+  }
+
+  .edit-btn-container {
+    text-align: right;
+    padding: 1rem 2rem;
+  }
+
+  .edit-profile-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+  }
+
+  .edit-profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+  }
+</style>
+
+<div class="profile-bg-gradient">
+  <div class="edit-btn-container">
+    <a href="{% url 'teacher_profile_edit' %}" class="edit-profile-btn">
+       Edit Profile
+    </a>
+  </div>
+  <div class="profile-card-outer">
+    <div class="profile-card no-radius">
+      <div class="profile-image-center">
+        {% if teacher.profile_picture %}
+        <img src="{{ teacher.profile_picture.url }}" alt="Profile" />
+        {% else %}
+        <img
+          src="https://cdn.builder.io/api/v1/assets/185b1526784f45f38850732c89cdf58b/smiling-young-brunette-caucasian-man-isolated-pink-wall-with-copy-space-aa89d3?format=webp&width=800"
+          alt="Profile" />
+        {% endif %}
+      </div>
+      <table class="profile-details-table">
+        <tr>
+          <td class="label">Name</td>
+          <td class="value">{{ teacher.user.full_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Aadhaar</td>
+          <td class="value">{{ teacher.aadhar_id }}</td>
+        </tr>
+        <tr>
+          <td class="label">Email</td>
+          <td class="value">{{ teacher.user.email }}</td>
+        </tr>
+        <tr>
+          <td class="label">Ph. no.</td>
+          <td class="value">{{ teacher.phone }}</td>
+        </tr>
+      </table>
+
+      <div class="contact-section-title">Contact Details</div>
+      <div class="contact-box">
+        <table class="contact-table">
+          <tr>
+            <td>Email:</td>
+            <td class="value">{{ teacher.user.email }}</td>
+          </tr>
+          <tr>
+            <td>Phone:</td>
+            <td class="value">{{ teacher.phone }}</td>
+          </tr>
+          <tr>
+            <td>Office:</td>
+            <td class="value">{{ teacher.office_location|default:"Not specified" }}</td>
+          </tr>
+          <tr>
+            <td>Office Hours:</td>
+            <td class="value">{{ teacher.office_hours|default:"Not specified" }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Give Remarks - Emesys{% endblock %}
+{% block header %}Give Remarks to Answers and Tests/Exams{% endblock %}
+{% block subtitle %}Review, assign marks and provide feedback on student answers{% endblock %}
+
+{% block extra_css %}
+<style>
+  .exam-card { background:#fff; border-radius:12px; padding:16px; margin-bottom:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+  .exam-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:10px; border-bottom:1px solid #e5e7eb; }
+  .exam-header h3 { font-size:18px; font-weight:600; color:#1f2937; margin:0; }
+  .arrow-icon { transition:transform 0.3s ease; }
+  .question-card { border:1px solid #e5e7eb; border-radius:8px; padding:12px; margin:12px 0; background:#f9fafb; }
+  .remark-box, .marks-input { width:100%; border:1px solid #d1d5db; border-radius:6px; padding:8px; margin-top:8px; }
+  .ai-btn { background:#10b981; color:#fff; padding:6px 12px; border-radius:6px; font-size:14px; margin-top:8px; cursor:pointer; border:none; }
+  .submit-btn { background:#2563eb; color:#fff; padding:10px 18px; border-radius:8px; font-weight:600; margin-top:12px; border:none; cursor:pointer;}
+  .equation-wrapper { display:flex; justify-content:center; margin:8px 0; }
+  .ai-loading { opacity:0.7; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-10">
+
+  <!-- ================= ASSIGNMENTS ================= -->
+  <h2 class="text-xl font-semibold text-gray-800">Assignment Answers</h2>
+  {% for ans in student_answers %}
+    <div class="exam-card" data-answer-id="{{ ans.id }}" data-answer-type="student">
+      <p class="font-bold text-blue-600">{{ ans.student_name }}</p>
+      <p><b>Question:</b> {{ ans.question_text }}</p>
+
+      {% if ans.latex %}
+        <div class="equation-wrapper">
+          <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ ans.latex|urlencode }}" alt="Equation">
+        </div>
+      {% endif %}
+
+      {% if ans.answer_file %}
+        <p>
+          📎 <a href="{{ ans.answer_file }}" target="_blank" class="text-blue-600 underline">
+            View Student Attachment
+          </a>
+        </p>
+      {% endif %}
+
+
+      <p><b>Student Answer:</b> {{ ans.answer_text }}</p>
+
+      <form method="post" class="mt-3 assignment-form">
+        {% csrf_token %}
+        <input type="hidden" name="answer_id" value="{{ ans.id }}">
+        <input type="hidden" name="answer_type" value="student">
+
+        <textarea name="remark_text" rows="2" class="remark-box" placeholder="Write remarks..."></textarea>
+        <div style="margin-top:8px;">
+          <button type="submit" class="submit-btn">Submit</button>
+          <button type="button" class="ai-btn" data-answer-id="{{ ans.id }}" data-answer-type="student">AI Checker</button>
+        </div>
+      </form>
+    </div>
+  {% empty %}
+    <p class="text-gray-600">No assignment answers pending for review.</p>
+  {% endfor %}
+
+  <!-- ================= EXAMS ================= -->
+  <h2 class="text-xl font-semibold text-gray-800">Exam Answers</h2>
+  {% regroup exam_answers by exam_title as exams_grouped %}
+  {% for exam in exams_grouped %}
+  <div class="exam-card">
+    <div class="exam-header" onclick="toggleExam('{{ forloop.counter }}')">
+      <h3>{{ exam.grouper }}</h3>
+      <svg width="24" height="24" ... class="arrow-icon" id="arrow-{{ forloop.counter }}">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+
+    <form method="post" id="exam-form-{{ forloop.counter }}" style="display:none; margin-top:12px;">
+      {% csrf_token %}
+      {% for ans in exam.list %}
+      <div class="question-card" data-answer-id="{{ ans.id }}" data-answer-type="exam">
+        <p class="font-bold text-blue-600">{{ ans.student_name }}</p>
+        <p><b>Q{{ forloop.counter }}:</b> {{ ans.question_text }}</p>
+
+        {% if ans.latex %}
+        <div class="equation-wrapper">
+          <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ ans.latex|urlencode }}" alt="Equation">
+        </div>
+        {% endif %}
+
+        {% if ans.answer_file %}
+          <p>
+            📎 <a href="{{ ans.answer_file }}" target="_blank" class="text-blue-600 underline">
+              View Student Attachment
+            </a>
+          </p>
+        {% endif %}
+
+
+
+        <p><b>Student Answer:</b> {{ ans.answer_text }}</p>
+
+        <input type="hidden" name="answers[{{ ans.id }}][id]" value="{{ ans.id }}">
+        <input type="hidden" name="answers[{{ ans.id }}][type]" value="exam">
+
+        <label>Marks:</label>
+        <input type="number" name="answers[{{ ans.id }}][marks]" min="0" class="marks-input" placeholder="Give marks">
+        <textarea name="answers[{{ ans.id }}][remark]" rows="2" class="remark-box" placeholder="Write remarks..."></textarea>
+        
+        <div style="margin-top:8px;">
+          <button type="button" class="ai-btn" data-answer-id="{{ ans.id }}" data-answer-type="exam">AI Checker</button>
+        </div>
+      </div>
+      {% endfor %}
+      <button type="submit" class="submit-btn">Submit All Remarks for {{ exam.grouper }}</button>
+    </form>
+  </div>
+  {% empty %}
+    <p class="text-gray-600">No exam answers pending for review.</p>
+  {% endfor %}
+</div>
+<script>
+  function toggleExam(counter) {
+    const form = document.getElementById('exam-form-' + counter);
+    const arrow = document.getElementById('arrow-' + counter);
+
+    if (form.style.display === "none" || form.style.display === "") {
+      form.style.display = "block";
+      if (arrow) arrow.style.transform = "rotate(180deg)";
+    } else {
+      form.style.display = "none";
+      if (arrow) arrow.style.transform = "rotate(0deg)";
+    }
+  }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".ai-btn").forEach(btn => {
+    btn.addEventListener("click", async function() {
+      const answerId = this.getAttribute("data-answer-id");
+      const answerType = this.getAttribute("data-answer-type");
+
+      // ✅ Use .exam-card OR .question-card as container
+      const card = this.closest(".exam-card, .question-card");
+      if (!card) {
+        console.error("No card container found for", answerId);
+        return;
+      }
+
+      let textarea = card.querySelector("textarea.remark-box");
+      if (!textarea) {
+        console.error("No remark textarea found inside card", answerId);
+        return;
+      }
+
+      // Show loading state
+      textarea.value = "⏳ Generating AI feedback...";
+      this.disabled = true;
+      this.classList.add("ai-loading");
+
+      try {
+        const response = await fetch("{% url 'generate_remark_feedback' %}", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            "answer_id": answerId,
+            "answer_type": answerType
+          })
+        });
+
+        const data = await response.json();
+        if (data.feedback) {
+          textarea.value = data.feedback;
+        } else if (data.error) {
+          textarea.value = "⚠️ " + data.error;
+        } else {
+          textarea.value = "⚠️ No feedback returned.";
+        }
+      } catch (err) {
+        textarea.value = "⚠️ Error: " + (err.message || err);
+      } finally {
+        this.disabled = false;
+        this.classList.remove("ai-loading");
+      }
+    });
+  });
+});
+
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, 10) === ('csrftoken=')) {
+        cookieValue = decodeURIComponent(cookie.substring(10));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
+
+{% endblock %}

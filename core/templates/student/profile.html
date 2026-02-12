@@ -1,0 +1,136 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Profile - EMESYS{% endblock %}
+{% block header %}Profile{% endblock %}
+{% block subtitle %}Your Comprehensive Educational Management Platform{% endblock %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+<style>
+  main {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .profile-bg-gradient {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .profile-card-outer {
+    margin: 24px auto !important;
+    padding: 0 !important;
+    max-width: 1000px;
+  }
+
+  .header-title,
+  .header-subtitle {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .container,
+  .content-container,
+  .wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .edit-btn-container {
+    text-align: right;
+    padding: 1rem 2rem;
+  }
+
+  .edit-profile-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+  }
+
+  .edit-profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+  }
+</style>
+{% endblock %}
+
+<div class="profile-bg-gradient">
+  <div class="edit-btn-container">
+    <a href="{% url 'student_profile_edit' %}" class="edit-profile-btn">
+      ✏️ Edit Profile
+    </a>
+  </div>
+  <div class="profile-card-outer">
+    <div class="profile-card no-radius">
+      <div class="profile-image-center">
+        {% if student.profile_picture %}
+        <img src="{{ student.profile_picture.url }}" alt="Profile" />
+        {% else %}
+        <img
+          src="https://cdn.builder.io/api/v1/assets/185b1526784f45f38850732c89cdf58b/smiling-young-brunette-caucasian-man-isolated-pink-wall-with-copy-space-aa89d3?format=webp&width=800"
+          alt="Profile" />
+        {% endif %}
+      </div>
+
+      <table class="profile-details-table">
+        <tr>
+          <td class="label">Name</td>
+          <td class="value">{{ student.user.full_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Roll No.</td>
+          <td class="value">{{ student.roll_number }}</td>
+        </tr>
+        <tr>
+          <td class="label">Class</td>
+          <td class="value">{{ student.student_class }}</td>
+        </tr>
+        <tr>
+          <td class="label">DOB</td>
+          <td class="value">{{ student.dob }}</td>
+        </tr>
+        <tr>
+          <td class="label">Email</td>
+          <td class="value">{{ student.user.email }}</td>
+        </tr>
+        <tr>
+          <td class="label">Ph. no.</td>
+          <td class="value">{{ student.phone }}</td>
+        </tr>
+      </table>
+
+      <div class="contact-section-title">Contact Details</div>
+      <div class="contact-box">
+        <table class="contact-table">
+          <tr>
+            <td>Email:</td>
+            <td class="value">{{ student.user.email }}</td>
+          </tr>
+          <tr>
+            <td>Phone:</td>
+            <td class="value">{{ student.phone }}</td>
+          </tr>
+          <tr>
+            <td>Assigned Teacher:</td>
+            <td class="value">{{ student.assigned_teacher.user.full_name|default:"Not assigned" }}</td>
+          </tr>
+          <tr>
+            <td>Teacher Email:</td>
+            <td class="value">{{ student.assigned_teacher.user.email|default:"N/A" }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

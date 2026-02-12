@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}EMESYS - Abacus Master Learning Platform{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'portal/css/page-home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>Build fast math skills with Abacus Master</h1>
+            <p>
+                Interactive Virtual Abacus lessons, certified teacher training, and franchise opportunities —
+                built to scale learning across cities.
+            </p>
+            <div class="hero-buttons">
+                <a href="{% url 'courses' %}" class="btn btn-primary" role="button">Start learning</a>
+                <button class="btn btn-secondary">Join as Teacher</button>
+            </div>
+        </div>
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2Fc18bf022004a47fdab2ec4898a2f2912?format=webp&width=800"
+             alt="Children learning with abacus">
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon orange">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.41 0-8-3.59-8-8V8.3l8-4.5 8 4.5V12c0 4.41-3.59 8-8 8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </div>
+            <h3>Learning Portal</h3>
+            <p>Interactive lessons and resources.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon blue">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6zm0 4h8v2H6zm10 0h2v2h-2zm0-4h2v2h-2z"/>
+                </svg>
+            </div>
+            <h3>Online Classes</h3>
+            <p>Live interactive sessions</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon pink">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </div>
+            <h3>Teacher Training</h3>
+            <p>Become a certified instructor</p>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section class="courses">
+    <div class="courses-container">
+        <h2>Courses</h2>
+        <div class="courses-grid">
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>Abacus</h3>
+                    <p>Foundational number sense + Virtual Abacus</p>
+                </div>
+                <p class="course-duration">3 months</p>
+                <div class="course-buttons">
+                    <button class="btn-outline">Details</button>
+                    <button class="btn-enroll">Enroll</button>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>Vedic</h3>
+                    <p>Speed &amp; accuracy, mental calculations</p>
+                </div>
+                <p class="course-duration">4 months</p>
+                <div class="course-buttons">
+                    <button class="btn-outline">Details</button>
+                    <button class="btn-enroll">Enroll</button>
+                </div>
+            </div>
+
+            <div class="course-card">
+                <div class="course-header">
+                    <h3>Teacher Training</h3>
+                    <p>Certify to teach AbacusMaster curriculum</p>
+                </div>
+                <p class="course-duration">6 Weeks</p>
+                <div class="course-buttons">
+                    <button class="btn-outline">Details</button>
+                    <button class="btn-enroll">Enroll</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter">
+    <div class="newsletter-content">
+        <div class="newsletter-text">
+            <h2>Start learning by creating free account and get register</h2>
+            <div class="newsletter-form">
+                <div class="form-row">
+                    <input type="text" placeholder="Your name">
+                    <input type="email" placeholder="Your email address">
+                </div>
+                <button class="btn-subscribe">Subscribe</button>
+            </div>
+        </div>
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2F83ff348448ed4d16aa7e1b859eeaedc7?format=webp&width=800"
+             alt="Student learning">
+    </div>
+</section>
+
+<!-- Franchise Section -->
+<section class="franchise">
+    <div class="franchise-content">
+        <div class="franchise-text">
+            <h2>Franchise Opportunities</h2>
+            <p>Join the AbacusMaster family — training, marketing support, and a proven curriculum to start your centre.</p>
+            <ul class="franchise-list">
+                <li>Turnkey curriculum &amp; teacher training</li>
+                <li>Operational support &amp; marketing assets</li>
+                <li>Ongoing updates &amp; community</li>
+            </ul>
+            <button class="btn-franchise" onclick="location.href='{% url 'franchise' %}#franchise-brochure'">Request Franchise Info</button>
+        </div>
+        <div class="franchise-form">
+            <h3>Franchise Inquiry</h3>
+            <form>
+                <input type="text" placeholder="Full name">
+                <input type="text" placeholder="City">
+                <input type="email" placeholder="Email">
+                <textarea placeholder="Message"></textarea>
+                <button type="button" class="btn-submit" onclick="location.href='{% url 'franchise' %}#franchise-inquiry'">Submit Inquiry</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials">
+    <div class="testimonials-container">
+        <h2>What Our Users Say</h2>
+        <div class="testimonial-card">
+            <button class="nav-arrow left">❮</button>
+            <button class="nav-arrow right">❯</button>
+            <div class="stars">
+                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                </svg>
+            </div>
+            <div class="quote">
+                <p>"Great platform to teach and connect with students worldwide. Highly recommended!"</p>
+            </div>
+            <div class="author">
+                <p class="author-name">Priya Singh</p>
+                <p class="author-role">Teacher</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

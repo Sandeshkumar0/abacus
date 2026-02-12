@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Abacus Course - AbacusMaster</title>
+
+  <!-- Google fonts (same as original) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind (original used Tailwind) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'css/abacus-course.css' %}">
+</head>
+<body class="bg-white">
+  <!-- NAVBAR (kept minimal from your original file) -->
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-24 lg:h-28">
+        <div class="flex-shrink-0">
+          <img src="https://cdn.builder.io/api/v1/image/assets%2F781bec...ec4?format=webp&width=800"
+               alt="Emesys Logo" class="h-20 lg:h-24 w-auto">
+        </div>
+        <div class="hidden lg:flex items-center gap-8 xl:gap-14">
+          <a href="{% url 'home' %}" class="text-black font-poppins font-semibold">Home</a>
+          <a href="{% url 'about' %}" class="text-black font-poppins font-semibold">About</a>
+          <a href="{% url 'franchise' %}" class="text-black font-poppins font-semibold">Franchise</a>
+          <a href="{% url 'courses' %}" class="text-black font-poppins font-semibold">Courses</a>
+        </div>
+
+        <a href="#contact" class="bg-orange-500 text-white px-6 py-2 rounded-lg">Contact us</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="home" class="bg-orange-500 py-16 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <h1 class="text-white font-poppins text-4xl md:text-5xl lg:text-6xl font-bold mb-6">Abacus Course</h1>
+      <p class="text-white font-poppins text-xl md:text-2xl lg:text-3xl font-bold max-w-4xl mx-auto mb-8">
+        Abacus learning builds a strong mathematical foundation...
+      </p>
+      <button onclick="alert('Fee details coming soon!')"
+              class="bg-white text-black px-12 py-4 rounded-3xl shadow-lg">Fee Details</button>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <main class="container mx-auto px-4 py-8">
+    <!-- copy the rest of the Abacus content as required (course levels, benefits etc.) -->
+    {% include "partials/abacus_content.html" %}
+  </main>
+
+  <!-- Footer (minimal) -->
+  <footer class="mt-12 py-8 text-center">
+    <p>© AbacusMaster</p>
+  </footer>
+</body>
+</html>

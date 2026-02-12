@@ -1,0 +1,102 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}View Remarks on Your Answers - Emesys{% endblock %}
+{% block header %}View Remarks on Your Answers{% endblock %}
+{% block subtitle %}See teacher feedback on your submitted answers.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/remarks.css' %}">
+{% endblock %}
+
+{% block content %}
+<body class="view-remarks-page">
+  <!-- Metrics Section -->
+    <div class="metrics-section">
+      <div class="metrics-grid">  
+        <div class="metric-card">
+          <h3>Total Answers</h3>
+          <div class="metric-value blue">{{ total_answers }}</div>
+        </div>
+        <div class="metric-card">
+          <h3>Graded</h3>
+          <div class="metric-value blue">{{ graded_count }}</div>
+        </div>
+        <div class="metric-card">
+          <h3>Pending Review</h3>
+          <div class="metric-value blue">{{ pending_review }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Answer Cards -->
+    <div class="answer-cards-outer">
+      <div class="answer-cards">
+
+        {% for answer in student_answers %}
+        <div class="answer-card">
+          <div class="section-header">
+            <div class="section-number">{{ forloop.counter }}</div>
+            <span class="section-label">{{ answer.question_text }}</span>
+          </div>
+          {% if answer.latex %}
+            <div class="equation-wrapper" style="display: flex; justify-content: center; width: 100%;">
+              <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ answer.latex|urlencode }}" alt="LaTeX Equation">
+            </div>
+          {% endif %}
+
+
+
+          <div class="section-header">
+            <span class="section-label">Your Answer</span>
+            <div class="status-badges">
+              {% if answer.remarks %}
+                <div class="badge badge-graded">Graded</div>
+                <div class="badge badge-reviewed">Reviewed</div>
+              {% else %}
+                <div class="badge badge-pending">Pending Review</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="content-box answer-box">
+            <p class="content-text">
+              {{ answer.answer_text }}
+            </p>
+          </div>
+
+          {% if answer.answer_file %}
+            <a href="{{ answer.answer_file }}" target="_blank" class="text-blue-600 underline">
+              View My Attachment
+            </a>
+          {% endif %}
+
+
+
+          <div class="section-title">
+            <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/301ca081dab835bebc2a2e6ec9ad9f8e422e7a71?width=50"
+                alt="Commentary" class="commentary-icon" />
+            <span class="section-label">Remarks From Teacher</span>
+          </div>
+
+          <div class="content-box remarks-box">
+            <p class="content-text remarks-text">
+              {{ answer.remarks|default:"Remarks will appear here once reviewed." }}
+            </p>
+            <p class="content-text teacher-name">
+              {{ answer.question.teacher_name.get_full_name|default:"Awaiting Review" }}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+
+      </div>
+
+      {% if student_answers|length > 3 %}
+      <div class="more-section">
+        <span class="more-text">and so on...</span>
+      </div>
+      {% endif %}
+    </div>
+</body>
+{% endblock %}

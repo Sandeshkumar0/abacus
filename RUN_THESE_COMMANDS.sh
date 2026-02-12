@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# FIXED: Blog Setup Commands
+# Run these commands ONE AT A TIME in your terminal
+
+echo "==========================================="
+echo "Blog Setup - Run These Commands"
+echo "==========================================="
+echo ""
+echo "✅ FIXED: The model error has been resolved!"
+echo ""
+echo "Now run these commands in your terminal:"
+echo ""
+echo "1. Activate virtual environment (if not already active):"
+echo "   source venv/bin/activate"
+echo ""
+echo "2. Create migrations:"
+echo "   python manage.py makemigrations core"
+echo ""
+echo "3. Apply migrations:"
+echo "   python manage.py migrate"
+echo ""
+echo "4. Create sample blog data:"
+echo "   python create_sample_blog_data.py"
+echo ""
+echo "5. Run the server:"
+echo "   python manage.py runserver 8000"
+echo ""
+echo "6. Visit your blog:"
+echo "   http://127.0.0.1:8000/blog/"
+echo ""
+echo "==========================================="

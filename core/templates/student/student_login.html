@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMESYS – Student Login</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Optional: Inter font (matches shadcn/ui look) -->
+  <link rel="preconnect" href="https://fonts.bunny.net" />
+  <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+  <style>
+    html {
+      font-family: 'Inter', sans-serif
+    }
+  </style>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen flex bg-white">
+
+  <!-- Left side (illustration) -->
+  <div class="hidden lg:flex lg:w-1/2 flex-col bg-white min-h-screen">
+    <div class="p-8">
+      <img src="{% static 'portal/Logo.png' %}" alt="EMESYS Logo" class="absolute left-8 top-8 h-24" />
+
+    </div>
+    <div class="flex-1 flex items-center justify-center">
+      <img src="{% static 'portal/Students.jpg' %}" alt="Students Illustration" class="w-4/5 max-w-lg" />
+
+    </div>
+  </div>
+
+  <!-- Right side (form) -->
+  <div
+    class="flex-1 lg:w-1/2 flex items-center justify-center p-8 relative overflow-hidden bg-cover bg-no-repeat bg-center"
+    style="background-image: url('{% static 'portal/bg-wave.png' %}');">
+
+    <!-- Decorative translucent circles -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <div class="absolute top-0 right-0 w-96 h-96 rounded-full bg-white/10 -translate-y-32 translate-x-32"></div>
+      <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-white/5 translate-y-32 -translate-x-32"></div>
+      <div class="absolute top-1/2 right-1/4 w-64 h-64 rounded-full bg-white/5"></div>
+    </div>
+
+    <!-- Mobile logo (shows below lg) -->
+    <img
+      src="https://cdn.builder.io/api/v1/assets/a0b9894449db45ad8d5ec0ecaff21601/emesys-logo-1-0509dd?format=webp&width=800"
+      alt="EMESYS Logo" class="lg:hidden absolute top-8 left-8 h-10 w-auto" />
+
+    <div class="w-full max-w-md space-y-8 relative z-10">
+
+      <!-- Brand / headline -->
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-blue-600 mb-2">Student Login</h1>
+          <p class="text-gray-600">Please login to continue to your account.</p>
+        </div>
+
+        <form method="POST" action="{% url 'student_login' %}" id="login-form" class="space-y-6">
+          {% csrf_token %}
+
+          <!-- Email -->
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
+            <input id="email" type="email" name="email" placeholder="Enter Email"
+              class="pl-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
+              required />
+          </div>
+
+          <!-- Password -->
+          <div>
+            <div class="relative">
+              <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
+              <input id="password" type="password" name="password" placeholder="Password"
+                class="pl-12 pr-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
+                required />
+              <button type="button" id="toggle-pass"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label="Toggle password visibility">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            {% if error %}
+            <p class="text-red-600 text-sm font-medium">{{ error }}</p>
+            {% endif %}
+            <div class="text-right mt-1">
+              <a href="#" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">Forgot Password?</a>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit"
+            class="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200">
+            Log in
+          </button>
+
+          <!-- Keep me logged in -->
+          <label for="keep" class="flex items-center space-x-2 cursor-pointer select-none">
+            <input id="keep" type="checkbox" class="rounded border-gray-300 accent-blue-600" />
+            <span class="text-sm text-gray-600">Keep me logged in</span>
+          </label>
+
+          <!-- Account link -->
+          <p class="text-center text-sm text-gray-600 pt-2">
+            Don't Have an Account?
+            <a href="{% url 'student_signup' %}"
+              class="text-blue-600 hover:text-blue-700 hover:underline font-medium">Create New Account</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Behaviour scripts -->
+  <script>
+    // Render Lucide SVG icons
+    lucide.createIcons();
+
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('toggle-pass');
+    let showPass = false;
+
+    toggleBtn.addEventListener('click', () => {
+      showPass = !showPass;
+      passwordInput.type = showPass ? 'text' : 'password';
+      // Swap eye ↔ eye-off icon
+      toggleBtn.innerHTML = '';
+      toggleBtn.insertAdjacentHTML('beforeend',
+        `<i data-lucide="${showPass ? 'eye-off' : 'eye'}"></i>`);
+      lucide.createIcons({ icons: ['eye', 'eye-off'] });
+    });
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AbacusMaster - Courses{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/page-courses.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Page content only (header/footer from base.html) -->
+
+<section class="hero" aria-label="Courses hero">
+  <img src="https://cdn.builder.io/api/v1/image/assets%2Fff5b390326fa458da72bfdd21c6fca04%2F5a9b7da7738b462593ede6a39f117295?format=webp&width=2000"
+       alt="Teacher and student with abacus" class="hero-bg">
+  <div class="hero-overlay"></div>
+
+  <!-- We keep content left-aligned and constrained so it matches the original look -->
+  <div class="hero-content container">
+    <h1>Our Courses</h1>
+    <p>Choose from our comprehensive range of courses designed for students and teachers</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="teachers-students">
+      <!-- For Teachers -->
+      <a href="{% url 'portal-landing' %}" class="teacher-student-item teacher-student-link" aria-label="For Teachers">
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Fff5b390326fa458da72bfdd21c6fca04%2F9426f3c8f16841abb193fc8a010b6617?format=webp&width=400"
+            alt="Teacher" class="teacher-illustration">
+        <div class="teacher-student-card">
+          <img src="https://api.builder.io/api/v1/image/assets/TEMP/f2e20641ea5938bf21b41264c16e0601a99d5337?width=130" alt="Books icon">
+          <h2>For Teachers</h2>
+        </div>
+      </a>
+
+      <!-- For Students -->
+      <a href="{% url 'portal-landing' %}" class="teacher-student-item teacher-student-link" aria-label="For Students">
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Fff5b390326fa458da72bfdd21c6fca04%2F1974fa67d7f14fe18a2a9e7988dfbe0f?format=webp&width=400"
+            alt="Student" class="teacher-illustration">
+        <div class="teacher-student-card">
+          <img src="https://api.builder.io/api/v1/image/assets/TEMP/f2e20641ea5938bf21b41264c16e0601a99d5337?width=130" alt="Books icon">
+          <h2>For Students</h2>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section ready-section">
+  <div class="container">
+    <h2>Ready to Start Learning?</h2>
+    <p>Join thousands of students and teachers already learning with AbacusMaster</p>
+    <div class="get-started-box" role="button" tabindex="0">Get started Today</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="virtual-preview">
+      <h2>Virtual Abacus Preview</h2>
+      <p>(Interactive demo placeholder — implement with canvas or an embeddable app)</p>
+
+      <div class="demo-buttons">
+        <a class="demo-btn demo-btn-primary" role="button" href="#">Try Demo</a>
+        <a class="demo-btn demo-btn-secondary" role="button" href="#">Enroll</a>
+      </div>
+
+      <div class="free-demo-box">
+        <p>Free demo: Try a 20-minute Virtual Abacus session. <a href="#">Request demo</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="courses-heading">Courses</h2>
+
+    <div class="courses-grid">
+      <!-- Course cards kept exact as original -->
+      <article class="course-card">
+        <div class="course-card-header">
+          <h3>Abacus</h3>
+          <p>Foundational number sense + Virtual Abacus</p>
+        </div>
+        <div class="course-card-footer">
+          <span class="course-duration">3 months</span>
+          <div class="course-card-buttons">
+            <button class="course-btn course-btn-details">Details</button>
+            <button class="course-btn course-btn-enroll">Enroll</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="course-card">
+        <div class="course-card-header">
+          <h3>Abacus Teacher Training</h3>
+          <p>Certify to teach AbacusMaster curriculum</p>
+        </div>
+        <div class="course-card-footer">
+          <span class="course-duration">6 Weeks</span>
+          <div class="course-card-buttons">
+            <button class="course-btn course-btn-details">Details</button>
+            <button class="course-btn course-btn-enroll">Enroll</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="course-card">
+        <div class="course-card-header">
+          <h3>Vedic</h3>
+          <p>Strengthens both short-term and long-term memory by engaging mental visualization.</p>
+        </div>
+        <div class="course-card-footer">
+          <span class="course-duration">3 months</span>
+          <div class="course-card-buttons">
+            <button class="course-btn course-btn-details">Details</button>
+            <button class="course-btn course-btn-enroll">Enroll</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="course-card">
+        <div class="course-card-header">
+          <h3>Calligraphy</h3>
+          <p>Showcase Your Work Visually</p>
+        </div>
+        <div class="course-card-footer">
+          <span class="course-duration">3 months</span>
+          <div class="course-card-buttons">
+            <button class="course-btn course-btn-details">Details</button>
+            <button class="course-btn course-btn-enroll">Enroll</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="course-card">
+        <div class="course-card-header">
+          <h3>Vedic Teacher Training</h3>
+          <p>Certify to teach Vedic curriculum</p>
+        </div>
+        <div class="course-card-footer">
+          <span class="course-duration">6 Weeks</span>
+          <div class="course-card-buttons">
+            <button class="course-btn course-btn-details">Details</button>
+            <button class="course-btn course-btn-enroll">Enroll</button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/courses.js' %}"></script>
+{% endblock %}

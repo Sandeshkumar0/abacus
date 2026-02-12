@@ -1,0 +1,234 @@
+{% extends 'teacher/base_teacher.html' %}
+{% load static %}
+
+{% block title %}Edit Student - {{ student.user.full_name }}{% endblock %}
+{% block header %}Edit Student{% endblock %}
+{% block subtitle %}Update student information{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'portal/css/profile.css' %}" />
+
+<div class="edit-container">
+    <div class="edit-header">
+        <h1>✏️ Edit Student Information</h1>
+        <p>Update details for {{ student.user.full_name }}</p>
+    </div>
+
+    <form id="editStudentForm" class="edit-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h2>Personal Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" value="{{ student.user.full_name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" value="{{ student.user.email }}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" value="{{ student.phone }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="student_class">Class *</label>
+                    <input type="text" id="student_class" name="student_class" value="{{ student.student_class }}"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" value="{{ student.dob|date:'Y-m-d' }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Roll Number (Read-only)</label>
+                    <input type="text" value="{{ student.roll_number }}" disabled>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+            <a href="{% url 'view_student' student.user.id %}" class="btn btn-secondary">❌ Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .edit-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .edit-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .edit-header h1 {
+        margin: 0 0 0.5rem 0;
+        color: #1e40af;
+        font-size: 2rem;
+    }
+
+    .edit-header p {
+        margin: 0;
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    .edit-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-section h2 {
+        margin: 0 0 1.5rem 0;
+        color: #1e40af;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .form-group input {
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-group input:disabled {
+        background-color: #f3f4f6;
+        cursor: not-allowed;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<script>
+    document.getElementById('editStudentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('{% url "edit_student" student.user.id %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert('✅ Student information updated successfully!');
+                window.location.href = '{% url "view_student" student.user.id %}';
+            } else {
+                alert('❌ Error: ' + data.message);
+            }
+        } catch (error) {
+            alert('❌ An error occurred. Please try again.');
+            console.error('Error:', error);
+        }
+    });
+</script>
+{% endblock %}

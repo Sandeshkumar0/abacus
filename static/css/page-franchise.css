@@ -1,0 +1,289 @@
+/* page-franchise.css
+   Small original helpers used by the franchise page.
+   Tailwind provides the main layout/scales (tailwind loaded via CDN in the template head).
+*/
+
+/* original page font helpers */
+* {
+    font-family: 'Poppins', sans-serif;
+}
+
+.font-lato {
+    font-family: 'Lato', sans-serif;
+}
+
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+input, textarea, select {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Minor visual safety: ensure hero image sits behind overlay */
+section.relative img.object-cover {
+    display: block;
+}
+
+/* Small adjustments so the page looks identical to the original layout in case some global resets override tailwind */
+body {
+    background-color: #ffffff;
+}
+
+/* Make sure select appearance arrow image doesn't break layout in some browsers */
+select[appearance-none] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Ensure big CTA buttons don't overflow in tiny screens */
+@media (max-width:480px) {
+    .text-5xl { font-size: 2.25rem; }
+    .text-6xl { font-size: 2.5rem; }
+}
+
+/* Keep a few border/box-shadow fallbacks similar to original design */
+.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+/* ---------- Franchise page scale/visual-balance overrides ---------- */
+/* Paste this at the bottom of page-franchise.css */
+
+/* local sizing tokens */
+:root {
+  --franchise-max-w: 1200px; /* slightly narrower than 7xl so things don't appear oversized */
+  --franchise-hero-min-height: 420px;
+  --franchise-input-h: 52px;
+}
+
+/* constrain wide container used on the page */
+.max-w-7xl {
+  max-width: var(--franchise-max-w) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* reduce hero height so its content doesn't look enormous */
+section.relative {
+  min-height: var(--franchise-hero-min-height) !important;
+  height: auto !important; /* allow content to flow naturally on very small screens */
+  padding-top: 3rem !important;
+  padding-bottom: 3rem !important;
+}
+
+/* Scale headline sizes (Tailwind classes are used; this overrides them on this page) */
+.text-6xl { font-size: clamp(2.0rem, 4.0vw, 3.0rem) !important; }
+.text-5xl { font-size: clamp(1.75rem, 3.2vw, 2.4rem) !important; }
+.text-4xl { font-size: clamp(1.25rem, 2.2vw, 1.85rem) !important; }
+.text-3xl { font-size: clamp(1.1rem, 1.8vw, 1.45rem) !important; }
+.text-2xl { font-size: 1rem !important; }
+.text-xl  { font-size: 0.95rem !important; }
+
+/* tighten hero paragraph width and line-height so it reads better */
+section.relative .max-w-\[780px\],
+section.relative .max-w-\[780px\] * {
+  max-width: 78rem !important;
+}
+section.relative p {
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.4 !important;
+}
+
+/* Reduce overly-large paddings used by cards/inputs */
+.bg-white.rounded-\[20px\],
+.bg-white.rounded-\[10px\],
+.bg-white.rounded-\[30px\] {
+  padding: 1rem !important;
+}
+
+/* Make form inputs and selects smaller & more balanced */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select,
+textarea {
+  height: var(--franchise-input-h) !important;
+  font-size: 1rem !important;
+  padding: 0.6rem 1rem !important;
+  border-radius: 12px !important;
+}
+
+/* textarea should stay usable but not huge */
+textarea {
+  min-height: 120px !important;
+  padding-top: 0.7rem !important;
+  padding-bottom: 0.7rem !important;
+}
+
+/* shrink the big submit CTA a bit */
+button[class*="bg-[#FC8621]"],
+button[class*="bg-white"] {
+  font-size: 1rem !important;
+  padding: 0.6rem 1rem !important;
+}
+
+/* shrink images used inside big buttons so they don't push the button size */
+button img {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: contain !important;
+}
+
+/* reduce grid gaps a bit so cards appear compact */
+.grid.gap-8 { gap: 1.25rem !important; }
+.grid.gap-6 { gap: 1rem !important; }
+.max-w-7xl .gap-16 { gap: 2rem !important; }
+
+/* Adjust shadows / box spacing to keep visual weight without size */
+.shadow-2xl { box-shadow: 0 22px 40px -10px rgba(0,0,0,0.18) !important; }
+.shadow-lg   { box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important; }
+
+/* responsive tweaks */
+@media (min-width: 1024px) {
+  .max-w-7xl { max-width: calc(var(--franchise-max-w) - 40px) !important; }
+  .text-6xl { font-size: 3.0rem !important; }
+  .text-5xl { font-size: 2.4rem !important; }
+  input[type="text"], input[type="email"], select { height: 56px !important; }
+  .section-relative { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+}
+
+@media (max-width: 640px) {
+  /* ensure CTAs fit on small screens */
+  .text-5xl, .text-6xl { font-size: 1.75rem !important; line-height: 1.05 !important; }
+  input[type="text"], input[type="email"], select, textarea { height: 48px !important; font-size: 0.95rem !important; }
+}
+
+/* ---------- Small page-specific adjustments (only what you asked) ---------- */
+
+/* HERO AS BACKGROUND
+   Use the same source you used previously and treat the section as a background container so
+   the image fills the width and reads like the design reference.
+*/
+#franchise-hero {
+  background-image: url('https://cdn.builder.io/api/v1/image/assets%2Fff5b390326fa458da72bfdd21c6fca04%2F1ef5edecf2f645e891b937d124d45871?format=webp&width=1600');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+
+  /* full-bleed behaviour kept */
+  position: relative;
+  width: 100%;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ↑ Increased desktop height so the entire image band is visible */
+  min-height: 960px;      /* was 720px — increased to reveal bottom area */
+  height: auto;
+  padding-top: 3.5rem;   /* a bit more top/bottom breathing */
+  padding-bottom: 4.5rem;/* increase bottom padding to further separate following content */
+  overflow: hidden;
+  z-index: 0;
+}
+/* overlay used for darker look on the image; keeps same opacity as before */
+/* Keep the overlay as before (ensure text contrasts nicely) */
+#franchise-hero .hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  z-index: 1;
+}
+/* ensure content sits above the overlay */
+/* ensure inner content sits above overlay */
+#franchise-hero > .relative,
+#franchise-hero .max-w-7xl {
+  position: relative;
+  z-index: 2;
+}
+
+/* Brochure CTA: reduce bottom whitespace so it sits snug above the footer */
+#franchise-brochure {
+  padding-top: 3rem !important;
+  padding-bottom: 1.5rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* gradient element inside brochure section (keeps identical visual) */
+#franchise-brochure .brochure-gradient {
+  background: linear-gradient(90deg, #F3F25B 0%, #FC8621 50%, #F3F25B 100%);
+}
+
+/* safety: ensure hero doesn't get forced height from inline attributes in some contexts */
+section.relative[style] {
+  height: auto !important;
+  min-height: var(--franchise-hero-min-height, 420px) !important;
+}
+/* --------- Compact brochure area (override) --------- */
+
+/* Make the whole brochure section more compact */
+#franchise-brochure {
+  padding-top: 1.25rem !important;   /* less top breathing */
+  padding-bottom: 0.75rem !important;/* much smaller bottom */
+  margin-bottom: 0 !important;
+  min-height: 120px !important;      /* ensure a minimum height on tiny screens */
+}
+
+/* Keep gradient but reduce its visual height so it does not create a large band */
+#franchise-brochure .brochure-gradient {
+  background: linear-gradient(90deg, #F3F25B 0%, #FC8621 50%, #F3F25B 100%);
+  background-size: cover;
+  background-repeat: no-repeat;
+  height: 100%; /* keeps cover behaviour but section min-height controls final size */
+}
+
+/* Slightly reduce hero text weight/size inside brochure so it fits compactly */
+#franchise-brochure h2 {
+  font-size: clamp(1.25rem, 2.2vw, 1.65rem) !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.15 !important;
+}
+
+/* Smaller subtitle */
+#franchise-brochure p {
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem) !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* Make the brochure button smaller (less vertical padding) */
+#franchise-brochure button {
+  padding: 0.45rem 1rem !important;
+  font-size: 0.95rem !important;
+  border-radius: 16px !important;
+}
+
+/* Ensure the CTA doesn't push the section height on small screens */
+@media (max-width: 640px) {
+  #franchise-brochure {
+    padding-top: 1rem !important;
+    padding-bottom: 0.6rem !important;
+    min-height: 100px !important;
+  }
+  #franchise-brochure h2 { font-size: 1.2rem !important; }
+  #franchise-brochure p  { font-size: 0.9rem !important; }
+  #franchise-brochure button { padding: 0.4rem 0.9rem !important; }
+}
+@media (max-width: 1024px) {
+  #franchise-hero {
+    padding-top: 2.75rem;
+    padding-bottom: 3rem;
+    background-position: 50% 22%;
+  }
+}
+
+/* small screens */
+@media (max-width: 768px) {
+  #franchise-hero {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+    background-position: center center;
+    width: 100vw;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+}

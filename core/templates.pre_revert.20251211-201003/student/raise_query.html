@@ -1,0 +1,105 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Raise Query - EMESYS{% endblock %}
+{% block header %}Raise Query{% endblock %}
+{% block subtitle %}Submit your queries or upload related documents.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/raise_query.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Metrics Section -->
+<div class="metrics-section">
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <h3>Active Queries</h3>
+      <div class="metric-value blue">{{ active_queries }}</div>
+      <div class="metric-change positive">+8% Compared Last Year</div>
+    </div>
+    <div class="metric-card">
+      <h3>Resolution Rate</h3>
+      <div class="metric-value green">{{ resolution_rate }}%</div>
+      <div class="metric-change positive">+5% Compared Last Year</div>
+    </div>
+    <div class="metric-card">
+      <h3>Team Utilization</h3>
+      <div class="metric-value warning">{{ team_utilization }}%</div>
+      <div class="metric-change positive">+12% Compared Last Year</div>
+    </div>
+    <div class="metric-card">
+      <h3>AVG. Response Time</h3>
+      <div class="metric-value blue">{{ avg_response_days }} Days</div>
+      <div class="metric-change negative">-2% Compared Last Year</div>
+    </div>
+  </div>
+</div>
+
+<!-- Query Form Section -->
+<div class="content-area">
+  <div class="query-form">
+    <h2>Raise Query</h2>
+    <p class="description">
+      In this page, there will be space to type the query and a button
+      to upload a query in form of image. Student can use any one of
+      them for raising their query.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Query Text Area -->
+      <div class="query-textarea">
+        <textarea name="query_text" placeholder="Type Your Query here" required></textarea>
+      </div>
+
+      <div class="file-upload" style="position: relative;">
+        <!-- Display Area -->
+        <div id="file-name-display" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <img
+            id="upload-icon"
+            src="https://cdn.builder.io/api/v1/image/assets/TEMP/a5ff2b16603afdf049a4bf545be0d5d447a16d79"
+            alt="Upload Icon"
+            style="width: 40px; margin-bottom: 10px;"
+          />
+          <h3 style="margin: 0;">Upload Attachment</h3>
+          <p style="margin: 2px;">Drag & Drop or Click To Select</p>
+          <p style="margin: 2px;">PDF, DOC, DOCX, PNG, JPG, JPEG formats supported</p>
+        </div>
+
+        <!-- Actual input field styled to overlay transparently -->
+        <input type="file"
+              name="query_file"
+              id="file-upload"
+              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+              onchange="updateFileName(this)"
+              style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;" />
+      </div>
+
+
+
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button type="submit" class="btn btn-submit">Submit</button>
+      </div>
+    </form>
+  </div>
+  <script>
+    function updateFileName(input) {
+      const fileName = input.files[0]?.name;
+      if (fileName) {
+        const displayDiv = document.getElementById('file-name-display');
+        displayDiv.innerHTML = `
+          <h3 style="margin: 0; color: #0073e6; text-align: center;">
+            ${fileName}
+          </h3>
+        `;
+      }
+    }
+  </script>
+
+</div>
+
+{% endblock %}

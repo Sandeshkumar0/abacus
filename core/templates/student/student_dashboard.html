@@ -1,0 +1,134 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+{% block title %}Student Dashboard - EMESYS{% endblock %}
+{% block header %}Welcome to Dashboard{% endblock %}
+{% block subtitle %}Manage your educational activities efficiently{% endblock %}
+
+{% block content %}
+<!-- Quick Overview Section -->
+<div class="bg-white rounded-xl p-6 mb-6 border-l-8 shadow-xs" style="border-color: #0656a5;">
+  <h2 class="text-2xl font-semibold text-blue-600 mb-2">Quick Overview</h2>
+  <p class="text-sm text-gray-600 leading-relaxed">
+    Access all your educational tools from the central board,
+    view your assignments, track your progress, and manage your queries efficiently.
+  </p>
+</div>
+
+<!-- Statistics Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+  <div class="bg-white rounded-xl shadow-xs border-t-8 text-center" style="border-color: #0656a5;">
+    <div class="pt-6 pb-6 px-6">
+      <div class="text-3xl font-bold text-blue-600 mb-2">{{ total_assignments|default:0 }}</div>
+      <div class="text-sm font-semibold text-blue-600">Total Assignments</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl shadow-xs border-t-8 text-center" style="border-color: #0656a5;">
+    <div class="pt-6 pb-6 px-6">
+      <div class="text-3xl font-bold text-blue-600 mb-2">{{ pending_assignments|default:0 }}</div>
+      <div class="text-sm font-semibold text-blue-600">Pending Assignments</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl shadow-xs border-t-8 text-center" style="border-color: #0656a5;">
+    <div class="pt-6 pb-6 px-6">
+      <div class="text-3xl font-bold text-blue-600 mb-2">{{ pending_queries|default:0 }}</div>
+      <div class="text-sm font-semibold text-blue-600">Pending Queries</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl shadow-xs border-t-8 text-center" style="border-color: #0656a5;">
+    <div class="pt-6 pb-6 px-6">
+      <div class="text-3xl font-bold text-blue-600 mb-2">{{ upcoming_exams|default:0 }}</div>
+      <div class="text-sm font-semibold text-blue-600">Upcoming Tests</div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Content Area -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Recent Activities -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow-xs">
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-blue-600 mb-4">Recent Activities</h3>
+      <div class="space-y-3">
+        {% if recent_graded %}
+        {% for answer in recent_graded %}
+        <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <div class="flex-1">
+            <span class="text-sm font-medium text-gray-700">✅ Answer Graded</span>
+            <p class="text-xs text-gray-500">Question #{{ answer.question.id }} - Max Marks: {{
+              answer.question.max_marks }}</p>
+          </div>
+          <a href="{% url 'view_remarks' %}" class="text-xs text-blue-600 hover:underline">View</a>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if recent_responses %}
+        {% for query in recent_responses %}
+        <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+          <div class="w-2 h-2 bg-purple-500 rounded-full"></div>
+          <div class="flex-1">
+            <span class="text-sm font-medium text-gray-700">💬 Query Answered</span>
+            <p class="text-xs text-gray-500">{{ query.query_text|truncatewords:8 }}</p>
+          </div>
+          <a href="{% url 'view_responded_queries' %}" class="text-xs text-blue-600 hover:underline">View</a>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% if pending_assignments > 0 %}
+        <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span class="text-sm text-gray-700">{{ pending_assignments }} pending assignment{{
+            pending_assignments|pluralize }}</span>
+        </div>
+        {% endif %}
+
+        {% if pending_queries > 0 %}
+        <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+          <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
+          <span class="text-sm text-gray-700">{{ pending_queries }} quer{{ pending_queries|pluralize:"y,ies" }} awaiting
+            response</span>
+        </div>
+        {% endif %}
+
+        {% if not recent_graded and not recent_responses and pending_assignments == 0 and pending_queries == 0 %}
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+          <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+          <span class="text-sm text-gray-700">All caught up! No recent activities.</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow-xs">
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-blue-600 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <a href="{% url 'student_assign' %}"
+          class="block w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+          Submit Assignment
+        </a>
+        <a href="{% url 'raise_query' %}"
+          class="block w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+          Ask a Question
+        </a>
+        <a href="{% url 'give_test' %}"
+          class="block w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+          Attempt Test
+        </a>
+        <a href="{% url 'view_remarks' %}"
+          class="block w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+          View Remarks & Feedback
+        </a>
+        <a href="{% url 'view_responded_queries' %}"
+          class="block w-full p-3 text-left bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-600 font-medium transition-colors">
+          View Query Responses
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

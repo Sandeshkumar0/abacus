@@ -1,0 +1,68 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Virtual Abacus - EMESYS{% endblock %}
+{% block header %}Virtual Abacus{% endblock %}
+{% block subtitle %}Practice mental math with the abacus.{% endblock %}
+
+{% block extra_css %}
+  <!-- Abacus styling (keep in static/css/page-virtual_abacus.css) -->
+  <link rel="stylesheet" href="{% static 'css/page-virtual_abacus.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Only the abacus part (controls + abacus display + value) — no page header/footer/feature sections -->
+<div class="main-wrapper">
+  <section class="hero" id="abacus">
+    <div class="container">
+
+      <div class="simulator-wrapper">
+        <!-- Controls -->
+        <div class="simulator-controls">
+          <div class="control-group">
+            <label for="mode">Mode:</label>
+            <select id="mode">
+              <option>Decimal (Base 10)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="columns">Columns:</label>
+            <!-- keep 13 as default (you can allow user change if your JS supports it) -->
+            <input type="number" id="columns" min="13" max="13" value="13">
+          </div>
+
+          <span class="control-hint">Click beads to move them.</span>
+
+          <div class="button-group">
+            <button class="btn btn-reset" type="button" onclick="resetAbacus()">Reset</button>
+            <button class="btn btn-random" type="button" onclick="setRandomNumber()">Random Number</button>
+          </div>
+        </div>
+
+        <!-- Abacus Visualization (JS will populate this) -->
+        <div class="abacus-container">
+          <div class="abacus" id="abacusDisplay"></div>
+        </div>
+
+        <!-- Value Display -->
+        <div class="value-section">
+          <div class="value-display">
+            <span class="value-label">Value:</span>
+            <span class="value-number" id="valueDisplay">0</span>
+          </div>
+          <p class="value-tip">
+            Tip: Rightmost column is the ones place, then tens, hundreds, and so on.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- loads your abacus logic (make sure this file is at static/js/virtual_abacus.js) -->
+  <script src="{% static 'js/virtual_abacus.js' %}"></script>
+{% endblock %}

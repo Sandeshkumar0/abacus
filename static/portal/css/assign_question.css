@@ -1,0 +1,117 @@
+body {
+      background: #f7fafc;
+    }
+    /* Sidebar styles (matches teacher_dashboard.html) */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      width: 320px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      /* box-shadow removed as per request */
+    }
+    .sidebar-logo {
+      padding: 24px;
+      overflow: hidden;
+    }
+    .sidebar-logo img {
+      width: 120px;
+      height: auto;
+    }
+    .sidebar-dashboard {
+      padding: 0 24px;
+      margin-bottom: 32px;
+    }
+    .dashboard-button {
+      background: #004f9f;
+      border-radius: 19px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .dashboard-button img {
+      width: 32px;
+      height: 32px;
+    }
+    .dashboard-button span {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .sidebar-menu {
+      flex: 1;
+      padding: 0 24px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .menu-item img {
+      width: 28px;
+      height: 28px;
+    }
+    .menu-item span {
+      color: #004f9f;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .menu-item.active, .menu-item:hover {
+      background: #eaf4fd;
+    }
+    @media (max-width: 900px) {
+      .sidebar { width: 80px; }
+      .main-content { margin-left: 80px; }
+    }
+    @media (max-width: 600px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+    }
+    /* Blue left border for card */
+    .left-blue-border {
+      border-left: 6px solid #2196f3;
+      border-radius: 18px;
+    }
+    /* Dotted border for upload and equation editor */
+    .dotted-border {
+      border: 2px dashed #cbd5e1;
+    }
+    /* Gradient buttons */
+    .gradient-blue {
+      background: linear-gradient(90deg, #2196f3 0%, #0d47a1 100%);
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .gradient-blue:hover {
+      background: linear-gradient(90deg, #0d47a1 0%, #2196f3 100%);
+    }
+    .gradient-yellow {
+      background: linear-gradient(90deg, #ffd23f 0%, #ffe66d 100%);
+      color: #0d47a1;
+      transition: background 0.2s;
+    }
+    .gradient-yellow:hover {
+      background: linear-gradient(90deg, #ffe66d 0%, #ffd23f 100%);
+    }
+    /* Green top bar for generated answer */
+    .green-top-bar {
+      border-top-left-radius: 18px;
+      border-top-right-radius: 18px;
+      background: #4caf50;
+      padding: 18px 32px;
+    }
+    /* Remove default focus ring for MathLive */
+    math-field:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }

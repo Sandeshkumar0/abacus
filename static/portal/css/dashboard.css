@@ -1,0 +1,104 @@
+body {
+    background: #eaf4fd;
+}
+.header {
+    padding: 40px 0 0 0;
+    background: #ffffff;
+    text-align: left;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+    margin-bottom: 0;
+    width: 100%;
+  }
+  .header-title {
+    color: #0656a5;
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 0.25rem;
+    margin-left: 20px;
+    margin-top: 0;
+  }
+  .header-subtitle {
+    font-size: 1.1rem;
+    color: #a0aec0;
+    font-weight: 700;
+    margin-left: 40px;
+    margin-bottom: 24px;
+  }
+.sidebar-dashboard {
+    padding: 0 24px;
+    margin-bottom: 32px;
+}
+.dashboard-button {
+    background-color: #004f9f;
+    border-radius: 19px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.dashboard-button img {
+    width: 32px;
+    height: 32px;
+}
+.dashboard-button span {
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+}
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 320px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+.sidebar-logo {
+    padding: 24px;
+    overflow: hidden;
+}
+.sidebar-logo img {
+width: 120px;
+height: auto;
+}
+.sidebar-menu {
+    flex: 1;
+    padding: 0 24px;
+    text-decoration: none;
+}
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+.menu-item img {
+    width: 28px;
+    height: 28px;
+    }
+.menu-item span {
+    color: #004f9f;
+    font-size: 15px;
+    font-weight: 700;
+}
+.menu-item.active, .menu-item:hover {
+    background: #eaf4fd;
+}
+@media (max-width: 900px) {
+    .sidebar { width: 80px; }
+    .main-content { margin-left: 80px; }
+}
+@media (max-width: 600px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+}
+/* Add these to the end of dashboard.css or in a new CSS file loaded in base_teacher.html */

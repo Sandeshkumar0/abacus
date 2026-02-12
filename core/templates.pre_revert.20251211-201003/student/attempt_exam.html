@@ -1,0 +1,119 @@
+{% extends "student/base_student.html" %}
+{% load static %}
+
+{% block title %}Attempt {{ exam.title }}{% endblock %}
+{% block header %}Attempt {{ exam.title }}{% endblock %}
+{% block subtitle %}Answer all questions carefully before submitting.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'portal/css/view_assign.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Stat Cards (compact like assigned questions) -->
+<!-- Stat Cards -->
+<div class="grid grid-cols-3 gap-6 mb-8">
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <div class="text-2xl font-bold text-blue-600">{{ questions|length }}</div>
+    <div class="text-gray-600 mt-1 text-sm">Total Questions</div>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <div class="text-2xl font-bold text-blue-600">{{ exam.total_marks }}</div>
+    <div class="text-gray-600 mt-1 text-sm">Total Marks</div>
+  </div>
+  <div class="bg-white shadow rounded-xl p-6 text-center">
+    <div class="text-lg font-bold text-blue-600">{{ exam.due_date|date:"M d, Y H:i" }}</div>
+    <div class="text-gray-600 mt-1 text-sm">Due Date</div>
+  </div>
+</div>
+
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="questions">
+    {% for q in questions %}
+  <div class="question-card fade-in" data-question-id="{{ q.id }}">
+    <div class="question-header">
+      <div class="question-title-section">
+        <div class="question-number">{{ forloop.counter }}</div>
+        <h3 class="question-title">{{ q.text }}</h3>
+      </div>
+      <div class="due-time">
+        Marks: {{ q.marks }}
+      </div>
+    </div>
+
+    {% if q.latex %}
+    <div class="math-preview centered-equation">
+      <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ q.latex|urlencode }}" alt="LaTeX Equation">
+    </div>
+    {% endif %}
+
+    {% if q.file %}
+      <div class="mt-2">
+        <a href="{{ q.file.url }}" target="_blank" class="text-blue-600 underline">📎 View Attached File</a>
+      </div>
+    {% endif %}
+
+
+
+    <textarea
+      class="answer-textarea"
+      name="answer_{{ q.id }}"
+      placeholder="Enter your answer here..."
+    ></textarea>
+    <div class="mt-2">
+      <label class="block text-gray-600 font-semibold mb-1">Upload Answer File (optional):</label>
+      <input type="file" name="answer_file_{{ q.id }}" class="block w-full text-sm text-gray-500" />
+    </div>
+  </div>
+{% endfor %}
+
+
+  </div>
+
+  <div style="text-align:center; margin-top:2rem;">
+    <button type="submit" class="btn btn-submit">Submit Exam</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitThenDownload(questionId) {
+  const textarea = document.querySelector(`textarea[name="answer_${questionId}"]`);
+  const answer = textarea?.value?.trim();
+
+  fetch('/dashboard/student/submit-answer/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: `question_id=${questionId}&answer=${encodeURIComponent(answer)}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      window.location.href = `/dashboard/student/download-answer/${questionId}/`;
+    } else {
+      alert("Failed to submit answer before downloading.");
+    }
+  })
+  .catch(error => {
+    console.error("Error in auto-submit:", error);
+    alert("Could not save answer before downloading.");
+  });
+}
+</script>
+
+<!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}

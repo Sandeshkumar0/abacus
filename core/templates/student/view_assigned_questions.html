@@ -1,0 +1,180 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}View Assigned Questions - EMESYS{% endblock %}
+{% block header %}View Assigned Questions{% endblock %}
+{% block subtitle %}Access the questions assigned to you.{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'portal/css/view_assign.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-number">{{ completed_count|add:pending_count }}</div>
+    <div class="stat-label">Total Questions</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="completed-questions">{{ completed_count }}</div>
+    <div class="stat-label">Completed</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number" id="pending-questions">{{ pending_count }}</div>
+    <div class="stat-label">Pending</div>
+  </div>
+</div>
+
+
+<!-- Render dynamic question cards -->
+<div class="questions">
+  <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+  {% for q in questions %}
+  <div class="question-card fade-in" data-question-id="{{ q.id }}">
+    <div class="question-header">
+      <div class="question-title-section">
+        <div class="question-number">{{ q.id }}</div>
+        <h3 class="question-title">{{ q.question_text }}</h3>
+      </div>
+      <div class="due-time">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12,6 12,12 16,14"></polyline>
+        </svg>
+        {{ q.due_date|date:"M d, Y H:i" }}
+      </div>
+    </div>
+
+    <p class="marks-info">
+      Marks: {{ q.max_marks }} {% if q.is_exam %}(Test Question){% else %}(Assignment){% endif %}
+    </p>
+
+    {% if q.latex %}
+    <div class="math-preview centered-equation">
+      <img src="https://latex.codecogs.com/png.image?\dpi{150} {{ q.latex|urlencode }}" alt="LaTeX Equation">
+    </div>
+    {% endif %}
+
+    {% if q.file %}
+      <a href="{{ q.file }}" target="_blank">📎 Download Attachment</a>
+    {% endif %}
+
+    <textarea
+      class="answer-textarea"
+      placeholder="Enter your answer here..."
+      data-question="{{ q.id }}"
+    ></textarea>
+
+    <!-- ✅ NEW file input -->
+    <input type="file" class="answer-file" data-question="{{ q.id }}">
+
+    <div class="button-group">
+      <button type="button" class="btn btn-download" onclick="submitThenDownload('{{ q.id }}')">Download</button>
+      <button type="button" class="btn btn-submit" onclick="submitAnswer('{{ q.id }}')">Submit</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitAnswer(questionId) {
+  const textarea = document.querySelector(`textarea[data-question="${questionId}"]`);
+  const fileInput = document.querySelector(`input.answer-file[data-question="${questionId}"]`);
+  const answer = textarea?.value?.trim();
+  const file = fileInput?.files[0];
+
+  if (!answer && !file) {
+    alert("Please enter an answer or upload a file before submitting.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("question_id", questionId);
+  formData.append("answer", answer || "");
+  if (file) formData.append("answer_file", file);
+
+  fetch('/dashboard/student/submit-answer/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCSRFToken() },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      alert("Answer submitted successfully!");
+      const questionCard = document.querySelector(`.question-card[data-question-id="${questionId}"]`);
+      if (questionCard) questionCard.remove();
+
+      // Update counters
+      const completed = document.getElementById('completed-questions');
+      const pending = document.getElementById('pending-questions');
+      if (completed && pending) {
+        completed.innerText = parseInt(completed.innerText) + 1;
+        pending.innerText = parseInt(pending.innerText) - 1;
+      }
+    } else {
+      alert("Failed to submit answer.");
+    }
+  })
+  .catch(error => {
+    console.error("Error submitting answer:", error);
+    alert("An error occurred.");
+  });
+}
+
+function submitThenDownload(questionId) {
+  const textarea = document.querySelector(`textarea[data-question="${questionId}"]`);
+  const fileInput = document.querySelector(`input.answer-file[data-question="${questionId}"]`);
+  const answer = textarea?.value?.trim();
+  const file = fileInput?.files[0];
+
+  const formData = new FormData();
+  formData.append("question_id", questionId);
+  formData.append("answer", answer || "");
+  if (file) formData.append("answer_file", file);
+
+  fetch('/dashboard/student/submit-answer/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCSRFToken() },
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      window.location.href = `/dashboard/student/download-answer/${questionId}/`;
+    } else {
+      alert("Failed to submit answer before downloading.");
+    }
+  })
+  .catch(error => {
+    console.error("Error in auto-submit:", error);
+    alert("Could not save answer before downloading.");
+  });
+}
+
+function getCSRFToken() {
+  return document.getElementById('csrf-token').value;
+}
+</script>
+
+<!-- MathJax -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+  window.addEventListener('load', function () {
+    if (window.MathJax) {
+      MathJax.typesetPromise().catch(function (err) {
+        console.error("MathJax render error:", err);
+      });
+    }
+  });
+</script>
+{% endblock %}

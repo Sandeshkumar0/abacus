@@ -1,0 +1,415 @@
+* {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          Roboto,
+          Helvetica,
+          sans-serif;
+        background: linear-gradient(
+          180deg,
+          rgba(177, 216, 255, 0.28) 0%,
+          rgba(0, 64, 129, 0.28) 75.96%
+        );
+        min-height: 100vh;
+      }
+
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+
+      /* Main Content Styles */
+      .main-content {
+        flex: 1;
+        margin-left: 320px;
+        background: transparent;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        min-height: 80px;
+        padding: 0 24px;
+        width: 100%;
+      }
+
+      .header-title {
+        color: #0656a5;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.2;
+        flex: 1;
+        padding-top: 24px;
+      }
+
+      /* Metrics Section */
+      .metrics-section {
+        width: 100%;
+        background: transparent;
+        padding: 24px 0 24px 0;
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .metrics-section .breadcrumb {
+        margin: 0 0 24px 0;
+        width: 100%;
+        max-width: 1200px;
+        text-align: left;
+      }
+
+      .metrics-section .breadcrumb span {
+        color: rgba(96, 96, 107, 0.57);
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .metrics-section .breadcrumb span a {
+        color: #0656a5;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .metrics-section .metrics-grid {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin: 0 auto;
+        width: 90%;
+        max-width: 1200px;
+        flex-wrap: nowrap;
+      }
+
+      .metrics-grid {
+          display: flex;
+          justify-content: center;
+          align-items: stretch;
+          gap: 32px;
+          width: 100%;
+          max-width: 1200px;
+          margin: 0 auto;
+          flex-wrap: nowrap;
+        }
+
+        .metric-card {
+          background-color: #fff;
+          border-radius: 16px;
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -4px rgba(0,0,0,0.10);
+          padding: 18px 0 14px 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          min-width: 0px;
+          max-width: none;
+          flex: 1 1 0;
+          transition: box-shadow 0.2s;
+          text-align: center;
+        }
+
+        .metric-card h3,
+        .metric-card .metric-value,
+        .metric-card .metric-change {
+          margin: 0;
+          padding: 0;
+        }
+
+        .metric-card h3 {
+          color: #234c75;
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+
+        .metric-value {
+          font-size: 20px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+
+        .metric-change {
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+      .positive {
+        color: #249306;
+      }
+      .negative {
+        color: #f00;
+      }
+      .warning {
+        color: #efa800;
+      }
+      .blue {
+        color: #234c75;
+      }
+      .green {
+        color: #249306;
+      }
+
+      /* Query Form */
+      .content-area {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: transparent;
+        margin-top: 0;
+        padding-top: 48px;
+      }
+
+      .query-form {
+        background-color: #fff;
+        border-radius: 24px;
+        border-top: 4px solid #3b73c6;    /* Only top border */
+        border-right: none;
+        border-bottom: none;
+        border-left: none;
+        box-shadow: 0 4px 12px 0 rgba(0,0,0,0.08);
+        padding: 32px 28px 28px 28px;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 0 40px 0;
+      }
+
+      .query-form h2 {
+        color: #111;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .query-form .description {
+        font-family: "Inter", sans-serif;
+        font-size: 15px;
+        color: #222;
+        margin-bottom: 18px;
+      }
+
+      .query-textarea {
+        width: 100%;
+        height: 170px;
+        border-radius: 16px;
+        border: 2px dashed #222;
+        background: #f4f6fa;
+        box-shadow: none;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+
+      .query-textarea textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        font-size: 16px;
+        font-style: italic;
+        font-weight: 500;
+        color: #222;
+        background: transparent;
+        font-family: "Inter", sans-serif;
+      }
+
+      .query-textarea textarea::placeholder {
+        color: rgba(10, 6, 6, 0.64);
+      }
+
+      .file-upload {
+        width: 100%;
+        height: 150px;
+        border-radius: 16px;
+        border: 2px dashed #222;
+        background: #f4f6fa;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        margin-bottom: 24px;
+        text-align: center;
+      }
+
+      .file-upload img {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 8px;
+      }
+
+      .file-upload h3 {
+        font-size: 15px;
+        font-weight: 900;
+        color: #222;
+        margin-bottom: 4px;
+      }
+
+      .file-upload p {
+        font-size: 11px;
+        font-weight: 700;
+        color: #888;
+        margin-bottom: 2px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 24px;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
+
+      .btn {
+        width: 120px;
+        height: 40px;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-upload {
+        background: linear-gradient(90deg, #ffd600 0%, #ffb800 100%);
+        color: #222;
+        font-weight: 700;
+        border: none;
+      }
+
+      .btn-upload:hover {
+        background: linear-gradient(90deg, #ffb800 0%, #ffd600 100%);
+      }
+
+      .btn-submit {
+        background: linear-gradient(90deg, #0656a5 0%, #007bff 100%);
+        color: white;
+        font-weight: 700;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-submit:hover {
+        background: linear-gradient(90deg, #007bff 0%, #0656a5 100%);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 900px) {
+        .metrics-section .metrics-grid,
+        .metrics-grid {
+          gap: 10px;
+        }
+        .metric-card {
+          padding: 10px 4px;
+          max-width: 120px;
+        }
+        .metric-card h3 {
+          font-size: 11px;
+        }
+        .metric-value {
+          font-size: 13px;
+        }
+        .metric-change {
+          font-size: 9px;
+        }
+      }
+      @media (max-width: 1100px) {
+        .metrics-grid {
+          gap: 16px;
+        }
+        .metric-card {
+          padding: 20px 12px;
+          min-width: 160px;
+          max-width: 180px;
+        }
+        .metric-card h3 {
+          font-size: 15px;
+        }
+        .metric-value {
+          font-size: 20px;
+        }
+      }
+
+      @media (max-width: 800px) {
+        .metrics-grid {
+          /* flex-wrap: wrap; */
+          gap: 12px;
+        }
+        .metric-card {
+          min-width: 120px;
+          max-width: 140px;
+          padding: 12px 6px;
+        }
+        .metric-card h3 {
+          font-size: 12px;
+        }
+        .metric-value {
+          font-size: 14px;
+        }
+      }
+      @media (max-width: 1536px) {
+        .metrics-section .metrics-grid {
+          /* flex-wrap: wrap; */
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .sidebar {
+          width: 280px;
+        }
+        .main-content {
+          margin-left: 280px;
+        }
+        .header-title {
+          font-size: 22px;
+        }
+        .metric-card h3 {
+          font-size: 12px;
+        }
+        .metric-value {
+          font-size: 14px;
+        }
+        .metrics-section .breadcrumb span {
+          font-size: 12px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-container {
+          flex-direction: column;
+        }
+        .sidebar {
+          position: relative;
+          width: 100%;
+          height: auto;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .metrics-section .metrics-grid {
+          flex-direction: column;
+          align-items: center;
+        }
+        .header-title {
+          font-size: 18px;
+        }
+        .action-buttons {
+          flex-direction: column;
+        }
+        .btn {
+          width: 100%;
+        }
+      }

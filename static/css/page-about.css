@@ -1,0 +1,450 @@
+/* ========== Basic reset (local to this page) ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: #1a1a2e;
+  background-color: #ffffff;
+  line-height: 1.6;
+}
+
+/* ========== HERO SECTION (full image, not cut) ========== */
+
+.hero {
+  position: relative;
+  height: 28rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    height: 36rem; /* taller on desktop, like your original */
+  }
+}
+
+.hero-background {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2Fe36ea6061fdd414ea3af350552037050?format=webp&width=2000');
+  background-size: cover;
+  background-position: center top; /* important: shows full teacher+student */
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #ffffff;
+  padding: 2rem;
+}
+
+.hero-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3.75rem;
+  }
+}
+
+.hero-subtitle {
+  font-family: 'Lato', sans-serif;
+  font-size: 1.125rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+}
+
+/* ========== SHARED SECTION WRAPPER (keeps existing layout) ========== */
+
+.section {
+  padding: 3rem 1rem 4rem;
+}
+
+.section-container {
+  max-width: 70rem;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #292d54;
+  margin: 2.5rem 0 2.5rem; /* enough gap so cards do NOT overlap it */
+}
+
+/* ========== MISSION & VISION (exact box + icons, no overlap) ========== */
+
+.mission-vision-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .mission-vision-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+  }
+}
+
+.mission-vision-grid .card {
+  border: 1px solid #eee;
+  border-radius: 14px;
+  /* keep space for the vertical accent inside the card */
+  padding: 1.75rem 2rem;
+  padding-left: calc(2rem + 20px); /* 20px accounts for the accent width + small gap */
+  position: relative;
+  background-color: #ffffff;
+  box-shadow: 0 12px 30px rgba(18, 24, 39, 0.06);
+  overflow: visible;
+  z-index: 1;
+}
+
+/* floating icon that sits on the border (clock / spark) */
+.mission-vision-grid .card .card-icon {
+  position: absolute;
+  top: -22px;              /* floats above the card, less tall than before */
+  left: 36px;              /* nudged right so it doesn't overlap the accent */
+  width: 48px;             /* slightly smaller */
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;     /* white core so icon reads clearly */
+  box-shadow: 0 8px 18px rgba(2, 6, 23, 0.06);
+  border: 3px solid rgba(217, 101, 77, 0.08); /* subtle halo */
+  z-index: 4;              /* above card content */
+}
+/* SVG icon style (orange, same size as original) */
+.mission-vision-grid .card .icon {
+  width: 30px;
+  height: 30px;
+  color: #d9654d;
+  fill: currentColor;
+  stroke: none;
+}
+.mission-vision-grid .card::before {
+  content: "";
+  position: absolute;
+  left: 1.25rem;            /* distance from card left edge */
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 12px;             /* thickness of the accent */
+  border-radius: 999px;    /* full rounding for pill ends */
+  background: linear-gradient(180deg, #ffb295 0%, #d9654d 100%);
+  box-shadow: 0 8px 18px rgba(217, 101, 77, 0.08);
+  z-index: 0;              /* behind card content */
+}
+
+
+/* headings & text inside cards */
+.mission-vision-grid .card .card-title {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.mission-vision-grid .card .card-text {
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4a4a4a;
+}
+
+/* ========== JOURNEY SECTION (unchanged) ========== */
+
+.journey-section {
+  background-color: #f9fafb;
+}
+
+.journey-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.journey-item {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.journey-year {
+  flex-shrink: 0;
+  background-color: #292d54;
+  color: #ffffff;
+  border-radius: 100%;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.journey-content {
+  flex-grow: 1;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.journey-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #292d54;
+}
+
+.journey-description {
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  color: #4a4a4a;
+}
+
+/* ========== TEAM SECTION ========== */
+
+.team-subtitle {
+  font-family: 'Lato', sans-serif;
+  font-size: 1.125rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #4a4a4a;
+}
+
+.team-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .team-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.team-card {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.team-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ---- avatar: circular + person icon (no more blue ring only) ---- */
+
+.team-avatar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.avatar-outer {
+  width: 5.2rem;       /* decreased from 6rem -> thinner ring */
+  height: 5.2rem;
+  background: linear-gradient(to bottom right, #60a5fa, #2563eb);
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-inner {
+  width: 4.8rem;       /* increased from 5rem -> smaller gap between outer/inner */
+  height: 4.8rem;
+  background-color: #ffffff;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-core {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 100%;
+  background: transparent;   /* remove old blue circle */
+  position: relative;
+}
+
+/* draw the little person using an inline SVG – same HTML, just CSS */
+.avatar-core::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23292d54'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+}
+
+.team-role-title {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #292d54;
+}
+
+.team-quote {
+  font-family: 'Lato', sans-serif;
+  font-size: 1.5rem;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #4a4a4a;
+  min-height: 6.25rem;
+}
+
+.read-more {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.read-more-link {
+  color: #d9654d;
+  font-family: 'Lato', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: text-decoration 0.3s ease;
+}
+
+.read-more-link:hover {
+  text-decoration: underline;
+}
+
+.team-divider {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.team-name {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  text-align: center;
+  color: #292d54;
+}
+
+.team-job-title {
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.social-link {
+  color: #292d54;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.social-link:hover {
+  color: #d9654d;
+}
+
+/* ====== Footer helpers from original CSS (kept for safety, not changed visually) ====== */
+
+.footer-container {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.footer-section h3 {
+  font-family: 'Lato', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+}
+
+.footer-section ul {
+  list-style: none;
+}
+
+.footer-section li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-section a {
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Lato', sans-serif;
+  transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+  color: #eac345;
+}
+
+/* Inline SVGs inside cards */
+svg {
+  display: inline;
+}

@@ -1,0 +1,41 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}Responses to Your Queries - Emesys{% endblock %}
+{% block header %}Responses to Your Queries{% endblock %}
+{% block subtitle %}See responses provided by teachers to your submitted queries{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'portal/css/respond.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-6">
+  <div class="grid gap-6">
+    {% for query in queries %}
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-xl font-semibold text-blue-600">Query Submitted on {{ query.submitted_at|date:"M d, Y H:i" }}</h3>
+        <span class="text-sm text-gray-500">Response from {{ query.teacher_name }}</span>
+      </div>
+
+      <p class="mb-4 text-gray-800 whitespace-pre-wrap"><strong>Query:</strong> {{ query.query_text }}</p>
+
+      {% if query.query_image %}
+      <div class="mb-4">
+        <a href="{{ query.query_image }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+          View Attached File
+        </a>
+      </div>
+      {% endif %}
+
+      <div class="bg-gray-100 p-4 rounded-md text-gray-800">
+        <strong>Response:</strong> {{ query.response }}
+      </div>
+    </div>
+    {% empty %}
+    <div class="text-center text-gray-600 mt-8">No responded queries yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

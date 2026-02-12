@@ -1,0 +1,114 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}AbacusMaster{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lato:wght@400;700;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Global shared CSS (styles for header/footer + helpers) -->
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <!-- Inline footer override: white background to match logo -->
+  <style>
+    /* force footer to be exact white and set readable link/text color */
+    body footer.site-footer {
+      background-color: #ffffff !important;   /* exact white */
+      color: #13294A !important;              /* logo navy for text/links */
+      border-top: 1px solid #e5e7eb !important; /* subtle divider - optional */
+    }
+    body footer.site-footer a {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+    body footer.site-footer a:hover {
+      text-decoration: underline !important;
+      opacity: 0.95 !important;
+    }
+    /* ensure the small footer logo area is solid white (helps PNGs/svg) */
+    body footer.site-footer .footer-logo {
+      background: #ffffff !important;
+      display: inline-block;
+    }
+  </style>
+
+
+  <!-- Page-specific CSS -->
+  {% block page_css %}{% endblock %}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <!-- ===== SHARED HEADER (used across all pages) ===== -->
+  <header class="site-header">
+    <div class="container header-content">
+      <a href="{% url 'home' %}" class="logo-link">
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2F8d3bb4b47da142e987abc1ab086fed8b?format=webp&width=150"
+             alt="EMESYS Logo" class="logo">
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'about' %}">About</a>
+        <a href="{% url 'franchise' %}">Franchise</a>
+        <a href="{% url 'blog_list' %}">Blog</a>
+        <!-- NEW: Virtual Abacus link in the top header bar -->
+        <a href="{% url 'virtual_abacus' %}">Virtual Abacus</a>
+        <a href="{% url 'courses' %}">Courses</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="contact-btn" onclick="location.href='{% url 'contact' %}'">Contact us</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ===== SHARED FOOTER (used across all pages) ===== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-content">
+      <div class="footer-col footer-brand">
+        <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2F8d3bb4b47da142e987abc1ab086fed8b?format=webp&width=150" alt="EMESYS Logo" class="footer-logo">
+        <p>Learn Abacus from expert teachers through live interactive online classes.</p>
+      </div>
+
+      <div class="footer-col footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="{% url 'about' %}">About Us</a></li>
+          <li><a href="{% url 'courses' %}">Courses</a></li>
+          <li><a href="{% url 'franchise' %}">Franchise</a></li>
+          <li><a href="{% url 'blog_list' %}">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-contact">
+        <h4>Contact</h4>
+        <p>Electronic city, Bengaluru</p>
+        <p><a href="mailto:info@emesyslearning.com">info@emesyslearning.com</a></p>
+        <p><a href="tel:+918867539798">+91 8867539798</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- shared JS -->
+  <script src="{% static 'js/main.js' %}"></script>
+  <script>
+    // Basic small helper to close mobile nav when clicking outside (optional)
+    document.addEventListener('click', function(e){
+      if(!e.target.closest('.site-header') && document.body.classList.contains('nav-open')){
+        document.body.classList.remove('nav-open');
+      }
+    });
+  </script>
+
+  {% block scripts %}{% endblock %} 
+</body>
+</html>

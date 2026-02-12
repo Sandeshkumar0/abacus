@@ -1,0 +1,44 @@
+# --- Security & Credentials ---
+.env
+.env.local
+.env.*.local
+secrets.json
+
+# --- Environment & Dependencies ---
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+pip-wheel-metadata/
+
+# --- Database ---
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+*.db
+
+# --- Media & Static ---
+# Ignore user-uploaded media
+media/
+# Only ignore static if it's collected static, not source static
+staticfiles/
+
+# --- IDE & System ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Logs & backups ---
+*.log
+*.bak
+*.tmp
+core_templates_backup/
+templates_backup/
+
+# --- Specific Files to Ignore ---
+temp_eq.png

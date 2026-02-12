@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Blog - AbacusMaster{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'css/page-blog.css' %}">
+
+<style>
+    /* Immediate override for category pills: prevent wrapping, keep them readable */
+    .categories {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        /* keep single row */
+        justify-content: center !important;
+        gap: 12px !important;
+        overflow-x: auto !important;
+        /* allow horizontal scroll if required */
+        -webkit-overflow-scrolling: touch !important;
+        padding: 8px 12px !important;
+        margin: 0 auto !important;
+    }
+
+    /* visible but subtle scrollbar */
+    .categories::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .categories::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+    }
+
+    /* compact pills that won't wrap labels */
+    .category-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        padding: 8px 12px !important;
+        font-size: clamp(12px, 1.1vw, 16px) !important;
+        border-radius: 20px !important;
+        background: rgba(0, 0, 0, 0.10) !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+    }
+
+    /* tweak on very wide / very small screens */
+    @media (min-width:1200px) {
+        .category-btn {
+            padding: 10px 18px !important;
+            font-size: 18px !important;
+        }
+    }
+
+    @media (max-width:420px) {
+        .category-btn {
+            padding: 6px 10px !important;
+            font-size: 12px !important;
+        }
+    }
+
+    /* hover / active */
+    .category-btn.active,
+    .category-btn:hover {
+        background: rgba(0, 0, 0, 0.18) !important;
+    }
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>Blog & News</h1>
+            <p>Stay updated with the latest insights, tips, and news from the world of abacus education</p>
+        </div>
+        <div class="hero-image">
+            <img src="https://cdn.builder.io/api/v1/image/assets%2Fc419bd14efe1424cbd2ad3b976103678%2F61f73f06e4ce40b2b4ca54e487997a1e?format=webp&width=800"
+                alt="Student studying online" />
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="blog-section">
+    <div class="blog-container">
+
+        <!-- Search -->
+        <div class="search-container">
+            <div class="search-wrapper">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" placeholder="Search articles..." />
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-btn {% if selected_category == 'All' %}active{% endif %}"
+                onclick="window.location.href='?category=All'">All</button>
+            {% for category in categories %}
+            <button class="category-btn {% if selected_category == category.slug %}active{% endif %}"
+                onclick="window.location.href='?category={{ category.slug }}'">{{ category.name }}</button>
+            {% endfor %}
+        </div>
+
+        <!-- Blog cards -->
+        <div class="blog-grid">
+
+            {% if posts %}
+            {% for post in posts %}
+            <!-- Card {{ forloop.counter }} -->
+            <article class="blog-card">
+                <img src="{{ post.get_image_url }}" alt="{{ post.title }}" class="blog-card-image" />
+                <div class="blog-card-content">
+                    <div class="blog-meta">
+                        <!-- date icon -->
+                        <svg width="16" height="16" viewBox="0 0 22 23" fill="none">
+                            <path
+                                d="M16.0922 2.28947H20.3835C20.668 2.28947 20.9409 2.41008 21.1421 2.62476C21.3433 2.83944 21.4563 3.13061 21.4563 3.43421V21.75C21.4563 22.0536 21.3433 22.3448 21.1421 22.5595C20.9409 22.7741 20.668 22.8947 20.3835 22.8947H1.07282C0.788287 22.8947 0.515412 22.7741 0.31422 22.5595C0.113028 22.3448 0 22.0536 0 21.75V3.43421C0 3.13061 0.113028 2.83944 0.31422 2.62476C0.515412 2.41008 0.788287 2.28947 1.07282 2.28947H5.36408V0H7.50971V2.28947H13.9466V0H16.0922V2.28947ZM19.3107 11.4474H2.14563V20.6053H19.3107V11.4474Z"
+                                fill="#747474" />
+                        </svg>
+                        <span>{{ post.published_date|date:"d M, Y" }}</span>
+                        <div class="blog-meta-divider"></div>
+                        <!-- comments icon -->
+                        <svg width="16" height="16" viewBox="0 0 19 21" fill="none">
+                            <path
+                                d="M13.8865 19.7652L18.8816 21L17.7713 15.4444C18.5025 13.9234 18.8839 12.2248 18.8816 10.5C18.8816 4.70085 14.6549 0 9.44081 0C4.22667 0 3.8147e-05 4.70085 3.8147e-05 10.5C3.8147e-05 16.2991 4.22667 21 9.44081 21C10.8985 21.0054 12.3387 20.665 13.6412 20.007L13.8865 19.7652ZM8.74047 6.54545L12.9919 10.5L8.74047 14.4545L7.35304 13.1591L9.13713 11.4545H5.88989V9.54545H9.13713L7.35304 7.84091L8.74047 6.54545Z"
+                                fill="#747474" />
+                        </svg>
+                        <span>{{ post.comments_count }} COMMENTS</span>
+                    </div>
+
+                    <span class="blog-category">{{ post.category.name|default:"General" }}</span>
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.excerpt }}</p>
+
+                    <div class="blog-card-footer">
+                        <div class="blog-author">
+                            <div class="author-avatar">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <span class="author-name">{{ post.author_name }}</span>
+                        </div>
+                        <button class="read-more-btn"
+                            onclick="window.location.href='{% url 'blog_detail' post.slug %}'">
+                            Read More
+                            <svg width="16" height="16" viewBox="0 0 20 22" fill="none">
+                                <path
+                                    d="M9.8699 0C15.3181 0 19.7398 4.928 19.7398 11C19.7398 17.072 15.3181 22 9.8699 22C4.42172 22 0 17.072 0 11C0 4.928 4.42172 0 9.8699 0ZM9.8699 9.9H5.92194V12.1H9.8699V15.4L13.8179 11L9.8699 6.6V9.9Z"
+                                    fill="white" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                <h3 style="color: #666; font-size: 24px; margin-bottom: 10px;">No blog posts found</h3>
+                <p style="color: #999;">{% if search_query %}Try a different search term{% else %}Check back soon for
+                    new content{% endif %}</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter">
+    <div class="newsletter-container">
+        <h2>Subscribe to Our Newsletter</h2>
+        <p>Get the latest articles and tips delivered to your inbox</p>
+        <form class="newsletter-form" method="post" action="{% url 'subscribe_newsletter' %}">
+            {% csrf_token %}
+            <input type="email" name="email" placeholder="Enter your email" required />
+            <button type="submit">Subscribe</button>
+        </form>
+    </div>
+    {% if newsletter_success %}
+    <div class="bg-green-50 border border-green-200 text-green-800 rounded p-4 mb-4">
+        Thanks — a confirmation email has been sent to your inbox.
+    </div>
+    {% endif %}
+    {% if errors %}
+    <div class="bg-red-50 border border-red-200 text-red-800 rounded p-4 mb-4">
+        <ul>
+            {% for err in errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>
+<script src="{% static 'js/newsletter.js' %}"></script>
+<script>
+    // category highlight behaviour
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // (NO newsletter submit handler here — newsletter.js handles it)
+</script>
+
+{% endblock %}

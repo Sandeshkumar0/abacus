@@ -1,0 +1,397 @@
+html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #eaf4fd;
+        min-height: 100vh;
+        height: 100%;
+        overflow-x: hidden;
+      }
+      .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+        height: 100vh;
+      }
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        margin-left: 320px;
+        background: transparent;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .equation-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 15px 0;
+      }
+      .header {
+        background: #fff;
+        border-radius: 0;
+        box-shadow: 0 0px 0px 0 rgba(0,0,0,0.10);
+        padding: 32px 40px 32px 0px;
+        margin: 0 0 24px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 2200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      /* Add margin below header to separate from metrics */
+      .header {
+        margin-bottom: 56px !important;
+      }
+      .header-title {
+        color: #0656a5;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 0.25rem;
+        margin-left: 0;
+      }
+      .header-subtitle {
+        font-size: 1.1rem;
+        color: #a0aec0;
+        font-weight: 700;
+        margin-left: 0;
+        margin-bottom: 0;
+        display: block !important;
+      }
+      /* Metrics Section */
+      .metrics-section {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto 0 auto; /* more space below metrics */
+        background: transparent;
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+        min-height: 0;
+      }
+      .metrics-section {
+        margin-top: 32px;
+        margin-bottom: 48px !important;
+      }
+      .metrics-grid {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 99%;
+        max-width: 1400px;
+        gap: 32px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      .metrics-grid,
+      .answer-cards {
+        width: 98%;                
+        max-width: 1900px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+        padding-right: 0;
+        border-radius: 12px;
+      }
+      .metric-card {
+        background-color: #fff;
+        border-radius: 14px;
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.10), 0 4px 6px -4px rgba(0,0,0,0.10);
+        padding: 24px 0 24px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 220px;
+        max-width: 240px;
+        flex: 1 1 0;
+        transition: box-shadow 0.2s;
+        text-align: center;
+        border-top: 4px solid #234c75;
+        border-right: none;
+        border-bottom: none;
+        border-left: none;
+        margin-bottom: 0;
+      }
+      /* Shift first and last metric card horizontally to align with answer card */
+      .metric-card:first-child {
+        margin-left: 2.5%;
+      }
+      .metric-card:last-child {
+        margin-right: 2.5%;
+      }
+      /* Remove any fake metric-card spacers */
+      .metric-card h3,
+      .metric-card .metric-value,
+      .metric-card .metric-change {
+        margin: 0;
+        padding: 0;
+      }
+      .metric-card h3 {
+        color: #234c75;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .metric-change {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .positive { color: #249306; }
+      .negative { color: #f00; }
+      .warning { color: #efa800; }
+      .blue { color: #234c75; }
+      .green { color: #249306; }
+      /* Answer Cards */
+      .answer-cards-outer {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 32px; /* add space between metrics and answer cards */
+        z-index: 1;
+      }
+      .answer-cards {
+        width: 95%;
+        max-width: 1100px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        margin: 0 auto;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .answer-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 10px 0 rgba(0,0,0,0.10);
+        padding: 32px 32px 32px 32px;
+        border-right: 4px solid #234c75;
+        border-bottom: 4px solid #234c75;
+        border-top: none;
+        border-left: none;
+        margin-bottom: 0;
+        position: relative;
+        overflow: hidden;
+        
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .section-number {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #0656a5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-right: 10px;
+      }
+      .section-label {
+        color: #0656a5;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .status-badges {
+        display: flex;
+        gap: 12px;
+        margin-left: auto;
+      }
+      .badge {
+        border-radius: 20px;
+        padding: 6px 18px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: black;
+      }
+      .badge-graded { background: #b1eaa5; color: black !important; }
+      .badge-reviewed { background: #e9eaa5; color: black !important; }
+      .badge-pending { background: #eaa5cf; color: black !important; }
+
+      .badge-score {
+        background: #1c8804;
+        color: #fff;
+        border-radius: 5px;
+        padding: 6px 18px;
+        font-size: 1rem;
+        font-weight: 700;
+      }
+      .content-box {
+        width: 100%;
+        min-height: 65px;
+        border-radius: 20px;
+        border: none;
+        padding: 8px 8px 8px 48pxpx;
+        margin-bottom: 18px;
+        background: #D9D9D9;
+        box-sizing: border-box;
+      }
+      .answer-box {
+        background: #D9D9D9;
+        fill: 32px;
+        margin-bottom: 20px;
+        border: 0.8px solid rgba(0, 0, 0, 0.4);  /* Soft black look */
+        
+      
+
+      }
+      .remarks-box {
+        background: #C7DCF2;
+        fill-opacity: 32px;
+        margin-bottom: 1px;
+       border: 0.8px solid rgba(0, 0, 0, 0.4);  /* Soft black look */
+
+      }
+      .content-text {
+        font-size: 1rem;
+        font-weight: 700;
+        font-style: italic;
+        color: #494744;
+        opacity: 73px;
+        margin: 18px;
+      }
+      .remarks-text {
+        color: #494744;
+        margin-bottom: 16px;
+        opacity: 73px;
+        margin-inline: 18px;
+      }
+      .teacher-name {
+        color: #494744;
+        font-size: 0.95rem;
+        border-top: 1px solid #b1d8ff;
+        padding-top: 12px;
+        font-style: normal;
+        margin: 18px;
+      }
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0656a5;
+        margin-bottom: 10px;
+      }
+      .commentary-icon {
+        width: 25px;
+        height: 25px;
+        flex-shrink: 0;
+      }
+      .more-section {
+  margin: 40px auto 0 auto;
+  width: 95%;
+  max-width: 1100px;
+  height: 60px;
+  border-radius: 20px;
+  border: 1.5px dashed rgba(0, 0, 0, 0.5); /* updated border */
+  background: #fff;
+  box-shadow: none; /* removed shadow */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+      .header-subtitle {
+        display: none !important;
+      }
+      .more-text {
+        color: #234c75;
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-style: italic;
+      }
+      @media (max-width: 1200px) {
+        .metrics-grid, .answer-cards, .more-section { width: 99%; }
+      }
+      @media (max-width: 900px) {
+        .metrics-grid,
+        .answer-cards {
+          width: 99%;
+        }
+        .metric-card:first-child,
+        .metric-card:last-child {
+          margin-left: 1%;
+          margin-right: 1%;
+        }
+      }
+      @media (max-width: 900px) {
+        .sidebar { width: 80px; }
+        .main-content { margin-left: 80px; }
+        .metrics-grid, .answer-cards, .more-section { width: 99%; }
+        .metric-card { min-width: 120px; max-width: 140px; padding: 10px 4px; }
+        .answer-card { padding: 16px 4px; }
+      }
+      @media (max-width: 600px) {
+        .sidebar { display: none; }
+        .main-content { margin-left: 0; }
+        .metrics-grid, .answer-cards, .more-section { width: 100%; }
+        .metric-card { min-width: 90px; max-width: 120px; }
+      }
+/* Common styles */
+.remarks-box {
+  padding: 1rem;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem; /* default rounded corners */
+}
+
+/* Override for give-remarks page */
+.give-remarks-page .remarks-box {
+  border-radius: 0 !important; /* Remove radius */
+}
+
+/* Submit Button */
+.btn-submit {
+  background-color: #3b82f6; /* Blue */
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  border: none;
+}
+
+.btn-submit:hover {
+  background-color: #2563eb;
+}
+
+/* AI Checker Button */
+.btn-ai-checker {
+  background-color: #10b981; /* Green */
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+  border: none;
+}
+
+.btn-ai-checker:hover {
+  background-color: #059669;
+}

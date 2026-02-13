@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Group - AbacusMaster{% endblock %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #f8fafc;
+    }
+
+    .glass-container {
+        background: rgba(255, 255, 255, 1);
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px -12px rgba(79, 70, 229, 0.4);
+    }
+
+    .form-input {
+        transition: all 0.2s;
+        border: 1px solid #e2e8f0;
+        background: #fdfdfd;
+    }
+
+    .form-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        background: #fff;
+    }
+
+    .class-checkbox:checked+div {
+        border-color: #6366f1;
+        background-color: #eff6ff;
+    }
+
+    .class-checkbox:checked+div .check-icon {
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div
+    class="min-h-screen py-16 px-4 flex justify-center items-start bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div class="glass-container w-full max-w-2xl p-8 md:p-12 relative">
+
+        <!-- Back Link -->
+        <a href="{% url 'manage_groups' %}"
+            class="absolute top-8 left-8 text-indigo-600 font-semibold flex items-center gap-2 hover:text-indigo-800 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to Groups
+        </a>
+
+        <div class="text-center mb-10 mt-8">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Create New Cohort</h1>
+            <p class="text-gray-500 text-lg">Organize your students into a new learning batch.</p>
+        </div>
+
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Group Name -->
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide">Group Name</label>
+                <div class="relative">
+                    <input type="text" name="name" required
+                        class="form-input w-full px-5 py-4 rounded-xl text-lg font-medium placeholder-gray-400 focus:outline-none"
+                        placeholder="e.g. Master Blasters Level 1">
+                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 pointer-events-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide">Description <span
+                        class="text-gray-400 font-normal normal-case">(Optional)</span></label>
+                <textarea name="description" rows="3"
+                    class="form-input w-full px-5 py-4 rounded-xl text-lg text-gray-700 placeholder-gray-400 focus:outline-none resize-none"
+                    placeholder="Briefly describe the purpose of this group..."></textarea>
+            </div>
+
+            <!-- Class Selection -->
+            <div class="space-y-4 pt-4 border-t border-gray-100">
+                <label class="block text-sm font-bold text-gray-700 uppercase tracking-wide flex justify-between">
+                    Select Classes
+                    <span class="text-indigo-500 text-xs normal-case bg-indigo-50 px-2 py-1 rounded-full">Auto-Add
+                        Students</span>
+                </label>
+
+                <div class="grid grid-cols-2 gap-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                    {% for cls in available_classes %}
+                    {% if cls %}
+                    <label class="cursor-pointer group relative">
+                        <input type="checkbox" name="classes" value="{{ cls }}"
+                            class="class-checkbox absolute opacity-0 w-0 h-0">
+                        <div
+                            class="border-2 border-gray-100 rounded-xl p-4 flex items-center justify-between transition-all hover:border-indigo-200 hover:bg-gray-50 bg-white">
+                            <span class="font-bold text-gray-700 text-lg">{{ cls }}</span>
+                            <div
+                                class="check-icon w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white opacity-0 transform scale-75 transition-all">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </label>
+                    {% endif %}
+                    {% empty %}
+                    <div class="col-span-2 text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <p class="text-gray-500 mb-2">No active classes found.</p>
+                        <a href="#" class="text-indigo-600 font-bold hover:underline">Manage Students Profile &rarr;</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-gray-400 italic mt-2 text-center">
+                    Selecting a class adds all current students from that class. You can remove individual students
+                    later.
+                </p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6">
+                <button type="submit"
+                    class="w-full btn-primary text-white font-bold py-4 rounded-xl text-lg shadow-xl flex items-center justify-center gap-3">
+                    <span>Create Group</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, FileResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
@@ -15,9 +16,10 @@ import json
 import os
 import tempfile
 from dotenv import load_dotenv
+from django.contrib import messages
 
-from accounts.models import TeacherProfile, StudentProfile
-from ..models import Question, Query, StudentAnswer, ExamAnswer, Exam, ExamQuestion
+from accounts.models import TeacherProfile, StudentProfile, CustomUser
+from ..models import Question, StudentAnswer, Query, Exam, ExamQuestion, ExamAnswer, Course, CourseResource, StudentGroup
 
 
 @login_required(login_url='teacher_login')
@@ -29,7 +31,13 @@ def teacher_dashboard(request):
         return redirect('teacher_login')
     
     # Get teacher profile
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
+    teacher_profile, created = TeacherProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'aadhar_id': 'Not Provided',
+            'phone': 'Not Provided'
+        }
+    )
     
     # Calculate statistics
     total_students = StudentProfile.objects.filter(assigned_teacher=teacher_profile).count()
@@ -53,14 +61,26 @@ def teacher_dashboard(request):
 @login_required
 def teacher_profile(request):
     """Display teacher profile."""
-    teacher = TeacherProfile.objects.get(user=request.user)
+    teacher, created = TeacherProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'aadhar_id': 'Not Provided',
+            'phone': 'Not Provided'
+        }
+    )
     return render(request, 'teacher/profile.html', {'teacher': teacher})
 
 
 @login_required
 def teacher_profile_edit(request):
     """Edit teacher profile - update profile picture and office details."""
-    teacher = TeacherProfile.objects.get(user=request.user)
+    teacher, created = TeacherProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'aadhar_id': 'Not Provided',
+            'phone': 'Not Provided'
+        }
+    )
     
     if request.method == 'POST':
         # Update profile picture if uploaded
@@ -203,7 +223,13 @@ def create_exam(request):
 @login_required
 def student_list(request):
     """View list of students assigned to the teacher."""
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'aadhar_id': 'Not Provided',
+            'phone': 'Not Provided'
+        }
+    )
     students = StudentProfile.objects.filter(assigned_teacher=teacher_profile)
     return render(request, 'teacher/student_list.html', {'students': students})
 
@@ -239,7 +265,13 @@ def add_student(request):
         )
         
         # Get teacher profile
-        teacher_profile = TeacherProfile.objects.get(user=request.user)
+        teacher_profile, _ = TeacherProfile.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'aadhar_id': 'Not Provided',
+                'phone': 'Not Provided'
+            }
+        )
         
         # Create student profile
         from django.utils.dateparse import parse_date
@@ -264,7 +296,13 @@ def add_student(request):
 @login_required
 def view_student(request, student_id):
     """View detailed information about a specific student."""
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'aadhar_id': 'Not Provided',
+            'phone': 'Not Provided'
+        }
+    )
     student = StudentProfile.objects.get(user_id=student_id, assigned_teacher=teacher_profile)
     
     # Get student's performance data
@@ -356,6 +394,50 @@ def export_students_csv(request):
     return response
 
 
+@login_required(login_url='teacher_login')
+def add_course(request):
+    """View to allow teachers to add new courses and resources."""
+    if not request.user.is_teacher:
+       messages.error(request, "Permission denied.")
+       return redirect('teacher_dashboard')
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        duration = request.POST.get('duration')
+        image = request.FILES.get('image')
+
+        # Get teacher profile
+        try:
+            teacher = TeacherProfile.objects.get(user=request.user)
+        except TeacherProfile.DoesNotExist:
+             messages.error(request, "Teacher profile not found.")
+             return redirect('teacher_dashboard')
+
+        # Create Course
+        course = Course.objects.create(
+            title=title,
+            description=description,
+            duration=duration,
+            image=image,
+            teacher=teacher
+        )
+        
+        # Handle Resources
+        files = request.FILES.getlist('resources')
+        for f in files:
+            CourseResource.objects.create(
+                course=course,
+                title=f.name, # Use filename as title for now
+                file=f
+            )
+
+        messages.success(request, 'Course created successfully!')
+        return redirect('teacher_dashboard')
+    
+    return render(request, 'teacher/add_course.html')
+
+
 @login_required
 def respond_queries(request):
     """Respond to student queries."""
@@ -392,7 +474,12 @@ def respond_queries(request):
 @login_required
 def view_responded_queries(request):
     """View queries that have been responded to (student view)."""
-    student_profile = StudentProfile.objects.get(user=request.user)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete or you are logged in as a teacher.'
+        })
 
     queries = Query.objects.filter(
         student=student_profile,
@@ -411,6 +498,97 @@ def view_responded_queries(request):
         })
 
     return render(request, 'student/response_query.html', {'queries': query_data})
+
+
+@login_required(login_url='teacher_login')
+def manage_groups(request):
+    """View to list and manage student study groups."""
+    teacher = TeacherProfile.objects.get(user=request.user)
+    groups = StudentGroup.objects.filter(teacher=teacher)
+    return render(request, 'teacher/manage_groups.html', {'groups': groups})
+
+@login_required(login_url='teacher_login')
+def create_group(request):
+    """View to create a new student group based on class filter."""
+    teacher = TeacherProfile.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        selected_classes = request.POST.getlist('classes')  # List of selected classes
+        
+        group = StudentGroup.objects.create(
+            name=name,
+            teacher=teacher,
+            description=description
+        )
+        
+        # Add students from selected classes
+        if selected_classes:
+            students = StudentProfile.objects.filter(student_class__in=selected_classes)
+            group.students.add(*students)
+            messages.success(request, f"Group '{name}' created with {students.count()} students from selected classes.")
+        else:
+            messages.warning(request, f"Group '{name}' created but no students added (no class selected).")
+            
+        return redirect('manage_groups')
+    
+    # Get distinct classes for filter dropdown
+    available_classes = StudentProfile.objects.values_list('student_class', flat=True).distinct()
+    return render(request, 'teacher/create_group.html', {'available_classes': available_classes})
+
+
+@login_required
+def search_dashboard(request):
+    """Universal search for teacher dashboard."""
+    query = request.GET.get('q', '').strip()
+    
+    if not query:
+        return render(request, 'teacher/search_results.html', {'query': query})
+    
+    try:
+        teacher_profile = TeacherProfile.objects.get(user=request.user)
+    except TeacherProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {'message': 'Teacher profile not found.'})
+
+    # 1. Search Students (assigned to this teacher)
+    students = StudentProfile.objects.filter(
+        (Q(user__full_name__icontains=query) |
+        Q(user__email__icontains=query) |
+        Q(roll_number__icontains=query)) &
+        Q(assigned_teacher=teacher_profile)
+    ).select_related('user')
+    
+    # 2. Search Assignments/Questions
+    assignments = Question.objects.filter(
+        description__icontains=query,
+        teacher=teacher_profile
+    )
+    
+    # 3. Search Exams
+    exams = Exam.objects.filter(
+        title__icontains=query,
+        teacher=teacher_profile
+    )
+    
+    # 4. Search Queries (from students)
+    # Filter queries where student is assigned to this teacher
+    queries = Query.objects.filter(
+        (Q(query_text__icontains=query) |
+        Q(student_name__full_name__icontains=query)) &
+        Q(student__assigned_teacher=teacher_profile)
+    ).select_related('student_name', 'student')
+
+    context = {
+        'query': query,
+        'students': students,
+        'assignments': assignments,
+        'exams': exams,
+        'queries': queries,
+        'total_results': students.count() + assignments.count() + exams.count() + queries.count()
+    }
+    
+    return render(request, 'teacher/search_results.html', context)
 
 
 @login_required

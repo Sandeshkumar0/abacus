@@ -1,6 +1,9 @@
+
+
 """
 Lecture notes generation utilities using AI.
 Handles YouTube transcript extraction, Whisper transcription, and PDF generation.
+Updated to use Groq (Llama 3) instead of OpenAI/Grok.
 """
 
 import os
@@ -13,28 +16,28 @@ from dotenv import load_dotenv
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-import google.generativeai as genai
+from openai import OpenAI
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
 import yt_dlp
 import whisper
 
 # Load environment variables
 load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Only configure if API key is available
-if GEMINI_API_KEY and GEMINI_API_KEY != "your_gemini_api_key_here":
-    genai.configure(api_key=GEMINI_API_KEY)
-    GEMINI_MODEL = "models/gemini-pro"
+client = None
+if GROQ_API_KEY:
+    client = OpenAI(
+        api_key=GROQ_API_KEY,
+        base_url="https://api.groq.com/openai/v1"
+    )
 else:
-    print("⚠️ GEMINI_API_KEY not configured. AI features will not work.")
-    print("Get your API key from: https://makersuite.google.com/app/apikey")
-    GEMINI_MODEL = None
+    print("⚠️ GROQ_API_KEY not configured. AI features will not work.")
 
 
 def clean_notes_text(text: str) -> str:
     """
-    Remove markdown symbols (*, **) and extra formatting from Gemini output.
+    Remove markdown symbols (*, **) and extra formatting from output.
     """
     text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)  # remove **bold**
     text = re.sub(r"\*(.*?)\*", r"\1", text)      # remove *italic*
@@ -42,18 +45,19 @@ def clean_notes_text(text: str) -> str:
     return text.strip()
 
 
-def query_gemini(prompt: str) -> str:
-    """Query Gemini AI with a prompt and return cleaned response."""
+def query_groq(prompt: str) -> str:
+    """Query Groq with a prompt and return cleaned response."""
+    if not client:
+        return "⚠️ Groq API not configured."
     try:
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        response = model.generate_content(prompt)
-
-        if response and response.candidates:
-            return clean_notes_text(response.candidates[0].content.parts[0].text)
-        else:
-            return "⚠️ No response generated from Gemini."
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000
+        )
+        return clean_notes_text(response.choices[0].message.content)
     except Exception as e:
-        print("Gemini error:", str(e))
+        print("Groq API error:", str(e))
         return f"⚠️ Error generating notes: {str(e)}"
 
 
@@ -191,7 +195,7 @@ def generate_notes(request):
         if not transcript_text:
             transcript_text = "Transcript not available, please provide valid input."
 
-        # Gemini Prompt
+        # Groq Prompt
         final_prompt = f"""
         You are an expert academic note generator.
 
@@ -206,7 +210,7 @@ def generate_notes(request):
         - Do NOT output markdown (** or ##). Just plain structured text.
         """
 
-        notes_text = query_gemini(final_prompt)
+        notes_text = query_groq(final_prompt)
 
         # Generate PDF
         buffer = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")

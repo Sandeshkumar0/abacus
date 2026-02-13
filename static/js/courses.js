@@ -4,8 +4,5 @@ document.addEventListener('click', function (e) {
     alert('Demo requested — we will contact you to schedule it.');
     e.preventDefault();
   }
-  if (e.target.closest('.course-btn-enroll')) {
-    alert('Enrollment flow not implemented in demo. Please contact us.');
-    e.preventDefault();
-  }
+  // Enrollment flow is now implemented via backend link.
 });

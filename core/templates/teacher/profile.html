@@ -39,18 +39,18 @@
 <div class="profile-bg-gradient">
   <div class="edit-btn-container">
     <a href="{% url 'teacher_profile_edit' %}" class="edit-profile-btn">
-       Edit Profile
+      Edit Profile
     </a>
   </div>
   <div class="profile-card-outer">
     <div class="profile-card no-radius">
       <div class="profile-image-center">
         {% if teacher.profile_picture %}
-        <img src="{{ teacher.profile_picture.url }}" alt="Profile" />
+        <img src="{{ teacher.profile_picture.url }}" alt="Profile" oncontextmenu="return false;" />
         {% else %}
         <img
           src="https://cdn.builder.io/api/v1/assets/185b1526784f45f38850732c89cdf58b/smiling-young-brunette-caucasian-man-isolated-pink-wall-with-copy-space-aa89d3?format=webp&width=800"
-          alt="Profile" />
+          alt="Profile" oncontextmenu="return false;" />
         {% endif %}
       </div>
       <table class="profile-details-table">

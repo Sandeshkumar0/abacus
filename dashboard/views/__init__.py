@@ -17,6 +17,8 @@ from .student_views import (
     attempt_exam,
     download_exam_answer_pdf,
     give_test,
+    enroll_course,
+    practice_questions_page,
 )
 
 # Teacher views
@@ -35,6 +37,10 @@ from .teacher_views import (
     export_students_csv,
     respond_queries,
     view_responded_queries,
+    search_dashboard,
+    add_course,
+    manage_groups,
+    create_group,
     give_remarks,
     lecture_notes,
 )
@@ -45,17 +51,18 @@ from .ai_utils import (
     generate_answer_query,
     generate_remark_feedback,
     download_pdf,
-    extract_text_from_response,
     clean_ai_text,
     collect_attachments_from_instance,
-    build_gemini_parts,
+    generate_practice_questions,
+    generate_exam_questions,
+    generate_student_report,
 )
 
 # Lecture notes utilities
 from .lecture_notes_utils import (
     generate_notes,
     clean_notes_text,
-    query_gemini,
+    query_groq,
     extract_youtube_id,
     get_transcript_from_youtube,
     transcribe_with_whisper,
@@ -77,6 +84,7 @@ __all__ = [
     'attempt_exam',
     'download_exam_answer_pdf',
     'give_test',
+    'practice_questions_page',
     
     # Teacher views
     'teacher_dashboard',
@@ -101,15 +109,16 @@ __all__ = [
     'generate_answer_query',
     'generate_remark_feedback',
     'download_pdf',
-    'extract_text_from_response',
     'clean_ai_text',
     'collect_attachments_from_instance',
-    'build_gemini_parts',
+    'generate_practice_questions',
+    'generate_exam_questions',
+    'generate_student_report',
     
     # Lecture notes utilities
     'generate_notes',
     'clean_notes_text',
-    'query_gemini',
+    'query_groq',
     'extract_youtube_id',
     'get_transcript_from_youtube',
     'transcribe_with_whisper',

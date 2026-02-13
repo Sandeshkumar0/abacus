@@ -13,7 +13,46 @@ def about(request):
     return render(request, "about.html")
 
 def courses(request):
-    return render(request, "courses.html")
+    courses_list = []
+    enrolled_ids = []
+    try:
+        from dashboard.models import Course, Enrollment
+        
+        # Auto-create courses if none exist (Hardcoded for demo)
+        if not Course.objects.exists():
+            Course.objects.create(
+                title='Abacus', 
+                description='Foundational number sense + Virtual Abacus', 
+                duration='3 months'
+            )
+            Course.objects.create(
+                title='Abacus Teacher Training', 
+                description='Certify to teach AbacusMaster curriculum', 
+                duration='6 Weeks'
+            )
+            Course.objects.create(
+                title='Vedic', 
+                description='Strengthens both short-term and long-term memory.', 
+                duration='3 months'
+            )
+            Course.objects.create(
+                title='Calligraphy', 
+                description='Showcase Your Work Visually', 
+                duration='3 months'
+            )
+            Course.objects.create(
+                title='Vedic Teacher Training', 
+                description='Certify to teach Vedic curriculum', 
+                duration='6 Weeks'
+            )
+
+        courses_list = Course.objects.all()
+        if request.user.is_authenticated and hasattr(request.user, 'studentprofile'):
+             enrolled_ids = list(Enrollment.objects.filter(student=request.user.studentprofile).values_list('course_id', flat=True))
+    except Exception as e:
+        print(f"Error fetching/creating courses: {e}")
+
+    return render(request, "courses.html", {'courses': courses_list, 'enrolled_ids': enrolled_ids})
 
 
 def attach_inline_logo(msg):

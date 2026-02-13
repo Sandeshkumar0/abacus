@@ -1,0 +1,145 @@
+{% extends 'student/base_student.html' %}
+{% load static %}
+
+{% block title %}AI Practice Questions - EMESYS{% endblock %}
+{% block header %}Practice with AI{% endblock %}
+{% block subtitle %}Generate custom practice questions based on your topics{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Input Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Generate New Questions</h2>
+
+        <form id="generateForm" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Topic Input -->
+                <div class="space-y-2">
+                    <label for="topic" class="block text-sm font-medium text-gray-700">Topic or Concept</label>
+                    <input type="text" id="topic" name="topic" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="e.g., Abacus Level 1, Multiplication, Vedic Math">
+                </div>
+
+                <!-- Difficulty Select -->
+                <div class="space-y-2">
+                    <label for="difficulty" class="block text-sm font-medium text-gray-700">Difficulty Level</label>
+                    <select id="difficulty" name="difficulty"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                        <option value="Simple">Simple</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+                <button type="submit" id="generateBtn"
+                    class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Generate Questions
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsArea" class="hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                        </path>
+                    </svg>
+                    Generated Questions
+                </h3>
+                <button onclick="copyQuestions()"
+                    class="text-sm text-gray-600 hover:text-blue-600 font-medium flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                        </path>
+                    </svg>
+                    Copy
+                </button>
+            </div>
+            <div class="p-6 prose max-w-none text-gray-800" id="questionsContent">
+                <!-- Questions will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-100 border-t-blue-600 mb-4">
+        </div>
+        <p class="text-gray-500 font-medium">Generating questions with AI...</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('generateForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const generateBtn = document.getElementById('generateBtn');
+        const resultsArea = document.getElementById('resultsArea');
+        const loadingState = document.getElementById('loadingState');
+        const questionsContent = document.getElementById('questionsContent');
+
+        // UI Update: Start Loading
+        generateBtn.disabled = true;
+        generateBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        resultsArea.classList.add('hidden');
+        loadingState.classList.remove('hidden');
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('{% url "generate_practice_questions" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.questions) {
+                // Success: Show Questions
+                // Format the text (convert newlines to <br>)
+                const formattedText = data.questions.replace(/\n/g, '<br>');
+                questionsContent.innerHTML = formattedText;
+                resultsArea.classList.remove('hidden');
+            } else {
+                // Error handled below
+                throw new Error(data.error || 'Failed to generate questions');
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        } finally {
+            // UI Update: Stop Loading
+            loadingState.classList.add('hidden');
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        }
+    });
+
+    function copyQuestions() {
+        const text = document.getElementById('questionsContent').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Questions copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
+{% endblock %}

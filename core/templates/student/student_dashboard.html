@@ -42,6 +42,50 @@
   </div>
 </div>
 
+<!-- My Enrolled Courses -->
+<div class="mt-8 mb-6">
+  <h2 class="text-xl font-bold text-gray-800 mb-4">My Enrolled Courses</h2>
+  {% if enrollments %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for enrollment in enrollments %}
+    <div class="bg-white border-l-4 border-blue-500 rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="font-bold text-lg text-gray-800">{{ enrollment.course.title }}</h3>
+        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Active</span>
+      </div>
+      <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ enrollment.course.description }}</p>
+      <div class="flex items-center justify-between mt-auto">
+        <span class="text-xs text-gray-500">Enrolled: {{ enrollment.enrolled_at|date:"M d, Y" }}</span>
+        <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
+          Continue
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm">
+    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+        </path>
+      </svg>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Start Learning Today</h3>
+    <p class="text-gray-500 mb-6 max-w-md mx-auto">Explore our range of courses designed to boost your skills. Enroll
+      now to get started!</p>
+    <a href="/courses/"
+      class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+      Browse Courses
+    </a>
+  </div>
+  {% endif %}
+</div>
+
 <!-- Additional Content Area -->
 <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
   <!-- Recent Activities -->

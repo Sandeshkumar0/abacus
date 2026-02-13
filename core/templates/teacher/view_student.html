@@ -12,7 +12,8 @@
     <div class="profile-header">
         <div class="profile-image">
             {% if student.profile_picture %}
-            <img src="{{ student.profile_picture.url }}" alt="{{ student.user.full_name }}">
+            <img src="{{ student.profile_picture.url }}" alt="{{ student.user.full_name }}"
+                oncontextmenu="return false;">
             {% else %}
             <div class="placeholder-avatar">{{ student.user.full_name|slice:":1"|upper }}</div>
             {% endif %}
@@ -71,8 +72,67 @@
                 </div>
             </div>
         </div>
+        <div class="detail-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="margin: 0; border: none;">AI Performance Analysis</h2>
+                <button id="generateReportBtn" class="btn btn-primary"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); cursor: pointer;">
+                    ✨ Generate Report
+                </button>
+            </div>
+            <div id="reportContent"
+                style="display: none; background: #f9fafb; padding: 1.5rem; border-radius: 8px; border: 1px solid #e5e7eb; color: #374151; line-height: 1.6;">
+                <!-- Report goes here -->
+            </div>
+            <p id="reportLoading"
+                style="display: none; text-align: center; color: #6b7280; font-style: italic; padding: 1rem;">Generating
+                analysis based on recent performance...</p>
+        </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('generateReportBtn').addEventListener('click', async function () {
+        const btn = this;
+        const reportDiv = document.getElementById('reportContent');
+        const loading = document.getElementById('reportLoading');
+        const studentId = "{{ student.user.id }}";
+
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        loading.style.display = "block";
+        reportDiv.style.display = "none";
+
+        try {
+            const formData = new FormData();
+            formData.append('student_id', studentId);
+
+            const response = await fetch("{% url 'generate_student_report' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.report) {
+                reportDiv.innerHTML = data.report;
+                reportDiv.style.display = "block";
+            } else {
+                alert(data.error || "Failed to generate report.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error connecting to AI service.");
+        } finally {
+            loading.style.display = "none";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    });
+</script>
 
 <style>
     .profile-container {

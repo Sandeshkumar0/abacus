@@ -23,6 +23,8 @@
         dropdown.classList.toggle('show');
 
         if (dropdown.classList.contains('show')) {
+            // Mark all as read immediately when opening
+            window.notificationManager.markAllAsRead();
             window.notificationManager.fetchNotifications();
         }
     }

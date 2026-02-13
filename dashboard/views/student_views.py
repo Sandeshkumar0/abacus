@@ -4,7 +4,7 @@ Handles student dashboard, assignments, queries, remarks, and exams.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.utils import timezone
@@ -18,25 +18,25 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 from accounts.models import StudentProfile, TeacherProfile
-from ..models import StudentAnswer, Question, Query, Exam, ExamQuestion, ExamAnswer
+from ..models import StudentAnswer, Question, Query, Exam, ExamQuestion, ExamAnswer, Course, Enrollment, Notification
 
 
-@login_required
+@login_required(login_url='student_login')
 def student_dashboard(request):
     """Main dashboard view for students with real statistics."""
     
     # Get the student's profile
-    try:
-        student_profile = StudentProfile.objects.get(user=request.user)
-    except StudentProfile.DoesNotExist:
-        # If no profile exists, show empty dashboard
-        context = {
-            'total_assignments': 0,
-            'pending_assignments': 0,
-            'pending_queries': 0,
-            'upcoming_exams': 0,
+    # Get the student's profile
+    student_profile, created = StudentProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'roll_number': f'STU{request.user.id}',
+            'student_class': 'Unknown',
+            'dob': timezone.now().date(),
+            'phone': '0000000000'
         }
-        return render(request, 'student/student_dashboard.html', context)
+    )
+    # New profile might not have teacher assigned, handle that gracefully if needed later
     
     # Get statistics
     # Total assignments (questions) assigned to this student
@@ -84,6 +84,9 @@ def student_dashboard(request):
         id__gte=StudentAnswer.objects.filter(student=student_profile).order_by('-id').first().id - 10 if StudentAnswer.objects.filter(student=student_profile).exists() else 0
     ).count()
     
+    # My Enrolled Courses
+    enrollments = Enrollment.objects.filter(student=student_profile).select_related('course')
+
     context = {
         'total_assignments': total_assignments,
         'pending_assignments': pending_assignments,
@@ -92,6 +95,7 @@ def student_dashboard(request):
         'recent_graded': recent_graded,
         'recent_responses': recent_responses,
         'recent_graded_count': recent_graded_count,
+        'enrollments': enrollments,
     }
     
     return render(request, 'student/student_dashboard.html', context)
@@ -104,9 +108,15 @@ def submit_answer(request):
         question_id = request.POST.get('question_id')
         answer_text = request.POST.get('answer')
         answer_file = request.FILES.get('answer_file')
-
-        question = Question.objects.get(id=question_id)
-        student_profile = StudentProfile.objects.get(user=request.user)
+        
+        try:
+            question = Question.objects.get(id=question_id)
+        except Question.DoesNotExist:
+             return JsonResponse({'status': 'error', 'message': 'Question not found'}, status=404)
+        try:
+            student_profile = StudentProfile.objects.get(user=request.user)
+        except StudentProfile.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Student profile not found'}, status=403)
 
         StudentAnswer.objects.update_or_create(
             student=student_profile,
@@ -125,8 +135,11 @@ def submit_answer(request):
 @login_required
 def download_answer_pdf(request, question_id):
     """Generate and download PDF of student's answer for a specific question."""
-    question = Question.objects.get(id=question_id)
-    student_profile = StudentProfile.objects.get(user=request.user)
+    question = get_object_or_404(Question, id=question_id)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        raise Http404("Student profile not found")
     answer = StudentAnswer.objects.filter(student=student_profile, question=question).first()
 
     buffer = io.BytesIO()
@@ -252,7 +265,12 @@ def student_profile(request):
 @login_required
 def student_profile_edit(request):
     """Edit student profile - update profile picture."""
-    student = StudentProfile.objects.get(user=request.user)
+    try:
+        student = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete. Please contact an administrator.'
+        })
     
     if request.method == 'POST':
         # Update profile picture if uploaded
@@ -268,7 +286,12 @@ def student_profile_edit(request):
 @login_required
 def raise_query(request):
     """Allow students to raise queries with statistics."""
-    student_profile = StudentProfile.objects.get(user=request.user)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete. Please contact an administrator.'
+        })
 
     if request.method == 'POST':
         query_text = request.POST.get('query_text')
@@ -318,7 +341,12 @@ def raise_query(request):
 @login_required
 def view_remarks(request):
     """View remarks/feedback on submitted answers."""
-    student = StudentProfile.objects.get(user=request.user)
+    try:
+        student = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete. Please contact an administrator.'
+        })
     student_answers_raw = StudentAnswer.objects.filter(student=student).select_related('question')
 
     student_answers = []
@@ -359,7 +387,10 @@ def view_remarks(request):
 @login_required
 def get_exam_questions(request, exam_id):
     """Get exam questions for a student (API endpoint)."""
-    student_profile = StudentProfile.objects.get(user=request.user)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Profile missing"}, status=403)
     exam = get_object_or_404(Exam, id=exam_id)
 
     # Prevent showing if already attempted
@@ -381,7 +412,12 @@ def get_exam_questions(request, exam_id):
 @login_required
 def attempt_exam(request, exam_id):
     """Handle exam attempt by student."""
-    student_profile = StudentProfile.objects.get(user=request.user)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete. Please contact an administrator.'
+        })
     exam = get_object_or_404(Exam, id=exam_id)
 
     if ExamAnswer.objects.filter(exam=exam, student=student_profile).exists():
@@ -412,7 +448,10 @@ def attempt_exam(request, exam_id):
 def download_exam_answer_pdf(request, exam_id):
     """Generate PDF for all exam answers of the logged-in student."""
     exam = get_object_or_404(Exam, id=exam_id)
-    student_profile = StudentProfile.objects.get(user=request.user)
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        raise Http404("Student profile not found")
     answers = ExamAnswer.objects.filter(exam=exam, student=student_profile)
 
     buffer = io.BytesIO()
@@ -484,7 +523,12 @@ def download_exam_answer_pdf(request, exam_id):
 @login_required
 def give_test(request):
     """View all exams (completed and new) for the student."""
-    student_profile = request.user.studentprofile
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        return render(request, 'student/profile_missing.html', {
+            'message': 'Your student profile is incomplete. Please contact an administrator.'
+        })
 
     # Completed exams
     completed_exams = Exam.objects.filter(
@@ -510,3 +554,39 @@ def give_test(request):
         "completed_exams": completed_exams,
         "new_exams": new_exams,
     })
+
+@login_required(login_url='student_login')
+def enroll_course(request, course_id):
+    """Enroll the current student in a course."""
+    if not request.user.is_student:
+        return redirect('student_dashboard')
+    
+    course = get_object_or_404(Course, id=course_id)
+    student, _ = StudentProfile.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'roll_number': f'STU{request.user.id}',
+            'student_class': 'Unknown',
+            'dob': timezone.now().date(),
+            'phone': '0000000000'
+        }
+    )
+    
+    _, created = Enrollment.objects.get_or_create(student=student, course=course)
+    
+    if created:
+        Notification.objects.create(
+            recipient=request.user,
+            notification_type='general',
+            title='Course Enrollment Successful',
+            message=f'You have successfully enrolled in {course.title}.',
+            link='/dashboard/student/dashboard/'
+        )
+    
+    return redirect('student_dashboard')
+
+
+@login_required
+def practice_questions_page(request):
+    """Render the AI practice questions page."""
+    return render(request, 'student/practice_questions.html')

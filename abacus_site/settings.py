@@ -83,9 +83,8 @@ CSRF_FAILURE_VIEW = 'core.csrf_views.csrf_failure'
 # Development mode: Print emails to console instead of sending
 import os
 
-# Use console backend for development (prints to terminal)
-# Change to 'django.core.mail.backends.smtp.EmailBackend' for production
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Switch to SMTP backend to send real emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # SMTP settings (for when you switch to production)
 EMAIL_HOST = 'smtp.sendgrid.net'
@@ -162,8 +161,12 @@ CHANNEL_LAYERS = {
 # -------------------------
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 

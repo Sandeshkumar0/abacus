@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Groups - AbacusMaster{% endblock %}
+
+{% block head %}
+<!-- Load Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* Custom Styles to ensure premium feel */
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .glass-header {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 1);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.02);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+    }
+
+    .btn-gradient:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+    }
+
+    .status-badge {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+            <div class="mb-6 md:mb-0">
+                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Study Groups</h1>
+                <p class="mt-2 text-lg text-gray-600">Manage your student batches effectively</p>
+            </div>
+            <a href="{% url 'create_group' %}"
+                class="btn-gradient text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Create New Batch
+            </a>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-8 space-y-4">
+            {% for message in messages %}
+            <div
+                class="p-4 rounded-xl flex items-center shadow-sm {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-100{% else %}bg-yellow-50 text-yellow-800 border border-yellow-100{% endif %}">
+                {% if message.tags == 'success' %}
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {% endif %}
+                <span class="font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Groups Grid -->
+        {% if groups %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for group in groups %}
+            <div class="glass-card p-8 flex flex-col justify-between h-full relative overflow-hidden group">
+                <!-- Decorative accent -->
+                <div
+                    class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-blue-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{
+                            group.name }}</h3>
+                        <span
+                            class="status-badge text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wide">Active</span>
+                    </div>
+
+                    <p class="text-gray-500 mb-6 leading-relaxed line-clamp-3">
+                        {{ group.description|default:"No description provided for this group." }}
+                    </p>
+                </div>
+
+                <div class="pt-6 border-t border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center text-gray-600">
+                        <div class="bg-blue-50 p-2 rounded-lg mr-3 text-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <span class="font-bold text-lg">{{ group.students.count }}</span>
+                        <span class="text-sm ml-1 font-medium">Students</span>
+                    </div>
+                    <span class="text-sm text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-md">{{
+                        group.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-24 glass-card mx-auto max-w-2xl">
+            <div class="bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">No Groups Yet</h2>
+            <p class="text-gray-500 text-lg mb-8 max-w-md mx-auto">Create your first study group to organize students
+                and assign tasks efficiently.</p>
+            <a href="{% url 'create_group' %}"
+                class="btn-gradient text-white px-8 py-3 rounded-lg font-bold shadow-md hover:shadow-lg inline-flex items-center gap-2">
+                <span>Get Started</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3">
+                    </path>
+                </svg>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

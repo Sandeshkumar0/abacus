@@ -1,7 +1,6 @@
 from django.db import models
-
-from django.db import models
 from accounts.models import StudentProfile, TeacherProfile, CustomUser
+from django.utils import timezone
 
 class Question(models.Model):
     teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='questions')
@@ -120,3 +119,48 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.notification_type} for {self.recipient.email} - {self.title}"
+
+# --- NEW MODELS FOR COURSES ---
+
+class Course(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    duration = models.CharField(max_length=50)
+    image_url = models.CharField(max_length=500, blank=True, null=True) # Using URL for now as per template or static
+    image = models.ImageField(upload_to='courses/', blank=True, null=True)
+    teacher = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='courses')
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    def __str__(self):
+        return self.title
+
+class CourseResource(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='resources')
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to='course_resources/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.course.title})"
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='enrollments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('student', 'course')
+    
+    def __str__(self):
+        return f"{self.student.user.email} enrolled in {self.course.title}"
+
+class StudentGroup(models.Model):
+    """Group of students created by a teacher (e.g. 'Class 5 Math', 'Advanced Group')"""
+    name = models.CharField(max_length=100)
+    teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='student_groups')
+    students = models.ManyToManyField(StudentProfile, related_name='study_groups', blank=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.students.count()} students)"

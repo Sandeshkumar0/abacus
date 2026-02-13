@@ -120,7 +120,8 @@
             <label for="profile_picture"> Profile Picture</label>
             {% if student.profile_picture %}
             <div>
-                <img src="{{ student.profile_picture.url }}" alt="Current Profile" class="current-image" />
+                <img src="{{ student.profile_picture.url }}" alt="Current Profile" class="current-image"
+                    oncontextmenu="return false;" />
                 <p class="info-text">Current profile picture</p>
             </div>
             {% else %}

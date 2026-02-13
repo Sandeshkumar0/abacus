@@ -13,6 +13,7 @@ urlpatterns = [
     path('student/view-responses/', views.view_responded_queries, name='view_responded_queries'),
     path('student/lecture-notes/', views.lecture_notes, name='lecture_notes'),
     path('student/lecture-notes/generate/', views.generate_notes, name='generate_notes'),
+    path('student/enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
     path("teacher/download-pdf/", views.download_pdf, name="download_pdf"),
     path("student/exams/<int:exam_id>/questions/", views.get_exam_questions, name="get_exam_questions"),
     path("student/exams/<int:exam_id>/attempt/", views.attempt_exam, name="attempt_exam"),
@@ -25,7 +26,11 @@ urlpatterns = [
     path("teacher/generate-answer-assign/", views.generate_answer_assign, name="generate_answer_assign"),
     path("teacher/generate-answer-query/", views.generate_answer_query, name="generate_answer_query"),
     path("teacher/generate-remark-feedback/", views.generate_remark_feedback, name="generate_remark_feedback"),
+    path("teacher/generate-exam-ai/", views.generate_exam_questions, name="generate_exam_questions"),
+    path("teacher/generate-report-ai/", views.generate_student_report, name="generate_student_report"),
     path('student/give-test/', views.give_test, name='give_test'),
+    path('student/practice-questions/', views.practice_questions_page, name='practice_questions_page'),
+    path('student/practice-questions/generate/', views.generate_practice_questions, name='generate_practice_questions'),
     path('teacher/give-remarks/', views.give_remarks, name='give_remarks'),
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('teacher/assign/', views.assign_questions, name='assign_questions'),
@@ -40,6 +45,10 @@ urlpatterns = [
     path('teacher/queries/', views.respond_queries, name='respond_queries'),
     path('teacher/take-test/', views.take_test, name='take_test'),
     path("teacher/create-exam/", views.create_exam, name="create_exam"),
+    path("teacher/add-course/", views.add_course, name="add_course"),
+    path("teacher/groups/", views.manage_groups, name="manage_groups"),
+    path("teacher/groups/create/", views.create_group, name="create_group"),
+    path("teacher/search/", views.search_dashboard, name='search_dashboard'),
 
 ]
  

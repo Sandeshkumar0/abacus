@@ -112,7 +112,8 @@
             <label for="profile_picture"> Profile Picture</label>
             {% if teacher.profile_picture %}
             <div>
-                <img src="{{ teacher.profile_picture.url }}" alt="Current Profile" class="current-image" />
+                <img src="{{ teacher.profile_picture.url }}" alt="Current Profile" class="current-image"
+                    oncontextmenu="return false;" />
                 <p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.9rem;">Current profile picture</p>
             </div>
             {% endif %}

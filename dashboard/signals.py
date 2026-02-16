@@ -9,7 +9,7 @@ from .models import Question, Exam, Notification, StudentAnswer, ExamAnswer, Que
 from accounts.models import StudentProfile, CustomUser
 
 
-@receiver(post_save, sender=Question)
+@receiver(post_save, sender=Question, dispatch_uid="notify_students_new_test_unique")
 def notify_students_new_test(sender, instance, created, **kwargs):
     """Send notification to all students when a new test/question is assigned"""
     if created:  # Only for newly created questions
@@ -51,7 +51,7 @@ def notify_students_new_test(sender, instance, created, **kwargs):
             )
 
 
-@receiver(post_save, sender=Exam)
+@receiver(post_save, sender=Exam, dispatch_uid="notify_students_new_exam_unique")
 def notify_students_new_exam(sender, instance, created, **kwargs):
     """Send notification to all students when a new exam is assigned"""
     if created:  # Only for newly created exams
@@ -93,7 +93,7 @@ def notify_students_new_exam(sender, instance, created, **kwargs):
             )
 
 
-@receiver(post_save, sender=StudentAnswer)
+@receiver(post_save, sender=StudentAnswer, dispatch_uid="notify_answer_events_unique")
 def notify_answer_events(sender, instance, created, **kwargs):
     """Handle notifications for student answer events"""
     channel_layer = get_channel_layer()
@@ -165,7 +165,7 @@ def notify_answer_events(sender, instance, created, **kwargs):
         )
 
 
-@receiver(post_save, sender=Query)
+@receiver(post_save, sender=Query, dispatch_uid="notify_query_events_unique")
 def notify_query_events(sender, instance, created, **kwargs):
     """Handle notifications for query events"""
     channel_layer = get_channel_layer()
@@ -240,7 +240,7 @@ def notify_query_events(sender, instance, created, **kwargs):
             pass
 
 
-@receiver(post_save, sender=ExamAnswer)
+@receiver(post_save, sender=ExamAnswer, dispatch_uid="notify_teacher_exam_submitted_unique")
 def notify_teacher_exam_submitted(sender, instance, created, **kwargs):
     """Notify teacher when student submits exam answer"""
     if created:

@@ -52,6 +52,9 @@
         <input type="hidden" name="answer_id" value="{{ ans.id }}">
         <input type="hidden" name="answer_type" value="student">
 
+        <label class="block text-gray-700 font-semibold mb-1">Marks:</label>
+        <input type="number" name="marks" min="0" class="marks-input mb-2" placeholder="Give marks" value="{{ ans.marks_obtained|default:'' }}">
+
         <textarea name="remark_text" rows="2" class="remark-box" placeholder="Write remarks..."></textarea>
         <div style="margin-top:8px;">
           <button type="submit" class="submit-btn">Submit</button>

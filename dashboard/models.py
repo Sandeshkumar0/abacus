@@ -10,6 +10,8 @@ class Question(models.Model):
     max_marks = models.PositiveIntegerField(default=0)  # <-- New field
     due_date = models.DateTimeField()
     is_exam = models.BooleanField(default=False)
+    subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')
+    chapter = models.ForeignKey('Chapter', on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -23,6 +25,7 @@ class StudentAnswer(models.Model):
     answer_text = models.TextField(blank=True)
     answer_file = models.FileField(upload_to='answers/', blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
+    marks_obtained = models.PositiveIntegerField(null=True, blank=True)
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -47,6 +50,8 @@ class Exam(models.Model):
     title = models.CharField(max_length=255)
     due_date = models.DateTimeField()
     total_marks = models.PositiveIntegerField(default=0)
+    subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='exams')
+    chapter = models.ForeignKey('Chapter', on_delete=models.SET_NULL, null=True, blank=True, related_name='exams')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -164,3 +169,42 @@ class StudentGroup(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.students.count()} students)"
+
+
+# --- SUBJECT & CHAPTER MODELS (Teacher-Defined) ---
+
+class Subject(models.Model):
+    """Teacher-defined subjects (e.g., Mathematics, Science, English)"""
+    teacher = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='subjects')
+    name = models.CharField(max_length=100)
+    class_level = models.CharField(max_length=20, blank=True)  # e.g., "Class 5", "Class 10"
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['class_level', 'name']
+        unique_together = ('teacher', 'name', 'class_level')
+    
+    def __str__(self):
+        if self.class_level:
+            return f"{self.name} ({self.class_level})"
+        return self.name
+
+
+class Chapter(models.Model):
+    """Chapters within a subject with NCERT/resource references"""
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='chapters')
+    name = models.CharField(max_length=200)
+    chapter_number = models.IntegerField(blank=True, null=True)
+    ncert_reference = models.CharField(max_length=500, blank=True, help_text="NCERT chapter link or reference")
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['chapter_number', 'name']
+        unique_together = ('subject', 'name')
+    
+    def __str__(self):
+        if self.chapter_number:
+            return f"Ch {self.chapter_number}: {self.name}"
+        return self.name

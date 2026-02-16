@@ -59,7 +59,6 @@ def student_dashboard(request):
     
     # Upcoming exams (exams that haven't expired yet)
     upcoming_exams = Exam.objects.filter(
-        teacher=student_profile.assigned_teacher,
         due_date__gt=timezone.now()
     ).count()
     
@@ -87,6 +86,87 @@ def student_dashboard(request):
     # My Enrolled Courses
     enrollments = Enrollment.objects.filter(student=student_profile).select_related('course')
 
+    # Performance Analysis
+    # Fetch all graded answers (Assignments + Exams)
+    # We need to link Questions (Assignment) -> Chapter and Exam -> Chapter
+    
+    from collections import defaultdict
+    
+    # Structure: { chapter_id: { 'name': str, 'total_obtained': int, 'total_max': int, 'ncert': str } }
+    performance_map = defaultdict(lambda: {'name': '', 'total_obtained': 0, 'total_max': 0, 'ncert': ''})
+
+    # 1. Assignment Performance
+    graded_assignments = StudentAnswer.objects.filter(
+        student=student_profile,
+        remarks__isnull=False
+    ).select_related('question__chapter')
+
+    for ans in graded_assignments:
+        chapter = ans.question.chapter
+        if chapter:
+            performance_map[chapter.id]['name'] = chapter.name
+            performance_map[chapter.id]['ncert'] = chapter.ncert_reference
+            if ans.marks_obtained is not None:
+                performance_map[chapter.id]['total_obtained'] += ans.marks_obtained
+            # Assuming question.max_marks is the total for this assignment
+            performance_map[chapter.id]['total_max'] += ans.question.max_marks
+
+    # 2. Exam Performance
+    # Exams might be linked to a chapter directly, or we might need to look at questions?
+    # The requirement says "teacher creates exam... select Subject/Chapter". 
+    # So the Exam object itself has a 'chapter' field.
+    
+    graded_exams = Exam.objects.filter(
+        answers__student=student_profile,
+        answers__marks_obtained__isnull=False
+    ).distinct().select_related('chapter')
+
+    # We need to sum up marks for each exam attempt. 
+    # Logic: For each exam, get total obtained and total max. 
+    # If exam has a chapter, add to that chapter's stats.
+    
+    for exam in graded_exams:
+        if exam.chapter:
+            # Calculate total obtained by student in this exam
+            obtained = ExamAnswer.objects.filter(
+                exam=exam, 
+                student=student_profile
+            ).aggregate(sum_marks=Sum('marks_obtained'))['sum_marks'] or 0
+            
+            # Total marks for the exam
+            max_marks = exam.total_marks
+            
+            performance_map[exam.chapter.id]['name'] = exam.chapter.name
+            performance_map[exam.chapter.id]['ncert'] = exam.chapter.ncert_reference
+            performance_map[exam.chapter.id]['total_obtained'] += obtained
+            performance_map[exam.chapter.id]['total_max'] += max_marks
+
+    # Calculate Status
+    performance_data = []
+    for chat_id, data in performance_map.items():
+        if data['total_max'] > 0:
+            percentage = (data['total_obtained'] / data['total_max']) * 100
+        else:
+            percentage = 0
+            
+        if percentage >= 75:
+            status = 'Strong'
+            color = 'green'
+        elif percentage >= 50:
+            status = 'Moderate'
+            color = 'yellow'
+        else:
+            status = 'Weak'
+            color = 'red'
+            
+        performance_data.append({
+            'chapter_name': data['name'],
+            'ncert_link': data['ncert'],
+            'percentage': round(percentage, 1),
+            'status': status,
+            'color': color
+        })
+
     context = {
         'total_assignments': total_assignments,
         'pending_assignments': pending_assignments,
@@ -96,6 +176,7 @@ def student_dashboard(request):
         'recent_responses': recent_responses,
         'recent_graded_count': recent_graded_count,
         'enrollments': enrollments,
+        'performance_data': performance_data,
     }
     
     return render(request, 'student/student_dashboard.html', context)

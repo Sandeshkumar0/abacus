@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Question, StudentAnswer, Query, Exam, ExamQuestion, ExamAnswer, 
-    Notification, Course, CourseResource, Enrollment
+    Notification, Course, CourseResource, Enrollment, Subject, Chapter
 )
 
 # Register your models here.
@@ -31,3 +31,16 @@ admin.site.register(Exam)
 admin.site.register(ExamQuestion)
 admin.site.register(ExamAnswer)
 admin.site.register(Notification)
+
+# Subject and Chapter management
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'class_level', 'teacher', 'created_at')
+    list_filter = ('teacher', 'class_level', 'created_at')
+    search_fields = ('name', 'description')
+
+@admin.register(Chapter)
+class ChapterAdmin(admin.ModelAdmin):
+    list_display = ('name', 'chapter_number', 'subject', 'ncert_reference')
+    list_filter = ('subject', 'subject__teacher')
+    search_fields = ('name', 'description', 'ncert_reference')

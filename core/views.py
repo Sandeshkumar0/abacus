@@ -1,8 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db import models
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 import os
 from email.mime.image import MIMEImage
-from django.conf import settings   # already present in your file
 
 # --------- Public / Marketing pages ---------
 
@@ -18,33 +22,7 @@ def courses(request):
     try:
         from dashboard.models import Course, Enrollment
         
-        # Auto-create courses if none exist (Hardcoded for demo)
-        if not Course.objects.exists():
-            Course.objects.create(
-                title='Abacus', 
-                description='Foundational number sense + Virtual Abacus', 
-                duration='3 months'
-            )
-            Course.objects.create(
-                title='Abacus Teacher Training', 
-                description='Certify to teach AbacusMaster curriculum', 
-                duration='6 Weeks'
-            )
-            Course.objects.create(
-                title='Vedic', 
-                description='Strengthens both short-term and long-term memory.', 
-                duration='3 months'
-            )
-            Course.objects.create(
-                title='Calligraphy', 
-                description='Showcase Your Work Visually', 
-                duration='3 months'
-            )
-            Course.objects.create(
-                title='Vedic Teacher Training', 
-                description='Certify to teach Vedic curriculum', 
-                duration='6 Weeks'
-            )
+
 
         courses_list = Course.objects.all()
         if request.user.is_authenticated and hasattr(request.user, 'studentprofile'):
@@ -77,11 +55,6 @@ def attach_inline_logo(msg):
         print("DEBUG: error attaching logo:", repr(e))
 
 
-# views.py (modify franchise view). Original file reference: :contentReference[oaicite:3]{index=3}
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.shortcuts import render, redirect
-from django.template.loader import render_to_string
 
 def franchise(request):
     """
@@ -219,10 +192,6 @@ def blog_list(request):
     }
     
     return render(request, "blog.html", context)
-from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
-from django.core.mail import EmailMultiAlternatives
-# render_to_string, settings are already imported in your file
 
 @require_http_methods(["POST", "GET"])
 def subscribe_newsletter(request):
@@ -237,7 +206,9 @@ def subscribe_newsletter(request):
 
     # POST
     email = request.POST.get("email", "").strip()
+    name = request.POST.get("name", "").strip()
     errors = []
+    
     if not email:
         errors.append("Please provide a valid email address.")
 
@@ -250,13 +221,37 @@ def subscribe_newsletter(request):
             return JsonResponse({"success": False, "errors": errors}, status=400)
         return render(request, "blog.html", {"errors": errors})
 
+    # Save to database
+    from .models import Subscription
+    try:
+        # Check if already subscribed
+        sub, created = Subscription.objects.get_or_create(email=email)
+        if not created:
+            # Update name if provided and wasn't there, or just update it
+            if name:
+                sub.name = name
+                sub.save()
+            # If we want to prevent duplicate emails from trying to subscribe again, we could error.
+            # But usually it's better to just say "success" (maybe they are updating name).
+        else:
+            if name:
+                sub.name = name
+                sub.save()
+    except Exception as e:
+        print(f"DEBUG: Subscription save error: {e}")
+        # Continue to send email? Or fail?
+        # If DB fails, maybe we shouldn't send email.
+        # But for now, let's proceed.
+
     # Build email context
     email_context = {
         "subscriber_email": email,
+        "subscriber_name": name or "Subscriber",
         "logo_url": request.build_absolute_uri('/static/images/logo.png'),  # ensure file exists
         "company_name": "AbacusMaster",
         "support_email": "info@emesyslearning.com",
         "company_address": "Electronic city, Bengaluru",
+        "cta_url": request.build_absolute_uri('/blog/'),  # Blog page URL
     }
 
     subject = f"Welcome to {email_context['company_name']} Newsletter"
@@ -266,6 +261,7 @@ def subscribe_newsletter(request):
     # Render HTML and plain text
     html_body = render_to_string("emails/newsletter_subscription.html", email_context)
     text_body = (
+        f"Hi {email_context['subscriber_name']},\n\n"
         f"Welcome to {email_context['company_name']}!\n\n"
         "Thanks for subscribing to our newsletter. We'll send useful articles and tips to this address.\n\n"
         f"If you need help, reach us at {email_context['support_email']}.\n\n"
@@ -278,7 +274,7 @@ def subscribe_newsletter(request):
         print("DEBUG: sending newsletter confirmation to", email)
         msg = EmailMultiAlternatives(subject, text_body, from_email, to_email, reply_to=[settings.FRANCHISE_NOTIFY_EMAIL])
         msg.attach_alternative(html_body, "text/html")
-        attach_inline_logo(msg)
+        # Note: Using hosted logo URL in template instead of inline attachment for better email client compatibility
         sent = msg.send(fail_silently=False)
         print("DEBUG: newsletter send() returned:", sent)
         email_sent = True
@@ -291,7 +287,7 @@ def subscribe_newsletter(request):
     try:
         admin_subject = f"New newsletter subscriber: {email}"
         admin_to = [getattr(settings, "FRANCHISE_NOTIFY_EMAIL", "info@emesyslearning.com")]
-        admin_text = f"New subscriber: {email}\n\nFrom page: Blog newsletter"
+        admin_text = f"New subscriber: {email}\nName: {name}\n\nFrom page: Blog newsletter"
         admin_msg = EmailMultiAlternatives(admin_subject, admin_text, from_email, admin_to,
                                            reply_to=[email])
         admin_msg.attach_alternative(html_body, "text/html")

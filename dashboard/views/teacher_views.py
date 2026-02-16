@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from django.contrib import messages
 
 from accounts.models import TeacherProfile, StudentProfile, CustomUser
-from ..models import Question, StudentAnswer, Query, Exam, ExamQuestion, ExamAnswer, Course, CourseResource, StudentGroup
+from ..models import Question, StudentAnswer, Query, Exam, ExamQuestion, ExamAnswer, Course, CourseResource, StudentGroup, Subject, Chapter
 
 
 @login_required(login_url='teacher_login')
@@ -151,13 +151,15 @@ def take_test(request):
         total_marks = request.POST.get("totalMarks")
         questions_data = request.POST.getlist("questions[]")
 
-        teacher = TeacherProfile.objects.get(user=request.user)
+        teacher, _ = TeacherProfile.objects.get_or_create(user=request.user)
         exam = Exam.objects.create(
             teacher=teacher,
             teacher_name=request.user,
             title=exam_heading,
             due_date=parse_datetime(due_date),
             total_marks=total_marks,
+            subject_id=request.POST.get("subject_id"),
+            chapter_id=request.POST.get("chapter_id")
         )
 
         for i, q in enumerate(questions_data):
@@ -174,10 +176,11 @@ def take_test(request):
         return JsonResponse({"status": "success", "exam_id": exam.id})
     
     # Fetch existing exams created by this teacher
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
     exams = Exam.objects.filter(teacher=teacher_profile).order_by('-created_at')
+    subjects = Subject.objects.filter(teacher=teacher_profile)
     
-    return render(request, "teacher/take_test.html", {'exams': exams})
+    return render(request, "teacher/take_test.html", {'exams': exams, 'subjects': subjects})
 
 
 @csrf_exempt
@@ -191,8 +194,35 @@ def create_exam(request):
 
         due_date = make_aware(datetime.strptime(due_date_str, "%Y-%m-%d %H:%M"))
 
-        teacher_profile = request.user.teacherprofile
+        teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
         teacher_user = request.user
+
+        # Handle Subject
+        subject_input = request.POST.get("subject_id")
+        subject = None
+        if subject_input:
+            if subject_input.isdigit():
+                subject = Subject.objects.get(id=int(subject_input))
+            else:
+                # It's a name from AI
+                subject, _ = Subject.objects.get_or_create(
+                    teacher=teacher_profile,
+                    name=subject_input,
+                    defaults={'class_level': 'General'} # Default if creating from name
+                )
+
+        # Handle Chapter
+        chapter_input = request.POST.get("chapter_id")
+        chapter = None
+        if chapter_input:
+            if chapter_input.isdigit():
+                chapter = Chapter.objects.get(id=int(chapter_input))
+            elif subject:
+                # It's a name from AI, create under the subject
+                chapter, _ = Chapter.objects.get_or_create(
+                    subject=subject,
+                    name=chapter_input
+                )
 
         exam = Exam.objects.create(
             teacher=teacher_profile,
@@ -200,6 +230,8 @@ def create_exam(request):
             title=exam_heading,
             due_date=due_date,
             total_marks=total_marks,
+            subject=subject,
+            chapter=chapter
         )
 
         # Save questions
@@ -594,20 +626,50 @@ def search_dashboard(request):
 @login_required
 def give_remarks(request):
     """Grade student answers and provide remarks/feedback."""
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
-        answer_id = request.POST.get('answer_id')
-        remark_text = request.POST.get('remark_text')
-        answer_type = request.POST.get('answer_type')
+        # 1. Single Assignment Submission
+        if request.POST.get('answer_id'):
+            answer_id = request.POST.get('answer_id')
+            remark_text = request.POST.get('remark_text')
+            answer_type = request.POST.get('answer_type')
+            marks = request.POST.get('marks')
 
-        if answer_type == "student":
-            answer = StudentAnswer.objects.get(id=answer_id)
-        else:  # exam
-            answer = ExamAnswer.objects.get(id=answer_id)
+            try:
+                if answer_type == "student":
+                    answer = StudentAnswer.objects.get(id=answer_id)
+                else:
+                    answer = ExamAnswer.objects.get(id=answer_id)
 
-        answer.remarks = remark_text
-        answer.save()
+                if marks:
+                    answer.marks_obtained = marks
+                
+                answer.remarks = remark_text
+                answer.save()
+            except (StudentAnswer.DoesNotExist, ExamAnswer.DoesNotExist):
+                pass
+
+        # 2. Bulk Exam Submission (from remarks.html)
+        else:
+            # Loop through keys to find answers[<id>][id]
+            for key in request.POST:
+                if key.startswith('answers[') and key.endswith('][id]'):
+                    try:
+                        ans_id = request.POST[key]
+                        ans_type = request.POST.get(f'answers[{ans_id}][type]')
+                        marks = request.POST.get(f'answers[{ans_id}][marks]')
+                        remark = request.POST.get(f'answers[{ans_id}][remark]')
+
+                        if ans_type == 'exam':
+                            answer = ExamAnswer.objects.get(id=ans_id)
+                            if marks:
+                                answer.marks_obtained = marks
+                            if remark:
+                                answer.remarks = remark
+                            answer.save()
+                    except (ExamAnswer.DoesNotExist, ValueError):
+                        continue
 
         return redirect('give_remarks')
 
@@ -669,3 +731,160 @@ def give_remarks(request):
 def lecture_notes(request):
     """Render lecture notes page."""
     return render(request, "student/lecture_notes.html")
+
+
+# ==================== SUBJECT & CHAPTER MANAGEMENT ====================
+
+@login_required
+def manage_subjects(request):
+    """View and manage teacher's subjects and chapters."""
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+    subjects = Subject.objects.filter(teacher=teacher_profile).prefetch_related('chapters')
+    
+    context = {
+        'subjects': subjects,
+    }
+    return render(request, 'teacher/manage_subjects.html', context)
+
+
+@login_required
+def create_subject(request):
+    """Create a new subject."""
+    if request.method == 'POST':
+        teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+        name = request.POST.get('name')
+        class_level = request.POST.get('class_level', '')
+        description = request.POST.get('description', '')
+        
+        try:
+            Subject.objects.create(
+                teacher=teacher_profile,
+                name=name,
+                class_level=class_level,
+                description=description
+            )
+            messages.success(request, f'Subject "{name}" created successfully!')
+        except Exception as e:
+            messages.error(request, f'Error creating subject: {str(e)}')
+        
+        return redirect('manage_subjects')
+    
+    return render(request, 'teacher/create_subject.html')
+
+
+@login_required
+def edit_subject(request, subject_id):
+    """Edit an existing subject."""
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+    try:
+        subject = Subject.objects.get(id=subject_id, teacher=teacher_profile)
+    except Subject.DoesNotExist:
+        messages.error(request, "Subject not found.")
+        return redirect('manage_subjects')
+    
+    if request.method == 'POST':
+        subject.name = request.POST.get('name', subject.name)
+        subject.class_level = request.POST.get('class_level', subject.class_level)
+        subject.description = request.POST.get('description', subject.description)
+        subject.save()
+        
+        messages.success(request, f'Subject "{subject.name}" updated successfully!')
+        return redirect('manage_subjects')
+    
+    context = {'subject': subject}
+    return render(request, 'teacher/edit_subject.html', context)
+
+
+@login_required
+@login_required
+def delete_subject(request, subject_id):
+    """Delete a subject."""
+    if request.method == 'POST':
+        teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+        try:
+            subject = Subject.objects.get(id=subject_id, teacher=teacher_profile)
+            subject_name = subject.name
+            subject.delete()
+            messages.success(request, f'Subject "{subject_name}" deleted successfully!')
+        except Subject.DoesNotExist:
+            messages.error(request, 'Subject not found.')
+        
+        return redirect('manage_subjects')
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+@login_required
+def create_chapter(request):
+    """Create a new chapter within a subject."""
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        subject_id = request.POST.get('subject_id')
+        name = request.POST.get('name')
+        chapter_number = request.POST.get('chapter_number')
+        ncert_reference = request.POST.get('ncert_reference', '')
+        description = request.POST.get('description', '')
+        
+        try:
+            subject = Subject.objects.get(id=subject_id, teacher=teacher_profile)
+            Chapter.objects.create(
+                subject=subject,
+                name=name,
+                chapter_number=int(chapter_number) if chapter_number else None,
+                ncert_reference=ncert_reference,
+                description=description
+            )
+            messages.success(request, f'Chapter "{name}" created successfully!')
+        except Exception as e:
+            messages.error(request, f'Error creating chapter: {str(e)}')
+        
+        return redirect('manage_subjects')
+    
+    subjects = Subject.objects.filter(teacher=teacher_profile)
+    context = {'subjects': subjects}
+    return render(request, 'teacher/create_chapter.html', context)
+
+
+@login_required
+def edit_chapter(request, chapter_id):
+    """Edit an existing chapter."""
+    teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+    try:
+        chapter = Chapter.objects.get(id=chapter_id, subject__teacher=teacher_profile)
+    except Chapter.DoesNotExist:
+        messages.error(request, "Chapter not found.")
+        return redirect('manage_subjects')
+    
+    if request.method == 'POST':
+        chapter.name = request.POST.get('name', chapter.name)
+        chapter_number = request.POST.get('chapter_number')
+        chapter.chapter_number = int(chapter_number) if chapter_number else None
+        chapter.ncert_reference = request.POST.get('ncert_reference', chapter.ncert_reference)
+        chapter.description = request.POST.get('description', chapter.description)
+        chapter.save()
+        
+        messages.success(request, f'Chapter "{chapter.name}" updated successfully!')
+        return redirect('manage_subjects')
+    
+    context = {'chapter': chapter}
+    return render(request, 'teacher/edit_chapter.html', context)
+
+
+@login_required
+def delete_chapter(request, chapter_id):
+    """Delete a chapter."""
+    if request.method == 'POST':
+        teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+        try:
+            chapter = Chapter.objects.get(id=chapter_id, subject__teacher=teacher_profile)
+            chapter_name = chapter.name
+            chapter.delete()
+            messages.success(request, f'Chapter "{chapter_name}" deleted successfully!')
+        except Chapter.DoesNotExist:
+             messages.error(request, 'Chapter not found.')
+             
+        return redirect('manage_subjects')
+
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})

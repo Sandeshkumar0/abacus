@@ -43,6 +43,14 @@ from .teacher_views import (
     create_group,
     give_remarks,
     lecture_notes,
+    # Subject and Chapter Management
+    manage_subjects,
+    create_subject,
+    edit_subject,
+    delete_subject,
+    create_chapter,
+    edit_chapter,
+    delete_chapter,
 )
 
 # AI utilities (exposed as views)
@@ -56,6 +64,7 @@ from .ai_utils import (
     generate_practice_questions,
     generate_exam_questions,
     generate_student_report,
+    suggest_syllabus,
 )
 
 # Lecture notes utilities
@@ -103,6 +112,13 @@ __all__ = [
     'view_responded_queries',
     'give_remarks',
     'lecture_notes',
+    'manage_subjects',
+    'create_subject',
+    'edit_subject',
+    'delete_subject',
+    'create_chapter',
+    'edit_chapter',
+    'delete_chapter',
     
     # AI utilities
     'generate_answer_assign',
@@ -114,6 +130,7 @@ __all__ = [
     'generate_practice_questions',
     'generate_exam_questions',
     'generate_student_report',
+    'suggest_syllabus',
     
     # Lecture notes utilities
     'generate_notes',

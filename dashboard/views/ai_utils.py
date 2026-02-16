@@ -391,12 +391,22 @@ def generate_exam_questions(request):
     if not class_name:
         return JsonResponse({"error": "Class is required."}, status=400)
 
+    subject = request.POST.get("subject", "").strip()
+    chapter = request.POST.get("chapter", "").strip()
+
     total_count = easy_count + medium_count + hard_count
     if total_count == 0:
          return JsonResponse({"error": "At least one question must be selected."}, status=400)
 
     prompt = (
         f"You are a teacher creating a test for {class_name}.\n"
+    )
+    if subject:
+        prompt += f"Subject: {subject}\n"
+    if chapter:
+        prompt += f"Chapter/Topic: {chapter}\n"
+        
+    prompt += (
         f"Generate exactly the following questions based on difficulty:\n"
         f"- {easy_count} Easy questions\n"
         f"- {medium_count} Medium questions\n"
@@ -470,6 +480,54 @@ def generate_exam_questions(request):
     except Exception as e:
         logger.exception("generate_exam_questions error: %s", e)
         return JsonResponse({"error": f"Error: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+def suggest_syllabus(request):
+    """
+    Suggest Subjects and Chapters based on Class Name using AI.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    if not client:
+        return JsonResponse({"error": "Groq API not configured."}, status=500)
+
+    class_name = request.POST.get("class_name", "").strip()
+    if not class_name:
+         return JsonResponse({"error": "Class name required"}, status=400)
+
+    prompt = (
+        f"Identify the standard subjects and list 3-5 key chapters/topics for each subject for {class_name} level (based on CBSE/NCERT curriculum).\n"
+        f"Output MUST be a valid JSON object. Do NOT include markdown formatting.\n"
+        f"Format: {{ 'subjects': [ {{ 'name': 'Mathematics', 'chapters': ['Algebra', 'Geometry'] }}, ... ] }}"
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1000,
+            temperature=0.7
+        )
+        
+        raw_text = response.choices[0].message.content
+        cleaned = clean_ai_text(raw_text)
+        
+        # JSON cleanup
+        import json
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+            
+        data = json.loads(cleaned.strip())
+        return JsonResponse(data)
+    except Exception as e:
+        logger.exception("suggest_syllabus error: %s", e)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @csrf_exempt

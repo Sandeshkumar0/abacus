@@ -27,6 +27,7 @@ urlpatterns = [
     path("teacher/generate-answer-query/", views.generate_answer_query, name="generate_answer_query"),
     path("teacher/generate-remark-feedback/", views.generate_remark_feedback, name="generate_remark_feedback"),
     path("teacher/generate-exam-ai/", views.generate_exam_questions, name="generate_exam_questions"),
+    path("teacher/suggest-syllabus/", views.suggest_syllabus, name="suggest_syllabus"),
     path("teacher/generate-report-ai/", views.generate_student_report, name="generate_student_report"),
     path('student/give-test/', views.give_test, name='give_test'),
     path('student/practice-questions/', views.practice_questions_page, name='practice_questions_page'),
@@ -49,6 +50,15 @@ urlpatterns = [
     path("teacher/groups/", views.manage_groups, name="manage_groups"),
     path("teacher/groups/create/", views.create_group, name="create_group"),
     path("teacher/search/", views.search_dashboard, name='search_dashboard'),
+    
+    # Subject and Chapter Management
+    path("teacher/subjects/", views.manage_subjects, name="manage_subjects"),
+    path("teacher/subjects/create/", views.create_subject, name="create_subject"),
+    path("teacher/subjects/<int:subject_id>/edit/", views.edit_subject, name="edit_subject"),
+    path("teacher/subjects/<int:subject_id>/delete/", views.delete_subject, name="delete_subject"),
+    path("teacher/chapters/create/", views.create_chapter, name="create_chapter"),
+    path("teacher/chapters/<int:chapter_id>/edit/", views.edit_chapter, name="edit_chapter"),
+    path("teacher/chapters/<int:chapter_id>/delete/", views.delete_chapter, name="delete_chapter"),
 
 ]
  

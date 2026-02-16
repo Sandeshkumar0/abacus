@@ -1,58 +1,67 @@
 <!-- core/templates/emails/newsletter_subscription.html -->
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Welcome to {{ company_name }}</title>
-  </head>
-  <body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f6f6f6;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6f6f6;padding:30px 0;">
-      <tr>
-        <td align="center">
-          <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;">
-            <tr style="background:#0f1724;color:#fff;">
-              <td style="padding:18px 24px; display:flex; align-items:center;">
-                <img src="cid:logo" alt="{{ company_name }}" width="160" style="display:block; border:0;">
-                <h1 style="margin:0;font-size:20px;">{{ company_name }}</h1>
-              </td>
-            </tr>
 
-            <tr>
-              <td style="padding:24px;">
-                <h2 style="font-size:18px;margin:0 0 12px 0;">Welcome to {{ company_name }}!</h2>
-                <p style="margin:0 0 12px 0;color:#333;line-height:1.5;">
-                  Thanks for subscribing to our newsletter. We’ll send the latest articles, teaching tips and announcements to <strong>{{ subscriber_email }}</strong>.
-                </p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Welcome to {{ company_name }}</title>
+</head>
 
-                <p style="margin:0 0 18px 0;color:#333;line-height:1.5;">
-                  Meanwhile, feel free to explore our blog and resources.
-                </p>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f6f6f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f6f6f6;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+          style="background:#ffffff;border-radius:8px;overflow:hidden;">
+          <tr style="background:#0f1724;color:#fff;">
+            <td style="padding:18px 24px;text-align:center;">
+              <img src="{{ logo_url }}" alt="{{ company_name }}" width="160"
+                style="display:block;margin:0 auto 10px;border:0;">
+              <h1 style="margin:0;font-size:20px;color:#fff;">{{ company_name }}</h1>
+            </td>
+          </tr>
 
-                <p style="margin:0 0 24px 0;">
-                  <a href="{{ cta_url|default:'#' }}" style="background:#FC8621;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">Visit our blog</a>
-                </p>
+          <tr>
+            <td style="padding:24px;">
+              <h2 style="font-size:18px;margin:0 0 12px 0;">Welcome to {{ company_name }}!</h2>
+              <p style="margin:0 0 12px 0;color:#333;line-height:1.5;">
+                Thanks for subscribing to our newsletter. We’ll send the latest articles, teaching tips and
+                announcements to <strong>{{ subscriber_email }}</strong>.
+              </p>
 
-                <hr style="border:none;border-top:1px solid #eee;margin:18px 0;">
+              <p style="margin:0 0 18px 0;color:#333;line-height:1.5;">
+                Meanwhile, feel free to explore our blog and resources.
+              </p>
 
-                <p style="margin:0;color:#777;font-size:13px;">
-                  If you have questions, reach us at <a href="mailto:{{ support_email }}" style="color:#0b6efd;text-decoration:none;">{{ support_email }}</a>.
-                </p>
+              <p style="margin:0 0 24px 0;text-align:center;">
+                <a href="{{ cta_url }}"
+                  style="background:#FC8621;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:bold;font-size:16px;">Visit
+                  our blog</a>
+              </p>
 
-                <p style="color:#aaa;font-size:12px;margin-top:16px;">
-                  {{ company_name }} — {{ company_address }}
-                </p>
-              </td>
-            </tr>
+              <hr style="border:none;border-top:1px solid #eee;margin:18px 0;">
 
-            <tr>
-              <td style="padding:12px 24px;background:#fafafa;font-size:12px;color:#999">
-                You are receiving this email because you subscribed to the newsletter at {{ company_name }}.
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
+              <p style="margin:0;color:#777;font-size:13px;">
+                If you have questions, reach us at <a href="mailto:{{ support_email }}"
+                  style="color:#0b6efd;text-decoration:none;">{{ support_email }}</a>.
+              </p>
+
+              <p style="color:#aaa;font-size:12px;margin-top:16px;">
+                {{ company_name }} — {{ company_address }}
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:12px 24px;background:#fafafa;font-size:12px;color:#999">
+              You are receiving this email because you subscribed to the newsletter at {{ company_name }}.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+
 </html>

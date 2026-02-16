@@ -83,7 +83,8 @@ CSRF_FAILURE_VIEW = 'core.csrf_views.csrf_failure'
 # Development mode: Print emails to console instead of sending
 import os
 
-# Switch to SMTP backend to send real emails
+# Switch to Console backend for development (logs to terminal instead of sending)
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 # SMTP settings (for when you switch to production)
@@ -93,7 +94,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'apikey'   # literal string
 EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY')
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Emesys <viditwatson@gmail.com>')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Emesys <sandeshkr07@gmail.com>')
 FRANCHISE_NOTIFY_EMAIL = os.getenv('FRANCHISE_NOTIFY_EMAIL', 'viditrajanikanttaunk@gmail.com')
 
 SERVER_EMAIL = DEFAULT_FROM_EMAIL

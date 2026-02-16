@@ -117,13 +117,14 @@
     <div class="newsletter-content">
         <div class="newsletter-text">
             <h2>Start learning by creating free account and get register</h2>
-            <div class="newsletter-form">
+            <form class="newsletter-form" method="POST" action="{% url 'subscribe_newsletter' %}">
+                {% csrf_token %}
                 <div class="form-row">
-                    <input type="text" placeholder="Your name">
-                    <input type="email" placeholder="Your email address">
+                    <input type="text" name="name" placeholder="Your name" required>
+                    <input type="email" name="email" placeholder="Your email address" required>
                 </div>
-                <button class="btn-subscribe">Subscribe</button>
-            </div>
+                <button type="submit" class="btn-subscribe">Subscribe</button>
+            </form>
         </div>
         <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2F83ff348448ed4d16aa7e1b859eeaedc7?format=webp&width=800"
             alt="Student learning">
@@ -199,4 +200,8 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/newsletter.js' %}"></script>
 {% endblock %}

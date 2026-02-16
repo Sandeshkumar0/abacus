@@ -151,6 +151,7 @@ class NotificationManager {
     createNotificationElement(notification) {
         const div = document.createElement('div');
         div.className = `notification-item ${notification.is_read ? 'read' : 'unread'}`;
+        div.dataset.notificationId = notification.id;
         div.innerHTML = `
             <div class="notification-content">
                 <strong>${notification.title}</strong>
@@ -159,6 +160,25 @@ class NotificationManager {
             </div>
             ${notification.link ? `<a href="${notification.link}" class="notification-link">View</a>` : ''}
         `;
+        
+        // Mark as read when clicked
+        div.addEventListener('click', (e) => {
+            if (!notification.is_read) {
+                this.markAsRead(notification.id);
+                div.classList.remove('unread');
+                div.classList.add('read');
+                
+                // Update unread count
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    const current = parseInt(badge.textContent) || 0;
+                    const newCount = Math.max(0, current - 1);
+                    badge.textContent = newCount;
+                    badge.style.display = newCount > 0 ? 'inline-block' : 'none';
+                }
+            }
+        });
+        
         return div;
     }
 

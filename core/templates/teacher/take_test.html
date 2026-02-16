@@ -61,6 +61,8 @@ Create and schedule exams for students
           class="w-full px-4 py-3 bg-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
       </div>
     </div>
+
+    <!-- Subject/Chapter Selection moved to AI Modal -->
   </div>
 
   <!-- Add Question -->
@@ -151,6 +153,39 @@ Create and schedule exams for students
             <option value="Class 8">Class 8</option>
             <option value="Class 9">Class 9</option>
             <option value="Class 10">Class 10</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Select Subject</label>
+          <div class="flex gap-2">
+            <select id="subjectSelect"
+              class="flex-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+              <option value="">-- Choose Subject --</option>
+              {% for subject in subjects %}
+              <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.class_level }})</option>
+              {% endfor %}
+            </select>
+            <button id="suggestSyllabusBtn" type="button"
+              class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-yellow-600 transition"
+              title="Get AI Suggestions">
+              ✨ Suggest
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Select Chapter</label>
+          <select id="chapterSelect"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+            <option value="">-- Choose Chapter --</option>
+            {% for subject in subjects %}
+            {% for chapter in subject.chapters.all %}
+            <option value="{{ chapter.id }}" data-subject="{{ subject.id }}" class="chapter-option hidden">
+              {{ chapter.name }}
+            </option>
+            {% endfor %}
+            {% endfor %}
           </select>
         </div>
 
@@ -341,6 +376,8 @@ Create and schedule exams for students
     formData.append("examHeading", examHeading);
     formData.append("dueDate", dueDate);
     formData.append("totalMarks", totalMarks);
+    formData.append("subject_id", document.getElementById("subjectSelect").value);
+    formData.append("chapter_id", document.getElementById("chapterSelect").value);
 
     // Attach questions JSON
     questions.forEach((q, idx) => {
@@ -380,6 +417,7 @@ Create and schedule exams for students
   const closeAiModalBtn = document.getElementById('closeAiModalBtn');
   const generateAiQuestionsBtn = document.getElementById('generateAiQuestionsBtn');
   const aiStatus = document.getElementById('aiStatus');
+  const suggestSyllabusBtn = document.getElementById('suggestSyllabusBtn');
 
   if (openAiModalBtn) {
     openAiModalBtn.addEventListener('click', () => aiModal.classList.remove('hidden'));
@@ -388,12 +426,79 @@ Create and schedule exams for students
     closeAiModalBtn.addEventListener('click', () => aiModal.classList.add('hidden'));
   }
 
+  // Suggest Syllabus Logic
+  if (suggestSyllabusBtn) {
+    suggestSyllabusBtn.addEventListener('click', async () => {
+      const className = document.getElementById('aiClass').value;
+      if (!className) {
+        alert("Please select a class first.");
+        return;
+      }
+
+      suggestSyllabusBtn.disabled = true;
+      suggestSyllabusBtn.textContent = "⏳ Loading...";
+
+      try {
+        const csrfToken = "{{ csrf_token }}";
+        const formData = new FormData();
+        formData.append('class_name', className);
+
+        const response = await fetch("{% url 'suggest_syllabus' %}", {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-CSRFToken': csrfToken }
+        });
+
+        const data = await response.json();
+
+        if (data.subjects) {
+          const subjectSelect = document.getElementById('subjectSelect');
+          const chapterSelect = document.getElementById('chapterSelect');
+
+          // Clear existing
+          subjectSelect.innerHTML = '<option value="">-- Choose AI Subject --</option>';
+          chapterSelect.innerHTML = '<option value="">-- Choose AI Chapter --</option>';
+
+          data.subjects.forEach(subj => {
+            const opt = document.createElement('option');
+            opt.value = subj.name; // Use Name as value
+            opt.textContent = subj.name;
+            subjectSelect.appendChild(opt);
+
+            // Add chapters as hidden options
+            subj.chapters.forEach(chap => {
+              const cOpt = document.createElement('option');
+              cOpt.value = chap; // Use Name as value
+              cOpt.textContent = chap;
+              cOpt.dataset.subject = subj.name; // Link by Name
+              cOpt.classList.add('chapter-option', 'hidden');
+              chapterSelect.appendChild(cOpt);
+            });
+          });
+
+          alert("✅ AI Suggestions Loaded!");
+        } else {
+          alert("Failed to get suggestions.");
+        }
+
+      } catch (e) {
+        console.error(e);
+        alert("Error fetching suggestions.");
+      } finally {
+        suggestSyllabusBtn.disabled = false;
+        suggestSyllabusBtn.textContent = "✨ Suggest";
+      }
+    });
+  }
+
   if (generateAiQuestionsBtn) {
     generateAiQuestionsBtn.addEventListener('click', async () => {
       const className = document.getElementById('aiClass').value;
       const easyCount = document.getElementById('aiEasyCount').value;
       const mediumCount = document.getElementById('aiMediumCount').value;
       const hardCount = document.getElementById('aiHardCount').value;
+      const subject = document.getElementById('subjectSelect').value;
+      const chapter = document.getElementById('chapterSelect').value;
 
       if (!className) return;
 
@@ -407,6 +512,8 @@ Create and schedule exams for students
       formData.append('easy_count', easyCount);
       formData.append('medium_count', mediumCount);
       formData.append('hard_count', hardCount);
+      if (subject) formData.append('subject', subject);
+      if (chapter) formData.append('chapter', chapter);
 
       try {
         const csrfToken = "{{ csrf_token }}";
@@ -454,6 +561,29 @@ Create and schedule exams for students
     dateFormat: "Y-m-d H:i",
     minDate: "today"
   });
+
+  // Updated Subject-Chapter Filter Logic
+  const subjectSelect = document.getElementById('subjectSelect');
+  const chapterSelect = document.getElementById('chapterSelect');
+
+  subjectSelect.addEventListener('change', function () {
+    const selectedSubject = this.value;
+    chapterSelect.value = "";
+
+    // Re-query options on every change to handle dynamic content
+    const currentOptions = chapterSelect.querySelectorAll('option.chapter-option');
+
+    currentOptions.forEach(option => {
+      // Logic handles both ID-based (manual) and Name-based (AI) matching
+      // as long as valid value is in dataset.subject
+      if (selectedSubject === "" || option.dataset.subject == selectedSubject) {
+        option.classList.remove('hidden');
+      } else {
+        option.classList.add('hidden');
+      }
+    });
+  });
+
 </script>
 
 {% endblock %}

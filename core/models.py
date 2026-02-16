@@ -85,3 +85,14 @@ class ContactSubmission(models.Model):
     def __str__(self):
         return f"{self.name} - {self.email} ({self.submitted_at.strftime('%Y-%m-%d %H:%M')})"
 
+
+class Subscription(models.Model):
+    """Newsletter/Platform subscriptions from home page"""
+    name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"{self.email} ({self.name})"
+

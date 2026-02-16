@@ -1,0 +1,17 @@
+--- Teachers ---
+Teacher: sandeshkr07@gmail.com (ID: 2, Profile ID: 2)
+Teacher: s@gmail.com (ID: 1, Profile ID: 1)
+Teacher: test_teacher_ai@example.com (ID: 7, Profile ID: 7)
+
+--- Students ---
+Student: a@gmail.com (ID: 5) -> Assigned To: sandeshkr07@gmail.com (ID: 2)
+Student: teststudent_auto@example.com (ID: 4) -> Assigned To: sandeshkr07@gmail.com (ID: 2)
+Student: s@gmail.com (ID: 1) -> Assigned To: sandeshkr07@gmail.com (ID: 2)
+Student: ajrajput3388@gmail.com (ID: 3) -> Assigned To: None
+Student: breloogala@gmail.com (ID: 6) -> Assigned To: sandeshkr07@gmail.com (ID: 2)
+Student: test_student_ai@example.com (ID: 8) -> Assigned To: None
+Student: sandeshkr07@gmail.com (ID: 2) -> Assigned To: None
+
+--- Summary ---
+Total Teachers: 3
+Total Students: 7

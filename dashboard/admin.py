@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Question, StudentAnswer, Query, Exam, ExamQuestion, ExamAnswer, 
-    Notification, Course, CourseResource, Enrollment, Subject, Chapter
+    Notification, Course, CourseResource, Enrollment, Subject, Chapter,
+    Testimonial
 )
 
 # Register your models here.
@@ -44,3 +45,9 @@ class ChapterAdmin(admin.ModelAdmin):
     list_display = ('name', 'chapter_number', 'subject', 'ncert_reference')
     list_filter = ('subject', 'subject__teacher')
     search_fields = ('name', 'description', 'ncert_reference')
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('author_name', 'author_role', 'rating', 'is_active', 'created_at')
+    list_filter = ('is_active', 'rating', 'created_at')
+    search_fields = ('author_name', 'text')

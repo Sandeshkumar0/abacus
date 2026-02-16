@@ -19,6 +19,10 @@ from .student_views import (
     give_test,
     enroll_course,
     practice_questions_page,
+    subject_list,
+    chapter_list,
+    chapter_detail,
+    submit_practice_answer,
 )
 
 # Teacher views
@@ -65,6 +69,8 @@ from .ai_utils import (
     generate_exam_questions,
     generate_student_report,
     suggest_syllabus,
+    generate_weak_topic_practice,
+    analyze_student_performance,
 )
 
 # Lecture notes utilities
@@ -94,6 +100,10 @@ __all__ = [
     'download_exam_answer_pdf',
     'give_test',
     'practice_questions_page',
+    'subject_list',
+    'chapter_list',
+    'chapter_detail',
+    'submit_practice_answer',
     
     # Teacher views
     'teacher_dashboard',
@@ -131,6 +141,8 @@ __all__ = [
     'generate_exam_questions',
     'generate_student_report',
     'suggest_syllabus',
+    'generate_weak_topic_practice',
+    'analyze_student_performance',
     
     # Lecture notes utilities
     'generate_notes',

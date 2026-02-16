@@ -1,0 +1,60 @@
+
+--- Debugging Data for: All Students ---
+
+Student: a@gmail.com (ID: 5)
+  Total Assignments: 1
+  Graded Assignments: 1
+    - QID 1: Marks 2/0 | Tags: 'Algebra'
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': 'Careful Mink', 'overall_accuracy': 0.0, 'assignment_accuracy': 0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 0, 'Medium': 0.0, 'Hard': 0}, 'weak_areas': ['Algebra (0%)'], 'strong_areas': [], 'consistency_score': 'Low'}
+
+Student: teststudent_auto@example.com (ID: 4)
+  Total Assignments: 0
+  Graded Assignments: 0
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': 'Test Student Auto', 'overall_accuracy': 0, 'assignment_accuracy': 0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 0, 'Medium': 0, 'Hard': 0}, 'weak_areas': [], 'strong_areas': [], 'consistency_score': 'Low'}
+
+Student: s@gmail.com (ID: 1)
+  Total Assignments: 1
+  Graded Assignments: 0
+  Total Exam Answers: 6
+  Graded Exam Answers: 6
+    - QID 7: Marks 1/2 | Tags: 'Number System'
+    - QID 8: Marks 1/2 | Tags: 'Algebra'
+    - QID 9: Marks 2/2 | Tags: 'Calculus'
+    - QID 10: Marks 2/5 | Tags: 'Number System'
+    - QID 11: Marks 4/5 | Tags: 'Trigonometry'
+  Calculated Metrics: {'student_name': 'aditya', 'overall_accuracy': 28.8, 'assignment_accuracy': 0, 'exam_accuracy': 57.7, 'difficulty_analysis': {'Easy': 0, 'Medium': 83.33333333333334, 'Hard': 0}, 'weak_areas': ['Number System (45%)'], 'strong_areas': ['Calculus (100%)'], 'consistency_score': 'Low'}
+
+Student: ajrajput3388@gmail.com (ID: 3)
+  Total Assignments: 0
+  Graded Assignments: 0
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': '', 'overall_accuracy': 0, 'assignment_accuracy': 0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 0, 'Medium': 0, 'Hard': 0}, 'weak_areas': [], 'strong_areas': [], 'consistency_score': 'Low'}
+
+Student: breloogala@gmail.com (ID: 6)
+  Total Assignments: 0
+  Graded Assignments: 0
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': 'BG', 'overall_accuracy': 0, 'assignment_accuracy': 0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 0, 'Medium': 0, 'Hard': 0}, 'weak_areas': [], 'strong_areas': [], 'consistency_score': 'Low'}
+
+Student: test_student_ai@example.com (ID: 8)
+  Total Assignments: 3
+  Graded Assignments: 3
+    - QID 2: Marks 10/10 | Tags: 'Algebra, Linear Equations'
+    - QID 3: Marks 2/10 | Tags: 'Algebra'
+    - QID 4: Marks 9/10 | Tags: 'Geometry'
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': 'AI Student', 'overall_accuracy': 35.0, 'assignment_accuracy': 70.0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 100.0, 'Medium': 0.0, 'Hard': 100.0}, 'weak_areas': [], 'strong_areas': ['Linear Equations (100%)', 'Geometry (90%)'], 'consistency_score': 'Low'}
+
+Student: sandeshkr07@gmail.com (ID: 2)
+  Total Assignments: 0
+  Graded Assignments: 0
+  Total Exam Answers: 0
+  Graded Exam Answers: 0
+  Calculated Metrics: {'student_name': 'My App', 'overall_accuracy': 0, 'assignment_accuracy': 0, 'exam_accuracy': 0, 'difficulty_analysis': {'Easy': 0, 'Medium': 0, 'Hard': 0}, 'weak_areas': [], 'strong_areas': [], 'consistency_score': 'Low'}

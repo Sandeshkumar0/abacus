@@ -164,41 +164,157 @@
 <section class="testimonials">
     <div class="testimonials-container">
         <h2>What Our Users Say</h2>
-        <div class="testimonial-card">
-            <button class="nav-arrow left">❮</button>
-            <button class="nav-arrow right">❯</button>
-            <div class="stars">
-                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <svg class="star" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-            </div>
-            <div class="quote">
-                <p>"Great platform to teach and connect with students worldwide. Highly recommended!"</p>
-            </div>
-            <div class="author">
-                <p class="author-name">Priya Singh</p>
-                <p class="author-role">Teacher</p>
+
+        <div class="testimonials-wrapper">
+            <button class="nav-arrow left" onclick="prevTestimonial()">❮</button>
+            <button class="nav-arrow right" onclick="nextTestimonial()">❯</button>
+
+            <div id="testimonial-slider">
+                {% if testimonials %}
+                {% for t in testimonials %}
+                <div class="testimonial-card {% if forloop.first %}active{% endif %}">
+                    <div class="stars">
+                        {% for i in "12345" %}
+                        <svg class="star {% if forloop.counter <= t.rating %}filled{% endif %}" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        {% endfor %}
+                    </div>
+                    <div class="quote">
+                        <p>"{{ t.text }}"</p>
+                    </div>
+                    <div class="author">
+                        <p class="author-name">{{ t.author_name }}</p>
+                        <p class="author-role">{{ t.author_role }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <!-- Hardcoded Fallbacks -->
+                <div class="testimonial-card active">
+                    <div class="stars">
+                        {% for i in "12345" %}<svg class="star filled" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>{% endfor %}
+                    </div>
+                    <div class="quote">
+                        <p>"Great platform to teach and connect with students worldwide. Highly recommended!"</p>
+                    </div>
+                    <div class="author">
+                        <p class="author-name">Priya Singh</p>
+                        <p class="author-role">Teacher</p>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        {% for i in "12345" %}<svg class="star filled" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>{% endfor %}
+                    </div>
+                    <div class="quote">
+                        <p>"The virtual abacus tool is amazing! My son has improved his calculation speed
+                            significantly."</p>
+                    </div>
+                    <div class="author">
+                        <p class="author-name">Rajesh Kumar</p>
+                        <p class="author-role">Parent</p>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        {% for i in "12345" %}<svg class="star filled" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>{% endfor %}
+                    </div>
+                    <div class="quote">
+                        <p>"Learning Vedic math was never this fun. The interactive lessons are easy to follow."</p>
+                    </div>
+                    <div class="author">
+                        <p class="author-name">Anjali Verma</p>
+                        <p class="author-role">Student</p>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
+
+<style>
+    .testimonials-wrapper {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .testimonial-card {
+        display: none;
+        padding: 40px;
+        text-align: center;
+    }
+
+    .testimonial-card.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .star {
+        width: 20px;
+        color: #ddd;
+    }
+
+    .star.filled {
+        color: #ffc107;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    let currentIdx = 0;
+    let autoRotateTimer;
+
+    function showTestimonial(idx) {
+        const cards = document.querySelectorAll('.testimonial-card');
+        if (cards.length === 0) return;
+
+        cards.forEach(c => c.classList.remove('active'));
+
+        if (idx >= cards.length) currentIdx = 0;
+        else if (idx < 0) currentIdx = cards.length - 1;
+        else currentIdx = idx;
+
+        cards[currentIdx].classList.add('active');
+        resetTimer();
+    }
+
+    function nextTestimonial() { showTestimonial(currentIdx + 1); }
+    function prevTestimonial() { showTestimonial(currentIdx - 1); }
+
+    function resetTimer() {
+        clearInterval(autoRotateTimer);
+        autoRotateTimer = setInterval(nextTestimonial, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        resetTimer();
+    });
+</script>
 
 {% endblock %}
 

@@ -35,7 +35,7 @@
     right: 20px;
     background: white;
     border-left: 4px solid #007bff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     border-radius: 4px;
     min-width: 300px;
     max-width: 400px;
@@ -91,7 +91,7 @@
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     width: 350px;
     max-height: 500px;
     overflow-y: auto;
@@ -197,20 +197,25 @@
     font-size: 14px;
 }
 
-/* Connection Status Indicator */
+/* Notification Status Dot (replacing connection status) */
 #connection-status {
-    width: 8px;
-    height: 8px;
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    display: inline-block;
-    margin-left: 5px;
+    border: 2px solid white;
+    z-index: 5;
 }
 
-#connection-status.connected {
+#connection-status.unread {
     background: #28a745;
+    /* Green */
     box-shadow: 0 0 4px #28a745;
 }
 
-#connection-status.disconnected {
+#connection-status.read {
     background: #dc3545;
+    /* Red */
 }

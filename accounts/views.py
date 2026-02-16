@@ -151,12 +151,12 @@ from django.contrib.auth.decorators import login_required
 def student_logout_view(request):
     if request.method == "POST":  # if user confirms logout
         logout(request)
-        return redirect("landing")   # redirect to your login page
+        return redirect("portal-landing")   # redirect to your login page
     return render(request, "student/logout.html")  # show modal
 
 @login_required
 def teacher_logout_view(request):
     if request.method == "POST":  # if user confirms logout
         logout(request)
-        return redirect("landing")   # redirect to your login page
+        return redirect("portal-landing")   # redirect to your login page
     return render(request, "teacher/logout.html")  # show modal

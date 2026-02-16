@@ -3,42 +3,116 @@
 .env.local
 .env.*.local
 secrets.json
+*.pem
+*.key
 
 # --- Environment & Dependencies ---
 venv/
 env/
 .venv/
+ENV/
+env.bak/
+venv.bak/
+bin/
+include/
+lib/
+lib64/
+share/
+pyvenv.cfg
+pip-selfcheck.json
+pip-wheel-metadata/
+
+# --- Python Build & Cache ---
 __pycache__/
 *.py[cod]
 *$py.class
-pip-wheel-metadata/
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # --- Database ---
 *.sqlite3
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3-shm
+db.sqlite3-wal
 *.db
+*.db-journal
 
 # --- Media & Static ---
-# Ignore user-uploaded media
 media/
-# Only ignore static if it's collected static, not source static
 staticfiles/
+node_modules/
+.webassets-cache/
 
 # --- IDE & System ---
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# --- Logs & backups ---
+# --- Testing & Coverage ---
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# --- Logs & Backups ---
 *.log
 *.bak
 *.tmp
 core_templates_backup/
 templates_backup/
+backups/
+pip-log.txt
+pip-delete-this-directory.txt
 
 # --- Specific Files to Ignore ---
 temp_eq.png
+DATA_RESTORED.md
+
+# --- Temporary Scripts ---
+inspect_db.py
+inspect_students.py
+assign_students.py
+scripts/inspect_db.py
+scripts/inspect_students.py
+scripts/assign_students.py
+scripts/check_teachers.py
+scripts/fix_notification_links.py
+scripts/quick_check.py
+scripts/verify_subscription.py
+scripts/temp_eq.png
+test_gemini_api.py
+verify_subscription.py

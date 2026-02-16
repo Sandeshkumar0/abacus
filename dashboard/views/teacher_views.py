@@ -675,8 +675,9 @@ def give_remarks(request):
 
     # Fetch unanswered Student Answers
     student_answers = StudentAnswer.objects.filter(
-        question__teacher=teacher_profile,
-        remarks__isnull=True
+        question__teacher=teacher_profile
+    ).filter(
+        Q(remarks__isnull=True) | Q(remarks='')
     ).select_related('question', 'student_name')
 
     student_list = []
@@ -702,8 +703,9 @@ def give_remarks(request):
 
     # Fetch unanswered Exam Answers
     exam_answers = ExamAnswer.objects.filter(
-        exam__teacher=teacher_profile,
-        remarks__isnull=True
+        exam__teacher=teacher_profile
+    ).filter(
+        Q(remarks__isnull=True) | Q(remarks='')
     ).select_related('exam', 'question', 'student_name')
 
     exam_list = []

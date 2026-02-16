@@ -71,13 +71,21 @@
 
 
   <!-- Main Content -->
-  <div class="flex-1 flex flex-col ml-[320px]">
+  <div class="main-content flex-1 flex flex-col">
     <!-- Topbar -->
     <header class="bg-white border-b border-gray-200 px-6 py-8">
       <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-semibold text-blue-600">{% block header %}Welcome{% endblock %}</h1>
-          <p class="text-sm text-gray-600 mt-1">{% block subtitle %}Manage your academic journey{% endblock %}</p>
+        <div class="flex items-center gap-4">
+          <!-- Mobile Menu Toggle -->
+          <button class="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-md" onclick="toggleSidebar()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-3xl font-semibold text-blue-600">{% block header %}Welcome{% endblock %}</h1>
+            <p class="text-sm text-gray-600 mt-1">{% block subtitle %}Manage your academic journey{% endblock %}</p>
+          </div>
         </div>
         <div class="flex gap-4 text-gray-400 items-center">
           <!-- Real-time Notification Bell -->
@@ -89,7 +97,7 @@
                 <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
               </svg>
               <span id="notification-badge" style="display: none;">0</span>
-              <span id="connection-status" class="disconnected"></span>
+              <span id="connection-status" class="read"></span>
             </div>
 
             <div class="notifications-dropdown" id="notifications-dropdown">
@@ -140,6 +148,11 @@
 
   <script src="{% static 'js/notifications.js' %}"></script>
   <script>
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('mobile-show');
+    }
+
     function toggleNotifications() {
       const dropdown = document.getElementById('notifications-dropdown');
       dropdown.classList.toggle('show');

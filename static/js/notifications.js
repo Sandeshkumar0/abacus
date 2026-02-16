@@ -112,6 +112,18 @@ class NotificationManager {
             badge.textContent = count;
             badge.style.display = count > 0 ? 'inline-block' : 'none';
         }
+
+        // Update the status dot color
+        const indicator = document.getElementById('connection-status');
+        if (indicator) {
+            if (count > 0) {
+                indicator.className = 'unread'; // Green
+                indicator.title = `${count} unread notifications`;
+            } else {
+                indicator.className = 'read'; // Red
+                indicator.title = 'No new notifications';
+            }
+        }
     }
 
     markAsRead(notificationId) {
@@ -160,25 +172,24 @@ class NotificationManager {
             </div>
             ${notification.link ? `<a href="${notification.link}" class="notification-link">View</a>` : ''}
         `;
-        
+
         // Mark as read when clicked
         div.addEventListener('click', (e) => {
             if (!notification.is_read) {
                 this.markAsRead(notification.id);
                 div.classList.remove('unread');
                 div.classList.add('read');
-                
+
                 // Update unread count
                 const badge = document.getElementById('notification-badge');
                 if (badge) {
                     const current = parseInt(badge.textContent) || 0;
                     const newCount = Math.max(0, current - 1);
-                    badge.textContent = newCount;
-                    badge.style.display = newCount > 0 ? 'inline-block' : 'none';
+                    this.updateUnreadCount(newCount);
                 }
             }
         });
-        
+
         return div;
     }
 
@@ -192,11 +203,8 @@ class NotificationManager {
     }
 
     updateConnectionStatus(connected) {
-        const indicator = document.getElementById('connection-status');
-        if (indicator) {
-            indicator.className = connected ? 'connected' : 'disconnected';
-            indicator.title = connected ? 'Connected' : 'Disconnected';
-        }
+        // We are now using this dot for unread status, but we can log connection status
+        console.log(`WebSocket ${connected ? 'Connected' : 'Disconnected'}`);
     }
 
     attemptReconnect() {

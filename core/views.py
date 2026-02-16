@@ -11,7 +11,14 @@ from email.mime.image import MIMEImage
 # --------- Public / Marketing pages ---------
 
 def home(request):
-    return render(request, "home.html")
+    try:
+        from dashboard.models import Testimonial
+        testimonials = Testimonial.objects.filter(is_active=True).order_by('-created_at')
+    except Exception as e:
+        print(f"Error fetching testimonials: {e}")
+        testimonials = []
+    
+    return render(request, "home.html", {'testimonials': testimonials})
 
 def about(request):
     return render(request, "about.html")

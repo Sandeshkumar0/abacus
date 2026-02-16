@@ -1,0 +1,13 @@
+--- Chapter Intelligence Data Verification ---
+
+Total Chapters: 1
+
+
+Chapter: Grammar and Composition (ID: 2)
+  Subject: English
+  Graded Assignment Answers: 0
+  Graded Exam Answers: 6
+  Total Graded Answers: 6
+    Exam: Student s@gmail.com | Q7 | Marks: 1/2 | Tags: 'Number System'
+    Exam: Student s@gmail.com | Q8 | Marks: 1/2 | Tags: 'Algebra'
+    Exam: Student s@gmail.com | Q9 | Marks: 2/2 | Tags: 'Calculus'

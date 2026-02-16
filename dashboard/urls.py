@@ -60,5 +60,15 @@ urlpatterns = [
     path("teacher/chapters/<int:chapter_id>/edit/", views.edit_chapter, name="edit_chapter"),
     path("teacher/chapters/<int:chapter_id>/delete/", views.delete_chapter, name="delete_chapter"),
 
+    # Course/Subject Navigation
+    path('student/subjects/', views.subject_list, name='subject_list'),
+    path('student/subjects/<int:subject_id>/chapters/', views.chapter_list, name='chapter_list'),
+    path('student/chapter/<int:chapter_id>/', views.chapter_detail, name='chapter_detail'),
+
+    # API Endpoints for Intelligence Panel
+    path('api/submit-practice-answer/', views.submit_practice_answer, name='submit_practice_answer'),
+    path('api/generate-weak-topic-practice/', views.generate_weak_topic_practice, name='generate_weak_topic_practice'),
+    path('api/analyze-performance/', views.analyze_student_performance, name='analyze_student_performance'),
+
 ]
  

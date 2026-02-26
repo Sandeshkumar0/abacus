@@ -28,7 +28,7 @@
   <!-- Left illustration (desktop only) -->
   <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-12 bg-white relative">
     <!-- EMESYS logo -->
-    <a href="{% url 'home' %}">
+    <a href="{% url 'portal-landing' %}">
       <img src="{% static 'portal/Logo.png' %}" alt="Emesys Logo"
         class="absolute left-8 top-8 h-24 cursor-pointer hover:opacity-80 transition-opacity" />
     </a>
@@ -83,7 +83,7 @@
               </button>
             </div>
             <div class="text-right mt-1">
-              <a href="#" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">Forgot Password?</a>
+              <a href="{% url 'password_reset' %}" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">Forgot Password?</a>
             </div>
           </div>
 
@@ -95,7 +95,7 @@
 
           <!-- Keep me logged in -->
           <label for="keep" class="flex items-center space-x-2 cursor-pointer select-none">
-            <input id="keep" type="checkbox" class="rounded border-gray-300 accent-blue-600" />
+            <input id="keep" name="remember_me" type="checkbox" class="rounded border-gray-300 accent-blue-600" {% if remember_me %}checked{% endif %} />
             <span class="text-sm text-gray-600">Keep me logged in</span>
           </label>
 

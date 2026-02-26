@@ -9,6 +9,7 @@ from .student_views import (
     submit_answer,
     download_answer_pdf,
     student_assign,
+    student_competitions,
     student_profile,
     student_profile_edit,
     raise_query,
@@ -19,6 +20,10 @@ from .student_views import (
     give_test,
     enroll_course,
     practice_questions_page,
+    virtual_abacus,
+    virtual_abacus_ai_tutor,
+    holiday_calendar,
+    student_attendance,
     subject_list,
     chapter_list,
     chapter_detail,
@@ -45,11 +50,18 @@ from .teacher_views import (
     add_course,
     manage_groups,
     create_group,
+    group_competition,
     give_remarks,
     lecture_notes,
+    teacher_assigned_sections,
+    upload_notes,
+    post_class_message,
+    manage_holidays,
+    attendance_marking,
     # Subject and Chapter Management
     manage_subjects,
     create_subject,
+    teacher_subject_resources,
     edit_subject,
     delete_subject,
     create_chapter,
@@ -71,6 +83,7 @@ from .ai_utils import (
     suggest_syllabus,
     generate_weak_topic_practice,
     analyze_student_performance,
+    topic_learning_content,
 )
 
 # Lecture notes utilities
@@ -85,12 +98,36 @@ from .lecture_notes_utils import (
     format_notes_to_pdf,
 )
 
+# Dashboard API views
+from .dashboard_api import (
+    student_dashboard_snapshot,
+    teacher_dashboard_snapshot,
+    teacher_at_risk_students,
+)
+
+# Parent views
+from .parent_views import (
+    parent_dashboard,
+    parent_children,
+    parent_assignments,
+    parent_assignment_explain,
+    parent_assignment_simplify_remark,
+    parent_clear_teacher_messages,
+    parent_clear_announcements,
+    parent_notes,
+    parent_messages,
+    parent_holidays,
+    parent_performance,
+    parent_exam_portion,
+)
+
 __all__ = [
     # Student views
     'student_dashboard',
     'submit_answer',
     'download_answer_pdf',
     'student_assign',
+    'student_competitions',
     'student_profile',
     'student_profile_edit',
     'raise_query',
@@ -100,6 +137,10 @@ __all__ = [
     'download_exam_answer_pdf',
     'give_test',
     'practice_questions_page',
+    'virtual_abacus',
+    'virtual_abacus_ai_tutor',
+    'holiday_calendar',
+    'student_attendance',
     'subject_list',
     'chapter_list',
     'chapter_detail',
@@ -121,9 +162,16 @@ __all__ = [
     'respond_queries',
     'view_responded_queries',
     'give_remarks',
+    'group_competition',
     'lecture_notes',
+    'teacher_assigned_sections',
+    'upload_notes',
+    'post_class_message',
+    'manage_holidays',
+    'attendance_marking',
     'manage_subjects',
     'create_subject',
+    'teacher_subject_resources',
     'edit_subject',
     'delete_subject',
     'create_chapter',
@@ -143,6 +191,7 @@ __all__ = [
     'suggest_syllabus',
     'generate_weak_topic_practice',
     'analyze_student_performance',
+    'topic_learning_content',
     
     # Lecture notes utilities
     'generate_notes',
@@ -153,4 +202,23 @@ __all__ = [
     'transcribe_with_whisper',
     'get_transcript',
     'format_notes_to_pdf',
+
+    # Dashboard API
+    'student_dashboard_snapshot',
+    'teacher_dashboard_snapshot',
+    'teacher_at_risk_students',
+
+    # Parent views
+    'parent_dashboard',
+    'parent_children',
+    'parent_assignments',
+    'parent_assignment_explain',
+    'parent_assignment_simplify_remark',
+    'parent_clear_teacher_messages',
+    'parent_clear_announcements',
+    'parent_notes',
+    'parent_messages',
+    'parent_holidays',
+    'parent_performance',
+    'parent_exam_portion',
 ]

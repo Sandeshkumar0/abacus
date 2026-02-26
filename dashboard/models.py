@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import StudentProfile, TeacherProfile, CustomUser
+from accounts.models import StudentProfile, TeacherProfile, CustomUser, Section, ParentProfile
 from django.utils import timezone
 
 class Question(models.Model):
@@ -12,6 +12,13 @@ class Question(models.Model):
     is_exam = models.BooleanField(default=False)
     subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')
     chapter = models.ForeignKey('Chapter', on_delete=models.SET_NULL, null=True, blank=True, related_name='questions')
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="questions",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     DIFFICULTY_CHOICES = [
@@ -65,8 +72,17 @@ class Exam(models.Model):
     title = models.CharField(max_length=255)
     due_date = models.DateTimeField()
     total_marks = models.PositiveIntegerField(default=0)
+    timer_enabled = models.BooleanField(default=False)
+    duration_minutes = models.PositiveIntegerField(null=True, blank=True, help_text="Exam duration in minutes when timer is enabled")
     subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True, blank=True, related_name='exams')
     chapter = models.ForeignKey('Chapter', on_delete=models.SET_NULL, null=True, blank=True, related_name='exams')
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exams",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -197,6 +213,22 @@ class StudentGroup(models.Model):
         return f"{self.name} ({self.students.count()} students)"
 
 
+class GroupCompetition(models.Model):
+    """Competition for a group based on an assigned question."""
+    group = models.ForeignKey(StudentGroup, on_delete=models.CASCADE, related_name='competitions')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='group_competitions')
+    created_by = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='created_competitions')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('group', 'question')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.group.name} - Q{self.question.id}"
+
+
 # --- SUBJECT & CHAPTER MODELS (Teacher-Defined) ---
 
 class Subject(models.Model):
@@ -217,6 +249,31 @@ class Subject(models.Model):
         return self.name
 
 
+class SubjectTeacherAssignment(models.Model):
+    """Maps subject teachers to subjects within a section."""
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="subject_assignments",
+    )
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="teacher_assignments",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="subject_assignments",
+    )
+
+    class Meta:
+        unique_together = ("teacher", "subject", "section")
+
+    def __str__(self):
+        return f"{self.teacher.user.email} -> {self.subject.name} ({self.section})"
+
+
 class Chapter(models.Model):
     """Chapters within a subject with NCERT/resource references"""
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='chapters')
@@ -234,6 +291,53 @@ class Chapter(models.Model):
         if self.chapter_number:
             return f"Ch {self.chapter_number}: {self.name}"
         return self.name
+
+
+class SubjectResource(models.Model):
+    """Learning resources attached to a subject and optionally scoped to a section."""
+    TYPE_BOOK = "book"
+    TYPE_NOTE = "note"
+    TYPE_VIDEO = "video"
+    TYPE_QUIZ = "quiz"
+    TYPE_WORKSHEET = "worksheet"
+    TYPE_CHOICES = [
+        (TYPE_BOOK, "Books"),
+        (TYPE_NOTE, "Notes"),
+        (TYPE_VIDEO, "Video Lessons"),
+        (TYPE_QUIZ, "Quiz"),
+        (TYPE_WORKSHEET, "Practice Worksheet"),
+    ]
+
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="resources",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subject_resources",
+    )
+    uploaded_by = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="subject_resources",
+    )
+    resource_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    file = models.FileField(upload_to="subject_resources/", blank=True, null=True)
+    external_url = models.URLField(blank=True)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.title} ({self.resource_type})"
 
 # --- MASTERY / INTELLIGENCE MODELS (New) ---
 
@@ -270,6 +374,458 @@ class ChapterPerformance(models.Model):
 
     def __str__(self):
         return f"{self.student.user.email} - {self.chapter.name}: {self.overall_mastery}%"
+
+
+class TeacherNote(models.Model):
+    """Teacher-uploaded notes that can optionally be scoped to a section."""
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="notes",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teacher_notes",
+    )
+    subject = models.ForeignKey(
+        "Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teacher_notes",
+    )
+    title = models.CharField(max_length=200)
+    content = models.TextField(blank=True)
+    attachment = models.FileField(upload_to="teacher_notes/", blank=True, null=True)
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} ({self.teacher.user.email})"
+
+
+class TeacherClassMessage(models.Model):
+    """Broadcast-style teacher message for one/all sections."""
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="class_messages",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="teacher_messages",
+    )
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    is_important = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} ({self.teacher.user.email})"
+
+
+class AttendanceRecord(models.Model):
+    """Daily attendance row per student."""
+    STATUS_PRESENT = "present"
+    STATUS_ABSENT = "absent"
+    STATUS_LATE = "late"
+    STATUS_CHOICES = [
+        (STATUS_PRESENT, "Present"),
+        (STATUS_ABSENT, "Absent"),
+        (STATUS_LATE, "Late"),
+    ]
+
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="attendance_records",
+    )
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="attendance_records",
+    )
+    date = models.DateField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PRESENT)
+    remarks = models.CharField(max_length=255, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date", "student__roll_number"]
+        unique_together = ("student", "date")
+
+    def __str__(self):
+        return f"{self.student.user.email} - {self.date} - {self.status}"
+
+
+class SubjectIntroCache(models.Model):
+    """Cached AI-generated introduction shown on subject cards."""
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="intro_cache_entries",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="subject_intro_cache_entries",
+    )
+    language = models.CharField(max_length=10, default="en")
+    intro_text = models.TextField()
+    generated_at = models.DateTimeField(auto_now_add=True)
+    refreshed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("subject", "section", "language")
+        ordering = ["subject__name"]
+
+    def __str__(self):
+        return f"{self.subject.name} intro ({self.section}, {self.language})"
+
+
+class TopicLearningCache(models.Model):
+    """Cached AI payload for chapter topics: flashcards + practice questions."""
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.CASCADE,
+        related_name="topic_cache_entries",
+    )
+    topic = models.CharField(max_length=200)
+    language = models.CharField(max_length=10, default="en")
+    flashcards_json = models.JSONField(default=list, blank=True)
+    practice_questions_json = models.JSONField(default=list, blank=True)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    refreshed_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("chapter", "topic", "language")
+        ordering = ["chapter", "topic"]
+
+    def __str__(self):
+        return f"{self.chapter.name} - {self.topic} ({self.language})"
+
+
+class Holiday(models.Model):
+    """Calendar entries with global or section-level scope."""
+    TYPE_GENERAL = "general"
+    TYPE_SECTION = "section"
+    TYPE_CHOICES = [
+        (TYPE_GENERAL, "General Holiday"),
+        (TYPE_SECTION, "Section Holiday"),
+    ]
+
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_holidays",
+    )
+    title = models.CharField(max_length=200)
+    date = models.DateField()
+    holiday_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=TYPE_GENERAL)
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="holidays",
+    )
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["date", "title"]
+        unique_together = ("date", "holiday_type", "section", "title")
+
+    def __str__(self):
+        return f"{self.title} ({self.date})"
+
+
+class StudentSubjectPerformance(models.Model):
+    """Normalized subject-level performance row for graphs and AI remarks."""
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="subject_performance_rows",
+    )
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="student_performance_rows",
+    )
+    marks_obtained = models.FloatField(default=0)
+    total_marks = models.FloatField(default=0)
+    percentage = models.FloatField(default=0)
+    ai_remark = models.TextField(blank=True, default="")
+    updated_by = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_performance_rows",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("student", "subject")
+        ordering = ["student", "subject"]
+
+    def __str__(self):
+        return f"{self.student.user.email} - {self.subject.name} ({self.percentage:.1f}%)"
+
+    def recompute_percentage_and_remark(self):
+        total = self.total_marks or 0
+        obtained = self.marks_obtained or 0
+        self.percentage = (obtained / total) * 100 if total > 0 else 0
+        if self.percentage < 40:
+            self.ai_remark = "Needs improvement"
+        elif self.percentage > 75:
+            self.ai_remark = "Excellent performance"
+        else:
+            self.ai_remark = "Good progress. Keep practicing consistently."
+
+
+class TimetableEntry(models.Model):
+    """Class timetable row mapped per section."""
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        related_name="timetable_entries",
+    )
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.CASCADE,
+        related_name="timetable_entries",
+    )
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="timetable_entries",
+    )
+    day_of_week = models.PositiveSmallIntegerField(help_text="1=Mon ... 7=Sun")
+    period_label = models.CharField(max_length=30, help_text="e.g. Period 1")
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        ordering = ["section", "day_of_week", "start_time"]
+        unique_together = ("section", "day_of_week", "period_label")
+
+    def __str__(self):
+        return f"{self.section} {self.period_label} - {self.subject.name}"
+
+
+class Announcement(models.Model):
+    """Message system supporting class-level and global announcements."""
+    SCOPE_CLASS = "class"
+    SCOPE_GENERAL = "general"
+    SCOPE_CHOICES = [
+        (SCOPE_CLASS, "Class Message"),
+        (SCOPE_GENERAL, "General Announcement"),
+    ]
+
+    scope = models.CharField(max_length=20, choices=SCOPE_CHOICES, default=SCOPE_CLASS)
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="announcements",
+    )
+    target_section = models.ForeignKey(
+        Section,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="announcements",
+    )
+    expires_at = models.DateTimeField(null=True, blank=True)
+    auto_delete_after_days = models.PositiveIntegerField(default=30)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.scope}: {self.title}"
+
+
+class AnnouncementRead(models.Model):
+    """Read/unread marker per user per announcement."""
+    announcement = models.ForeignKey(
+        Announcement,
+        on_delete=models.CASCADE,
+        related_name="read_receipts",
+    )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="announcement_reads",
+    )
+    read_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("announcement", "user")
+        ordering = ["-read_at"]
+
+    def __str__(self):
+        return f"{self.user.email} read {self.announcement_id}"
+
+
+class TeacherMessageEngagement(models.Model):
+    """Student reaction/comment for a teacher class message."""
+    message = models.ForeignKey(
+        TeacherClassMessage,
+        on_delete=models.CASCADE,
+        related_name="engagements",
+    )
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="teacher_message_engagements",
+    )
+    is_liked = models.BooleanField(default=False)
+    comment_text = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("message", "student")
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.student.user.email} -> message {self.message_id}"
+
+
+class AnnouncementEngagement(models.Model):
+    """Student reaction/comment for an announcement."""
+    announcement = models.ForeignKey(
+        Announcement,
+        on_delete=models.CASCADE,
+        related_name="engagements",
+    )
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="announcement_engagements",
+    )
+    is_liked = models.BooleanField(default=False)
+    comment_text = models.TextField(blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("announcement", "student")
+        ordering = ["-updated_at"]
+
+    def __str__(self):
+        return f"{self.student.user.email} -> announcement {self.announcement_id}"
+
+
+class StudentMessageClearState(models.Model):
+    """Stores last clear timestamp for student messages/announcements feed."""
+    student = models.OneToOneField(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="message_clear_state",
+    )
+    cleared_at = models.DateTimeField()
+    teacher_messages_cleared_at = models.DateTimeField(null=True, blank=True)
+    announcements_cleared_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.student.user.email} cleared at {self.cleared_at}"
+
+
+class ParentMessageClearState(models.Model):
+    """Stores last clear timestamps for parent messages per linked child."""
+    parent = models.ForeignKey(
+        ParentProfile,
+        on_delete=models.CASCADE,
+        related_name="message_clear_states",
+    )
+    child = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="parent_message_clear_states",
+    )
+    teacher_messages_cleared_at = models.DateTimeField(null=True, blank=True)
+    announcements_cleared_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("parent", "child")
+
+    def __str__(self):
+        return f"{self.parent.user.email} -> {self.child.user.email}"
+
+
+class SchoolExamResult(models.Model):
+    """Manual school exam results (mid-term, end-term, formative, etc.)."""
+    EXAM_MID_TERM = "mid_term"
+    EXAM_END_TERM = "end_term"
+    EXAM_FORMATIVE = "formative"
+    EXAM_OTHER = "other"
+    EXAM_TYPE_CHOICES = [
+        (EXAM_MID_TERM, "Mid Term"),
+        (EXAM_END_TERM, "End Term"),
+        (EXAM_FORMATIVE, "Formative"),
+        (EXAM_OTHER, "Other"),
+    ]
+
+    teacher = models.ForeignKey(
+        TeacherProfile,
+        on_delete=models.CASCADE,
+        related_name="manual_exam_results",
+    )
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name="manual_exam_results",
+    )
+    section = models.ForeignKey(
+        Section,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="manual_exam_results",
+    )
+    subject = models.ForeignKey(
+        Subject,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="manual_exam_results",
+    )
+    exam_type = models.CharField(max_length=20, choices=EXAM_TYPE_CHOICES, default=EXAM_OTHER)
+    exam_name = models.CharField(max_length=120, blank=True, default="")
+    exam_date = models.DateField(null=True, blank=True)
+    total_marks = models.PositiveIntegerField(default=100)
+    marks_obtained = models.FloatField(default=0)
+    review = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.student.user.email} - {self.get_exam_type_display()} ({self.marks_obtained}/{self.total_marks})"
+
 
 class Testimonial(models.Model):
     author_name = models.CharField(max_length=100)

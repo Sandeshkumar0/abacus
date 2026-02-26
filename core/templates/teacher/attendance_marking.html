@@ -1,0 +1,110 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block title %}Attendance Marking - EMESYS{% endblock %}
+{% block header %}Attendance Marking{% endblock %}
+{% block subtitle %}Mark and update daily student attendance{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  {% if messages %}
+    {% for message in messages %}
+    <div class="p-3 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+      <div>
+        <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+        <input id="date" name="date" type="date" value="{{ selected_date }}" max="{{ today_date }}" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+      </div>
+      <div>
+        <label for="section" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
+        <select id="section" name="section" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+          <option value="">All Sections</option>
+          {% for section in sections %}
+          <option value="{{ section.id }}" {% if selected_section_id == section.id|stringformat:'s' %}selected{% endif %}>
+            {{ section.class_level }}{{ section.section }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">Load Students</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <div class="text-sm text-gray-500">Total</div>
+      <div class="text-xl font-semibold text-blue-700">{{ summary.total }}</div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <div class="text-sm text-gray-500">Present</div>
+      <div class="text-xl font-semibold text-green-600">{{ summary.present }}</div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <div class="text-sm text-gray-500">Absent</div>
+      <div class="text-xl font-semibold text-red-600">{{ summary.absent }}</div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <div class="text-sm text-gray-500">Late</div>
+      <div class="text-xl font-semibold text-yellow-600">{{ summary.late }}</div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="attendance_date" value="{{ selected_date }}">
+      <input type="hidden" name="section_id" value="{{ selected_section_id }}">
+      <div class="overflow-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-700">Student</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-700">Roll</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-700">Section</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-700">Status</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-700">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in student_rows %}
+            <tr class="border-b border-gray-100">
+              <td class="px-4 py-3">{{ row.student.user.get_full_name }}</td>
+              <td class="px-4 py-3">{{ row.student.roll_number }}</td>
+              <td class="px-4 py-3">{% if row.student.section %}{{ row.student.section }}{% else %}-{% endif %}</td>
+              <td class="px-4 py-3">
+                <select name="attendance_{{ row.student.user_id }}" class="border border-gray-300 rounded-lg px-2 py-1">
+                  <option value="present" {% if row.existing and row.existing.status == 'present' %}selected{% endif %}>Present</option>
+                  <option value="absent" {% if row.existing and row.existing.status == 'absent' %}selected{% endif %}>Absent</option>
+                  <option value="late" {% if row.existing and row.existing.status == 'late' %}selected{% endif %}>Late</option>
+                </select>
+              </td>
+              <td class="px-4 py-3">
+                <input type="text" name="remarks_{{ row.student.user_id }}" value="{% if row.existing %}{{ row.existing.remarks }}{% endif %}" class="w-full border border-gray-300 rounded-lg px-2 py-1" placeholder="Optional remark">
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="px-4 py-6 text-center text-gray-600">No students found for selected filters.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if students %}
+      <div class="p-4 border-t border-gray-200">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+          Save Attendance
+        </button>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

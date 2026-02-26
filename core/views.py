@@ -1,10 +1,13 @@
-from django.shortcuts import render, redirect
+from urllib.parse import urlencode
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import models
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 import os
 from email.mime.image import MIMEImage
 
@@ -149,11 +152,12 @@ def franchise(request):
         # optionally: notify internal email address
         try:
             admin_subject = "New franchise inquiry from {}".format(fullName)
-            admin_to = [getattr(settings, "FRANCHISE_NOTIFY_EMAIL", "info@emesyslearning.com")]
-            admin_text = "New inquiry:\n\n" + text_body
-            admin_msg = EmailMultiAlternatives(admin_subject, admin_text, from_email, admin_to)
-            admin_msg.attach_alternative(html_body, "text/html")
-            admin_msg.send(fail_silently=True)
+            notify_email = (getattr(settings, "FRANCHISE_NOTIFY_EMAIL", "info@emesyslearning.com") or "").strip()
+            if notify_email and notify_email.lower() != email.lower():
+                admin_text = "New inquiry:\n\n" + text_body
+                admin_msg = EmailMultiAlternatives(admin_subject, admin_text, from_email, [notify_email])
+                admin_msg.attach_alternative(html_body, "text/html")
+                admin_msg.send(fail_silently=True)
         except Exception:
             pass
 
@@ -312,11 +316,14 @@ def subscribe_newsletter(request):
         # fallback: render blog page with success flag
         return render(request, "blog.html", {"newsletter_success": True})
 def blog_detail(request, slug):
-    """
-    Minimal placeholder detail view. Use `slug` to fetch the post later.
-    """
-    # For testing, just pass the slug to the template
-    return render(request, "blog_detail.html", {"slug": slug})
+    """Render a published blog post by slug."""
+    from .models import BlogPost
+
+    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    post.views_count = (post.views_count or 0) + 1
+    post.save(update_fields=["views_count"])
+
+    return render(request, "blog_detail.html", {"post": post})
 
 def contact(request):
     """
@@ -366,7 +373,14 @@ Message:
 
 Submitted at: {submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S')}
 """
-                admin_msg = EmailMultiAlternatives(admin_subject, admin_text, settings.EMAIL_HOST_USER, admin_to, reply_to=[email])
+                from_email = getattr(settings, "DEFAULT_FROM_EMAIL", settings.EMAIL_HOST_USER)
+                admin_msg = EmailMultiAlternatives(
+                    admin_subject,
+                    admin_text,
+                    from_email,
+                    admin_to,
+                    reply_to=[email]
+                )
                 admin_msg.send(fail_silently=True)
             except Exception as e:
                 print(f"DEBUG: Failed to send admin notification: {repr(e)}")
@@ -398,7 +412,11 @@ def refund(request):
 # --------- Auth pages (static placeholders for now) ---------
 
 def signin(request):
-    return render(request, "signin.html")
+    next_url = request.GET.get("next")
+    target = reverse("student_login")
+    if next_url:
+        return redirect(f"{target}?{urlencode({'next': next_url})}")
+    return redirect("student_login")
 
 def signup(request):
-    return render(request, "signup.html")
+    return redirect("student_signup")

@@ -1,0 +1,238 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: abacusmaster\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-20 00:00+0000\n"
+"PO-Revision-Date: 2026-02-20 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: hi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Main navigation"
+msgstr "मुख्य नेविगेशन"
+
+msgid "Home"
+msgstr "होम"
+
+msgid "About"
+msgstr "हमारे बारे में"
+
+msgid "Franchise"
+msgstr "फ्रेंचाइज़ी"
+
+msgid "Blog"
+msgstr "ब्लॉग"
+
+msgid "Virtual Abacus"
+msgstr "वर्चुअल अबेकस"
+
+msgid "Courses"
+msgstr "कोर्स"
+
+msgid "Select language"
+msgstr "भाषा चुनें"
+
+msgid "Contact us"
+msgstr "संपर्क करें"
+
+msgid "Learn Abacus from expert teachers through live interactive online classes."
+msgstr "विशेषज्ञ शिक्षकों से लाइव इंटरैक्टिव ऑनलाइन कक्षाओं के माध्यम से अबेकस सीखें।"
+
+msgid "Quick Links"
+msgstr "त्वरित लिंक"
+
+msgid "About Us"
+msgstr "हमारे बारे में"
+
+msgid "Contact"
+msgstr "संपर्क"
+
+msgid "Student Dashboard"
+msgstr "छात्र डैशबोर्ड"
+
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+msgid "Profile"
+msgstr "प्रोफाइल"
+
+msgid "View Questions Assigned"
+msgstr "सौंपे गए प्रश्न देखें"
+
+msgid "Competitions"
+msgstr "प्रतियोगिताएं"
+
+msgid "Raise Query"
+msgstr "प्रश्न पूछें"
+
+msgid "Give Test"
+msgstr "परीक्षा दें"
+
+msgid "Practice with AI"
+msgstr "एआई के साथ अभ्यास करें"
+
+msgid "View Remarks On Your Answers"
+msgstr "अपने उत्तरों पर टिप्पणियां देखें"
+
+msgid "View Query Responses"
+msgstr "प्रश्नों के उत्तर देखें"
+
+msgid "Logout"
+msgstr "लॉगआउट"
+
+msgid "Welcome"
+msgstr "स्वागत है"
+
+msgid "Manage your academic journey"
+msgstr "अपनी शैक्षणिक यात्रा प्रबंधित करें"
+
+msgid "Notifications"
+msgstr "सूचनाएं"
+
+msgid "Mark all as read"
+msgstr "सभी को पढ़ा हुआ चिह्नित करें"
+
+msgid "Loading..."
+msgstr "लोड हो रहा है..."
+
+msgid "Settings"
+msgstr "सेटिंग्स"
+
+msgid "EMESYS"
+msgstr "EMESYS"
+
+msgid "Student list"
+msgstr "छात्र सूची"
+
+msgid "Assign Questions"
+msgstr "प्रश्न सौंपें"
+
+msgid "Respond to Queries"
+msgstr "प्रश्नों का उत्तर दें"
+
+msgid "Give Remarks to Answers and Tests/Exams"
+msgstr "उत्तरों और टेस्ट/परीक्षाओं पर टिप्पणी दें"
+
+msgid "Take Test & Exam"
+msgstr "टेस्ट और परीक्षा लें"
+
+msgid "Search"
+msgstr "खोज"
+
+msgid "Manage your dashboard"
+msgstr "अपना डैशबोर्ड प्रबंधित करें"
+
+msgid "Subject Cards"
+msgstr "विषय कार्ड"
+
+msgid "Pending Assignments"
+msgstr "लंबित असाइनमेंट"
+
+msgid "Class Notes"
+msgstr "कक्षा नोट्स"
+
+msgid "Messages"
+msgstr "संदेश"
+
+msgid "Holiday Calendar"
+msgstr "अवकाश कैलेंडर"
+
+msgid "Performance Graph"
+msgstr "प्रदर्शन ग्राफ"
+
+msgid "Exam Portion"
+msgstr "परीक्षा पाठ्यक्रम"
+
+msgid "Language Switcher"
+msgstr "भाषा बदलें"
+
+msgid "Welcome to Dashboard"
+msgstr "डैशबोर्ड में आपका स्वागत है"
+
+msgid "Manage your educational activities efficiently"
+msgstr "अपनी शैक्षिक गतिविधियों को प्रभावी रूप से प्रबंधित करें"
+
+msgid "Quick Overview"
+msgstr "त्वरित अवलोकन"
+
+msgid "Access all your educational tools from the central board, view your assignments, track your progress, and manage your queries efficiently."
+msgstr "केंद्रीय बोर्ड से अपने सभी शैक्षिक टूल्स तक पहुंचें, असाइनमेंट देखें, प्रगति ट्रैक करें और अपने प्रश्नों को प्रभावी ढंग से प्रबंधित करें।"
+
+msgid "Topic Performance Analysis"
+msgstr "विषय प्रदर्शन विश्लेषण"
+
+msgid "Needs more attention!"
+msgstr "और अधिक ध्यान की आवश्यकता है!"
+
+msgid "Study NCERT Chapter"
+msgstr "एनसीईआरटी अध्याय पढ़ें"
+
+msgid "Great job! Keep it up."
+msgstr "बहुत बढ़िया! ऐसे ही जारी रखें।"
+
+msgid "Total Assignments"
+msgstr "कुल असाइनमेंट"
+
+msgid "Pending Queries"
+msgstr "लंबित प्रश्न"
+
+msgid "Upcoming Tests"
+msgstr "आगामी टेस्ट"
+
+msgid "My Enrolled Courses"
+msgstr "मेरे नामांकित कोर्स"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Course Files"
+msgstr "कोर्स फ़ाइलें"
+
+msgid "Enrolled:"
+msgstr "नामांकित:"
+
+msgid "Start Learning Today"
+msgstr "आज ही सीखना शुरू करें"
+
+msgid "Explore our range of courses designed to boost your skills."
+msgstr "अपने कौशल को बढ़ाने के लिए तैयार किए गए हमारे कोर्स देखें।"
+
+msgid "Browse Courses"
+msgstr "कोर्स देखें"
+
+msgid "Academic and public holidays"
+msgstr "शैक्षणिक और सार्वजनिक अवकाश"
+
+msgid "No holidays found."
+msgstr "कोई अवकाश नहीं मिला।"
+
+msgid "Practice mental math with the abacus."
+msgstr "अबेकस के साथ मानसिक गणित का अभ्यास करें।"
+
+msgid "Mode:"
+msgstr "मोड:"
+
+msgid "Decimal (Base 10)"
+msgstr "दशमलव (आधार 10)"
+
+msgid "Columns:"
+msgstr "स्तंभ:"
+
+msgid "Click beads to move them."
+msgstr "मनके हिलाने के लिए उन पर क्लिक करें।"
+
+msgid "Reset"
+msgstr "रीसेट"
+
+msgid "Random Number"
+msgstr "रैंडम नंबर"
+
+msgid "Value:"
+msgstr "मान:"
+
+msgid "Tip: Rightmost column is the ones place, then tens, hundreds, and so on."
+msgstr "सुझाव: सबसे दाहिना स्तंभ इकाई का स्थान है, फिर दहाई, सैकड़ा आदि आते हैं।"

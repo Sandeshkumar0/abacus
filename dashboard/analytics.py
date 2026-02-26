@@ -17,7 +17,11 @@ def calculate_student_metrics(student_id):
     # --- 1. Accuracy Calculation ---
     
     # Assignment Accuracy
-    assignments = StudentAnswer.objects.filter(student=student, marks_obtained__isnull=False).select_related('question')
+    assignments = StudentAnswer.objects.filter(
+        student=student,
+        marks_obtained__isnull=False,
+        question__is_practice=False
+    ).select_related('question')
     total_assignments = assignments.count()
     total_assignment_marks = assignments.aggregate(Sum('marks_obtained'))['marks_obtained__sum'] or 0
     total_possible_assignment_marks = assignments.aggregate(Sum('question__max_marks'))['question__max_marks__sum'] or 0
@@ -164,8 +168,9 @@ def get_student_improvement_trend(student_id):
 
     # Combine Assignments and Exams, sort by date
     assignments = StudentAnswer.objects.filter(
-        student=student, 
-        marks_obtained__isnull=False
+        student=student,
+        marks_obtained__isnull=False,
+        question__is_practice=False
     ).select_related('question').annotate(
         date=F('submitted_at'),
         score=F('marks_obtained'),

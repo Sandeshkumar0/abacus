@@ -5,8 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .models import Question, Exam, Notification, StudentAnswer, ExamAnswer, Query
-from accounts.models import StudentProfile, CustomUser
+from .models import Question, Exam, Notification, StudentAnswer, ExamAnswer, Query, GroupCompetition
+from accounts.models import StudentProfile, CustomUser, ParentStudentRelation
 
 
 @receiver(post_save, sender=Question, dispatch_uid="notify_students_new_test_unique")
@@ -49,6 +49,47 @@ def notify_students_new_test(sender, instance, created, **kwargs):
                     'notification': notification_data
                 }
             )
+
+        # Notify linked parents for affected students
+        if instance.section_id:
+            target_students = StudentProfile.objects.filter(section=instance.section).select_related("user")
+        else:
+            target_students = StudentProfile.objects.all().select_related("user")
+
+        for student_profile in target_students:
+            parent_links = ParentStudentRelation.objects.filter(student=student_profile).select_related("parent__user")
+            for link in parent_links:
+                parent_user = link.parent.user
+                parent_notification = Notification.objects.create(
+                    recipient=parent_user,
+                    notification_type='test_assigned',
+                    title='New Assignment Uploaded',
+                    message=(
+                        f'A new assignment was uploaded for {student_profile.user.get_full_name()}. '
+                        f'Due: {instance.due_date.strftime("%b %d, %Y %I:%M %p")}'
+                    ),
+                    link='/portal/dashboard/parent/assignments/',
+                    question=instance
+                )
+
+                parent_notification_data = {
+                    'id': parent_notification.id,
+                    'type': parent_notification.notification_type,
+                    'title': parent_notification.title,
+                    'message': parent_notification.message,
+                    'link': parent_notification.link,
+                    'is_read': parent_notification.is_read,
+                    'created_at': parent_notification.created_at.isoformat()
+                }
+
+                parent_group = f"notifications_{parent_user.id}"
+                async_to_sync(channel_layer.group_send)(
+                    parent_group,
+                    {
+                        'type': 'notification_message',
+                        'notification': parent_notification_data
+                    }
+                )
 
 
 @receiver(post_save, sender=Exam, dispatch_uid="notify_students_new_exam_unique")
@@ -244,6 +285,15 @@ def notify_query_events(sender, instance, created, **kwargs):
 def notify_teacher_exam_submitted(sender, instance, created, **kwargs):
     """Notify teacher when student submits exam answer"""
     if created:
+        # An exam submission creates one ExamAnswer per question.
+        # Notify teacher only for the first answer record of this student+exam pair.
+        already_submitted = ExamAnswer.objects.filter(
+            exam=instance.exam,
+            student_name=instance.student_name
+        ).exclude(id=instance.id).exists()
+        if already_submitted:
+            return
+
         teacher_user = instance.exam.teacher_name
         student_name = instance.student_name.get_full_name()
         
@@ -268,6 +318,47 @@ def notify_teacher_exam_submitted(sender, instance, created, **kwargs):
         }
         
         group_name = f"notifications_{teacher_user.id}"
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'notification_message',
+                'notification': notification_data
+            }
+        )
+
+
+@receiver(post_save, sender=GroupCompetition, dispatch_uid="notify_students_group_competition_unique")
+def notify_students_group_competition(sender, instance, created, **kwargs):
+    """Notify students in the specific group when a competition is assigned."""
+    if not created:
+        return
+
+    channel_layer = get_channel_layer()
+    teacher_name = instance.created_by.user.get_full_name() if instance.created_by_id else "Teacher"
+    students = instance.group.students.select_related('user')
+
+    for student_profile in students:
+        recipient = student_profile.user
+        notification = Notification.objects.create(
+            recipient=recipient,
+            notification_type='general',
+            title='🏁 New Group Competition',
+            message=f'{teacher_name} assigned a new competition in "{instance.group.name}". Submit early to top the leaderboard.',
+            link='/portal/dashboard/student/competitions/',
+            question=instance.question
+        )
+
+        notification_data = {
+            'id': notification.id,
+            'type': notification.notification_type,
+            'title': notification.title,
+            'message': notification.message,
+            'link': notification.link,
+            'is_read': notification.is_read,
+            'created_at': notification.created_at.isoformat()
+        }
+
+        group_name = f"notifications_{recipient.id}"
         async_to_sync(channel_layer.group_send)(
             group_name,
             {

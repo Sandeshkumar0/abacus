@@ -1,6 +1,6 @@
-{% load static %}
+{% load static i18n %}
 <!doctype html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -50,18 +50,30 @@
              alt="EMESYS Logo" class="logo">
       </a>
 
-      <nav class="main-nav" aria-label="Main navigation">
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'about' %}">About</a>
-        <a href="{% url 'franchise' %}">Franchise</a>
-        <a href="{% url 'blog_list' %}">Blog</a>
+      <nav class="main-nav" aria-label="{% trans 'Main navigation' %}">
+        <a href="{% url 'home' %}">{% trans "Home" %}</a>
+        <a href="{% url 'about' %}">{% trans "About" %}</a>
+        <a href="{% url 'franchise' %}">{% trans "Franchise" %}</a>
+        <a href="{% url 'blog_list' %}">{% trans "Blog" %}</a>
         <!-- NEW: Virtual Abacus link in the top header bar -->
-        <a href="{% url 'virtual_abacus' %}">Virtual Abacus</a>
-        <a href="{% url 'courses' %}">Courses</a>
+        <a href="{% url 'virtual_abacus' %}">{% trans "Virtual Abacus" %}</a>
+        <a href="{% url 'courses' %}">{% trans "Courses" %}</a>
       </nav>
 
       <div class="header-actions">
-        <button class="contact-btn" onclick="location.href='{% url 'contact' %}'">Contact us</button>
+        <form action="{% url 'set_language' %}" method="post" style="display:inline-flex;align-items:center;gap:8px;">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label for="language-select" class="sr-only">{% trans "Select language" %}</label>
+          <select id="language-select" name="language" onchange="this.form.submit()" style="padding:8px;border-radius:8px;border:1px solid #d1d5db;">
+            {% get_current_language as CURRENT_LANG %}
+            {% get_available_languages as AVAILABLE_LANGUAGES %}
+            {% for code, name in AVAILABLE_LANGUAGES %}
+            <option value="{{ code }}" {% if code == CURRENT_LANG %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </form>
+        <button class="contact-btn" onclick="location.href='{% url 'contact' %}'">{% trans "Contact us" %}</button>
       </div>
     </div>
   </header>
@@ -76,21 +88,21 @@
     <div class="container footer-content">
       <div class="footer-col footer-brand">
         <img src="https://cdn.builder.io/api/v1/image/assets%2Ff32d67493bee49d986810d0293608d58%2F8d3bb4b47da142e987abc1ab086fed8b?format=webp&width=150" alt="EMESYS Logo" class="footer-logo">
-        <p>Learn Abacus from expert teachers through live interactive online classes.</p>
+        <p>{% trans "Learn Abacus from expert teachers through live interactive online classes." %}</p>
       </div>
 
       <div class="footer-col footer-links">
-        <h4>Quick Links</h4>
+        <h4>{% trans "Quick Links" %}</h4>
         <ul>
-          <li><a href="{% url 'about' %}">About Us</a></li>
-          <li><a href="{% url 'courses' %}">Courses</a></li>
-          <li><a href="{% url 'franchise' %}">Franchise</a></li>
-          <li><a href="{% url 'blog_list' %}">Blog</a></li>
+          <li><a href="{% url 'about' %}">{% trans "About Us" %}</a></li>
+          <li><a href="{% url 'courses' %}">{% trans "Courses" %}</a></li>
+          <li><a href="{% url 'franchise' %}">{% trans "Franchise" %}</a></li>
+          <li><a href="{% url 'blog_list' %}">{% trans "Blog" %}</a></li>
         </ul>
       </div>
 
       <div class="footer-col footer-contact">
-        <h4>Contact</h4>
+        <h4>{% trans "Contact" %}</h4>
         <p>Electronic city, Bengaluru</p>
         <p><a href="mailto:info@emesyslearning.com">info@emesyslearning.com</a></p>
         <p><a href="tel:+918867539798">+91 8867539798</a></p>

@@ -22,8 +22,18 @@
 
 {% block content %}
 <div class="space-y-10">
+  {% if messages %}
+    <div class="space-y-2">
+      {% for message in messages %}
+      <div class="p-3 rounded-md text-sm {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <!-- ================= ASSIGNMENTS ================= -->
+  {% if student_answers %}
   <h2 class="text-xl font-semibold text-gray-800">Assignment Answers</h2>
   {% for ans in student_answers %}
     <div class="exam-card" data-answer-id="{{ ans.id }}" data-answer-type="student">
@@ -62,11 +72,11 @@
         </div>
       </form>
     </div>
-  {% empty %}
-    <p class="text-gray-600">No assignment answers pending for review.</p>
   {% endfor %}
+  {% endif %}
 
   <!-- ================= EXAMS ================= -->
+  {% if exam_answers %}
   <h2 class="text-xl font-semibold text-gray-800">Exam Answers</h2>
   {% regroup exam_answers by exam_title as exams_grouped %}
   {% for exam in exams_grouped %}
@@ -118,9 +128,169 @@
       <button type="submit" class="submit-btn">Submit All Remarks for {{ exam.grouper }}</button>
     </form>
   </div>
-  {% empty %}
-    <p class="text-gray-600">No exam answers pending for review.</p>
   {% endfor %}
+  {% endif %}
+
+  <!-- ================= REVIEWED RESULTS ================= -->
+  <h2 class="text-xl font-semibold text-gray-800">Reviewed Assignment Results</h2>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-3 py-2 text-left">Student</th>
+          <th class="px-3 py-2 text-left">Question</th>
+          <th class="px-3 py-2 text-left">Marks</th>
+          <th class="px-3 py-2 text-left">Review</th>
+          <th class="px-3 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in reviewed_student_answers %}
+        <tr class="border-t border-gray-100">
+          <td class="px-3 py-2">{{ item.student_name }}</td>
+          <td class="px-3 py-2">{{ item.question_text|truncatewords:20 }}</td>
+          <td class="px-3 py-2">{{ item.marks_obtained|default:"-" }}</td>
+          <td class="px-3 py-2">{{ item.remarks|truncatewords:20 }}</td>
+          <td class="px-3 py-2">{{ item.submitted_at|date:"M d, Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="px-3 py-5 text-center text-gray-600">No reviewed assignment results yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="text-xl font-semibold text-gray-800">Reviewed Test/Exam Results</h2>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-3 py-2 text-left">Exam</th>
+          <th class="px-3 py-2 text-left">Student</th>
+          <th class="px-3 py-2 text-left">Question</th>
+          <th class="px-3 py-2 text-left">Marks</th>
+          <th class="px-3 py-2 text-left">Review</th>
+          <th class="px-3 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in reviewed_exam_answers %}
+        <tr class="border-t border-gray-100">
+          <td class="px-3 py-2">{{ item.exam_title }}</td>
+          <td class="px-3 py-2">{{ item.student_name }}</td>
+          <td class="px-3 py-2">{{ item.question_text|truncatewords:15 }}</td>
+          <td class="px-3 py-2">{{ item.marks_obtained|default:"-" }}</td>
+          <td class="px-3 py-2">{{ item.remarks|truncatewords:20 }}</td>
+          <td class="px-3 py-2">{{ item.submitted_at|date:"M d, Y" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="px-3 py-5 text-center text-gray-600">No reviewed test/exam results yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= MANUAL SCHOOL EXAM RESULTS ================= -->
+  <h2 class="text-xl font-semibold text-gray-800">Upload School Exam Results (Manual)</h2>
+  <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <form method="post" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="manual_school_result">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Exam Type</label>
+        <select name="exam_type" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+          <option value="">Select exam type</option>
+          {% for key, label in manual_exam_type_choices %}
+          <option value="{{ key }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Exam Name (optional)</label>
+        <input type="text" name="exam_name" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g. Unit Test 2">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Exam Date</label>
+        <input type="date" name="exam_date" class="w-full border border-gray-300 rounded-md px-3 py-2">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
+        <select name="student_id" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+          <option value="">Select student</option>
+          {% for student in manual_students %}
+          <option value="{{ student.user_id }}">{{ student.user.get_full_name }}{% if student.section %} ({{ student.section }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+        <select name="subject_id" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+          <option value="">Select subject</option>
+          {% for subject in manual_subjects %}
+          <option value="{{ subject.id }}">{{ subject.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Total Marks</label>
+        <input type="number" step="0.01" name="total_marks" min="1" required class="w-full border border-gray-300 rounded-md px-3 py-2" value="100">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Marks Obtained</label>
+        <input type="number" step="0.01" name="marks_obtained" min="0" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g. 72">
+      </div>
+      <div class="lg:col-span-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Review / Remarks</label>
+        <textarea name="review" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Teacher review..."></textarea>
+      </div>
+      <div class="lg:col-span-3">
+        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" name="generate_ai_remark" class="rounded border-gray-300">
+          Generate AI remark (optional)
+        </label>
+      </div>
+      <div class="lg:col-span-3">
+        <button type="submit" class="submit-btn">Upload School Result</button>
+      </div>
+    </form>
+  </div>
+
+  <h3 class="text-lg font-semibold text-gray-800">Uploaded School Exam Results</h3>
+  <div class="bg-white rounded-xl border border-gray-200 overflow-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-3 py-2 text-left">Type</th>
+          <th class="px-3 py-2 text-left">Exam Name</th>
+          <th class="px-3 py-2 text-left">Student</th>
+          <th class="px-3 py-2 text-left">Section</th>
+          <th class="px-3 py-2 text-left">Subject</th>
+          <th class="px-3 py-2 text-left">Marks</th>
+          <th class="px-3 py-2 text-left">Percentage</th>
+          <th class="px-3 py-2 text-left">Review</th>
+          <th class="px-3 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for result in manual_exam_results %}
+        <tr class="border-t border-gray-100">
+          <td class="px-3 py-2">{{ result.get_exam_type_display }}</td>
+          <td class="px-3 py-2">{{ result.exam_name|default:"-" }}</td>
+          <td class="px-3 py-2">{{ result.student.user.get_full_name }}</td>
+          <td class="px-3 py-2">{{ result.section|default:"-" }}</td>
+          <td class="px-3 py-2">{% if result.subject %}{{ result.subject.name }}{% else %}-{% endif %}</td>
+          <td class="px-3 py-2">{{ result.marks_obtained }}/{{ result.total_marks }}</td>
+          <td class="px-3 py-2">{% widthratio result.marks_obtained result.total_marks 100 %}%</td>
+          <td class="px-3 py-2">{{ result.review|truncatewords:16|default:"-" }}</td>
+          <td class="px-3 py-2">{% if result.exam_date %}{{ result.exam_date|date:"M d, Y" }}{% else %}{{ result.created_at|date:"M d, Y" }}{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="px-3 py-5 text-center text-gray-600">No manual school results uploaded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 <script>
   function toggleExam(counter) {

@@ -17,6 +17,29 @@
 <script src="https://editor.codecogs.com/eqneditor.api.min.js" crossorigin="anonymous"></script>
 
 <style>
+  .assign-q-wrap {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .eq-editor-box {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #toolbar {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #latexInput,
+  #equation-output img {
+    max-width: 100%;
+  }
+
   .math-field {
     border: 1px dashed #ccc;
     padding: 14px;
@@ -83,6 +106,7 @@
 
 </style>
 
+<div class="assign-q-wrap">
 <form method="POST" enctype="multipart/form-data" class="space-y-6">
   {% csrf_token %}
   <input type="hidden" name="latex_equation" id="latex-equation" />
@@ -97,13 +121,24 @@
         <textarea name="description" placeholder="Space to Write Question"
           class="w-full h-32 p-6 border-2 border-dashed border-[#bcdffb] rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 text-gray-700 text-lg"></textarea>
       </div>
-      <div class="flex flex-col items-center justify-center min-w-[180px] max-w-[200px] pr-8 pt-8">
+      <div class="flex flex-col items-center justify-center w-full lg:w-72 lg:max-w-72 px-4 lg:px-6 pt-8">
         <div class="dotted-border rounded-xl flex flex-col items-center justify-center p-4 w-full bg-white">
           <label class="cursor-pointer flex flex-col items-center">
             <span class="gradient-yellow px-8 py-2 rounded-full font-semibold text-base mb-2 text-center">Upload</span>
             <input type="file" class="hidden" name="image" onchange="showFileName(this)">
             <span id="file-name" class="text-gray-400 text-sm text-center">Upload Question File here</span>
           </label>
+        </div>
+        <div class="mt-6">
+          <label class="block text-lg font-semibold text-gray-800 mb-2">Section</label>
+          <select name="section_id"
+                  class="w-full p-3 border-2 border-dashed border-[#bcdffb] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 text-gray-700 text-lg"
+                  required>
+            <option value="">Select Section</option>
+            {% for section in sections %}
+            <option value="{{ section.id }}">{{ section.class_level }}{{ section.section }}</option>
+            {% endfor %}
+          </select>
         </div>
         <div class="mt-6">
           <label class="block text-lg font-semibold text-gray-800 mb-2">Due Date</label>
@@ -125,7 +160,7 @@
       </div>
     </div>
     <div class="flex flex-col gap-6 bg-white px-6 py-8 rounded-b-[16px] shadow border border-gray-200">
-      <div class="rounded-xl border-2 border-dashed border-[#bcdffb] bg-[#f8faff] p-4 mb-4" style="min-height:250px;">
+      <div class="eq-editor-box rounded-xl border-2 border-dashed border-[#bcdffb] bg-[#f8faff] p-4 mb-4" style="min-height:250px;">
         <div id="history" class="mb-2"></div>
         <div id="toolbar" class="mb-2"></div>
         <div id="latexInput" style="min-height: 100px; background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 12px;"></div>
@@ -167,6 +202,7 @@
   </div>
 
 </form>
+</div>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function () {
   const MAX_EDITOR_INIT_ATTEMPTS = 8;

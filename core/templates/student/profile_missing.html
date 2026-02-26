@@ -1,0 +1,18 @@
+{% extends 'student/base_student.html' %}
+{% load i18n %}
+
+{% block title %}Profile Incomplete - EMESYS{% endblock %}
+{% block header %}Profile Incomplete{% endblock %}
+{% block subtitle %}Student profile is required to continue{% endblock %}
+
+{% block content %}
+<div class="bg-white border border-gray-200 rounded-xl p-8 text-center">
+  <h2 class="text-xl font-semibold text-gray-800 mb-2">{% trans "Student Profile Not Found" %}</h2>
+  <p class="text-sm text-gray-600 mb-6">
+    {{ message|default:"Your student profile is incomplete. Please contact an administrator." }}
+  </p>
+  <a href="{% url 'student_dashboard' %}" class="inline-block px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
+    {% trans "Back to Dashboard" %}
+  </a>
+</div>
+{% endblock %}

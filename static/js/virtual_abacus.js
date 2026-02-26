@@ -1,4 +1,4 @@
-// Abacus State Management
+﻿// Abacus State Management
 class AbacusSimulator {
   constructor() {
     this.columns = 10;

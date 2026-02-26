@@ -1,0 +1,130 @@
+{% extends 'parent/base_parent.html' %}
+{% block title %}Messages{% endblock %}
+{% block header %}Messages{% endblock %}
+{% block subtitle %}Class messages and announcements{% endblock %}
+{% block content %}
+<div class="bg-white border rounded-xl p-4 mb-6">
+  <form method="get" class="flex items-center gap-2">
+    <label class="text-sm font-semibold text-gray-700" for="child_id">Child</label>
+    <select id="child_id" name="child_id" class="border rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
+      {% for child in children %}
+      <option value="{{ child.pk }}" {% if selected_child and child.pk == selected_child.pk %}selected{% endif %}>
+        {{ child.user.get_full_name }} ({{ child.roll_number }})
+      </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="bg-white border rounded-xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-blue-600">Teacher/Class Messages</h3>
+      <button type="button" onclick="clearTeacherMessages()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        Clear
+      </button>
+    </div>
+    <div id="teacher-messages-list" class="space-y-3">
+      {% for item in teacher_messages_feed %}
+      <div class="p-3 rounded-lg bg-yellow-50">
+        <p class="font-semibold">{{ item.title }}</p>
+        <p class="text-sm text-gray-600">{{ item.body }}</p>
+        <p class="text-xs text-gray-500 mt-1">From {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+      </div>
+      {% empty %}
+      <p class="text-gray-500">No teacher messages available.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white border rounded-xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-blue-600">General Announcements</h3>
+      <button type="button" onclick="clearAnnouncements()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+        Clear
+      </button>
+    </div>
+    <div id="announcements-list" class="space-y-3">
+      {% for item in announcements_feed %}
+      <div class="p-3 rounded-lg bg-green-50">
+        <p class="font-semibold">{{ item.title }}</p>
+        <p class="text-sm text-gray-600">{{ item.body }}</p>
+        <p class="text-xs text-gray-500 mt-1">By {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+      </div>
+      {% empty %}
+      <p class="text-gray-500">No announcements available.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border rounded-xl p-6 mt-6">
+  <h3 class="text-lg font-semibold text-blue-600 mb-4">System Notifications</h3>
+  <div class="space-y-3">
+    {% for item in notifications_feed %}
+    <div class="p-3 rounded-lg {% if item.is_read %}bg-gray-50{% else %}bg-blue-50{% endif %}">
+      <p class="font-semibold">{{ item.title }}</p>
+      <p class="text-sm text-gray-600">{{ item.message }}</p>
+      <p class="text-xs text-gray-500 mt-1">{{ item.created_at|date:"d M Y, h:i A" }}</p>
+    </div>
+    {% empty %}
+    <p class="text-gray-500">No system notifications available.</p>
+    {% endfor %}
+  </div>
+</div>
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  function getSelectedChildId() {
+    const sel = document.getElementById('child_id');
+    return sel ? sel.value : '';
+  }
+
+  function clearTeacherMessages() {
+    const list = document.getElementById('teacher-messages-list');
+    if (!list) return Promise.resolve();
+    return fetch("{% url 'parent_clear_teacher_messages' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ child_id: getSelectedChildId() })
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Failed to clear teacher messages.');
+        list.innerHTML = '<p class="text-gray-500">No teacher messages available.</p>';
+      })
+      .catch((err) => {
+        alert(err.message || 'Failed to clear teacher messages.');
+      });
+  }
+
+  function clearAnnouncements() {
+    const list = document.getElementById('announcements-list');
+    if (!list) return Promise.resolve();
+    return fetch("{% url 'parent_clear_announcements' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ child_id: getSelectedChildId() })
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Failed to clear announcements.');
+        list.innerHTML = '<p class="text-gray-500">No announcements available.</p>';
+      })
+      .catch((err) => {
+        alert(err.message || 'Failed to clear announcements.');
+      });
+  }
+</script>
+{% endblock %}

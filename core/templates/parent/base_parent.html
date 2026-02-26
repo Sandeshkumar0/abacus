@@ -1,0 +1,150 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Parent Dashboard{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'portal/css/student_dashboard.css' %}" />
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen bg-white flex">
+  <style>
+    #parent-sidebar {
+      width: 320px;
+      transition: width 0.25s ease;
+      overflow-x: hidden;
+    }
+
+    #parent-main-content {
+      margin-left: 320px;
+      transition: margin-left 0.25s ease;
+    }
+
+    .sidebar-toggle-wrap {
+      padding: 0 24px 10px;
+    }
+
+    .sidebar-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    .sidebar-toggle-icon {
+      width: 18px;
+      height: 14px;
+      display: grid;
+      gap: 3px;
+    }
+
+    .sidebar-toggle-icon span {
+      display: block;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    #parent-sidebar.sidebar-collapsed {
+      width: 220px !important;
+    }
+
+    @media (max-width: 600px) {
+      #parent-sidebar {
+        display: none;
+      }
+      #parent-main-content {
+        margin-left: 0 !important;
+      }
+    }
+  </style>
+  <div id="parent-sidebar" class="sidebar bg-white flex flex-col min-h-screen overflow-y-auto">
+    <div class="sidebar-logo p-6 flex justify-center">
+      <a href="{% url 'portal-landing' %}">
+        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cef2b2c7204fa5a2b59ca47c30c035bf78bd37ce" alt="EMESYS Logo" />
+      </a>
+    </div>
+    <div class="sidebar-toggle-wrap">
+      <button type="button" id="parent-sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle sidebar">
+        <span class="sidebar-toggle-icon"><span></span><span></span><span></span></span>
+      </button>
+    </div>
+    <div class="sidebar-dashboard mt-2 px-6">
+      <a href="{% url 'parent_dashboard' %}">
+        <div class="dashboard-button !bg-[#004f9f] !text-white flex items-center gap-3 p-3 rounded-lg">
+          <span>{% trans "Dashboard" %}</span>
+        </div>
+      </a>
+    </div>
+    <div class="sidebar-menu px-6 flex-1">
+      <a href="{% url 'parent_children' %}" class="menu-item"><span>Children</span></a>
+      <a href="{% url 'parent_assignments' %}" class="menu-item"><span>Assignments</span></a>
+      <a href="{% url 'parent_messages' %}" class="menu-item"><span>Messages</span></a>
+      <a href="{% url 'parent_holidays' %}" class="menu-item"><span>Holiday Calendar</span></a>
+      <a href="{% url 'parent_performance' %}" class="menu-item"><span>Performance</span></a>
+      <a href="{% url 'parent_exam_portion' %}" class="menu-item"><span>Exam Portion</span></a>
+      <form method="post" action="{% url 'parent_logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="menu-item w-full text-left"><span>Logout</span></button>
+      </form>
+    </div>
+  </div>
+
+  <div id="parent-main-content" class="flex-1 flex flex-col">
+    <header class="bg-white border-b border-gray-200 px-6 py-8">
+      <h1 class="text-3xl font-semibold text-blue-600">{% block header %}Parent Dashboard{% endblock %}</h1>
+      <p class="text-sm text-gray-600 mt-1">{% block subtitle %}Track your child's learning journey{% endblock %}</p>
+    </header>
+    <main class="flex-1 px-6 py-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script>
+    function syncParentMainOffset() {
+      const sidebar = document.getElementById('parent-sidebar');
+      const main = document.getElementById('parent-main-content');
+      if (!sidebar || !main) return;
+      if (window.innerWidth <= 600) {
+        main.style.marginLeft = '0px';
+        return;
+      }
+      const width = Math.round(sidebar.getBoundingClientRect().width || 0);
+      main.style.marginLeft = width > 0 ? `${width}px` : '0px';
+    }
+
+    function setParentSidebarCollapsed(collapsed) {
+      const sidebar = document.getElementById('parent-sidebar');
+      if (!sidebar) return;
+      sidebar.classList.toggle('sidebar-collapsed', !!collapsed);
+      try { localStorage.setItem('parentSidebarCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+      syncParentMainOffset();
+    }
+
+    function initParentSidebarToggle() {
+      const sidebar = document.getElementById('parent-sidebar');
+      const toggleBtn = document.getElementById('parent-sidebar-toggle');
+      if (!sidebar || !toggleBtn) return;
+      let collapsed = false;
+      try { collapsed = localStorage.getItem('parentSidebarCollapsed') === '1'; } catch (e) {}
+      setParentSidebarCollapsed(collapsed);
+      toggleBtn.addEventListener('click', function () {
+        setParentSidebarCollapsed(!sidebar.classList.contains('sidebar-collapsed'));
+      });
+    }
+
+    window.addEventListener('resize', syncParentMainOffset);
+    document.addEventListener('DOMContentLoaded', function () {
+      initParentSidebarToggle();
+      syncParentMainOffset();
+    });
+  </script>
+</body>
+</html>

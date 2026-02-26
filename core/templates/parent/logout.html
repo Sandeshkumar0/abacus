@@ -1,0 +1,31 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Parent Logout</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); display:flex; align-items:center; justify-content:center; }
+    .card { background:#fff; border-radius:16px; padding:28px; text-align:center; width:90%; max-width:420px; }
+    .actions { display:flex; gap:10px; justify-content:center; margin-top:18px; }
+    button, a.btn { border:none; border-radius:10px; padding:10px 16px; font-weight:700; cursor:pointer; text-decoration:none; }
+    .logout { background:#e6f1ff; color:#000; }
+    .cancel { background:#004f9f; color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="card">
+      <img src="{% static 'portal/logout.png' %}" alt="Logout icon" width="72" />
+      <h2>Logout</h2>
+      <p>Are you sure you want to logout?</p>
+      <div class="actions">
+        <form method="post">{% csrf_token %}<button type="submit" class="logout">Logout</button></form>
+        <a class="btn cancel" href="{% url 'parent_dashboard' %}">Cancel</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

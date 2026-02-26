@@ -169,19 +169,29 @@
         <div id="questionsList" class="space-y-6"></div>
     </div>
 </div>
+{{ saved_practice_questions|json_script:"savedPracticeQuestionsData" }}
 
 <!-- JAVASCRIPT LOGIC -->
 <script>
     const CHAPTER_NAME = "{{ chapter.name }}";
+    const CHAPTER_SUBJECT = "{{ chapter_subject_name|escapejs }}";
     const CHAPTER_ID = "{{ chapter.id }}";
     const WEAK_TOPICS = [{% for t in weak_topics %}"{{ t }}", {% endfor %}];
     const STRONG_TOPICS = [{% for t in strong_topics %}"{{ t }}", {% endfor %}];
     const OVERALL_ACCURACY = {{ overall_mastery }};
+    const SAVED_PRACTICE_QUESTIONS = JSON.parse(document.getElementById("savedPracticeQuestionsData").textContent || "[]");
 
     let currentQuestions = [];
 
     // 1. Load AI Insight on Page Load
     document.addEventListener("DOMContentLoaded", function () {
+        if (Array.isArray(SAVED_PRACTICE_QUESTIONS) && SAVED_PRACTICE_QUESTIONS.length > 0) {
+            currentQuestions = SAVED_PRACTICE_QUESTIONS;
+            document.getElementById("questionContainer").classList.remove("hidden");
+            document.getElementById("loadingSkeleton").style.display = 'none';
+            renderQuestions(currentQuestions);
+        }
+
         fetch("/dashboard/api/analyze-performance/", {
             method: "POST",
             headers: {
@@ -189,6 +199,7 @@
             },
             body: JSON.stringify({
                 chapter_name: CHAPTER_NAME,
+                chapter_subject: CHAPTER_SUBJECT,
                 overall_accuracy: OVERALL_ACCURACY,
                 strong_topics: STRONG_TOPICS,
                 weak_topics: WEAK_TOPICS,
@@ -222,6 +233,8 @@
 
         const payload = {
             chapter_name: CHAPTER_NAME,
+            chapter_id: CHAPTER_ID,
+            chapter_subject: CHAPTER_SUBJECT,
             weak_subtopics: mode === 'weak' ? WEAK_TOPICS : [CHAPTER_NAME]
         };
 
@@ -310,6 +323,7 @@
             },
             body: JSON.stringify({
                 chapter_id: CHAPTER_ID,
+                question_id: q.id || null,
                 question_text: q.text,
                 subtopic: q.subtopic || "General",
                 answer_text: ansText
@@ -317,7 +331,12 @@
         })
             .then(res => res.json())
             .then(data => {
-                btn.innerText = "Submitted";
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                btn.disabled = false;
+                btn.innerText = "Submit Again";
+                btn.classList.remove("opacity-75");
                 const fbDiv = document.getElementById(`feedback_${index}`);
                 fbDiv.classList.remove("hidden");
 
@@ -331,6 +350,7 @@
                 console.error(err);
                 btn.disabled = false;
                 btn.innerText = "Submit Answer";
+                btn.classList.remove("opacity-75");
                 alert("Error submitting answer.");
             });
     }

@@ -1,0 +1,153 @@
+{% extends 'student/base_student.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Virtual Abacus" %} - EMESYS{% endblock %}
+{% block header %}{% trans "Virtual Abacus" %}{% endblock %}
+{% block subtitle %}{% trans "Practice mental math with the abacus." %}{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/page-virtual_abacus.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="main-wrapper">
+  <section class="hero" id="abacus">
+    <div class="container">
+      <div class="simulator-wrapper">
+        <div class="simulator-controls">
+          <div class="control-group">
+            <label for="mode">{% trans "Mode:" %}</label>
+            <select id="mode">
+              <option>{% trans "Decimal (Base 10)" %}</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="columns">{% trans "Columns:" %}</label>
+            <input type="number" id="columns" min="13" max="13" value="13">
+          </div>
+
+          <span class="control-hint">{% trans "Click beads to move them." %}</span>
+
+          <div class="button-group">
+            <button class="btn btn-reset" type="button" onclick="resetAbacus()">{% trans "Reset" %}</button>
+            <button class="btn btn-random" type="button" onclick="setRandomNumber()">{% trans "Random Number" %}</button>
+          </div>
+        </div>
+
+        <div class="abacus-container">
+          <div class="abacus" id="abacusDisplay"></div>
+        </div>
+
+        <div class="value-section">
+          <div class="value-display">
+            <span class="value-label">{% trans "Value:" %}</span>
+            <span class="value-number" id="valueDisplay">0</span>
+          </div>
+          <p class="value-tip">
+            {% trans "Tip: Rightmost column is the ones place, then tens, hundreds, and so on." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-6">
+    <div class="bg-white border border-blue-100 rounded-xl p-5">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+        <div>
+          <h2 class="text-xl font-bold text-blue-700">{% trans "AI Abacus Tutor" %}</h2>
+          <p class="text-sm text-gray-600">{% trans "Ask AI to explain abacus concepts in simple school-level language." %}</p>
+        </div>
+        <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold">{% trans "Interactive Learning" %}</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label for="abacusTopic" class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Topic" %}</label>
+          <select id="abacusTopic" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="Number representation on abacus">{% trans "Number representation" %}</option>
+            <option value="Place value using abacus">{% trans "Place value" %}</option>
+            <option value="Addition on abacus">{% trans "Addition" %}</option>
+            <option value="Subtraction on abacus">{% trans "Subtraction" %}</option>
+            <option value="Complement method on abacus">{% trans "Complement method" %}</option>
+            <option value="Mental math with abacus">{% trans "Mental math" %}</option>
+          </select>
+        </div>
+        <div>
+          <label for="abacusLanguage" class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Language" %}</label>
+          <select id="abacusLanguage" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+            <option value="odia">Odia</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button type="button" onclick="askAbacusTutor()"
+            class="w-full rounded-lg bg-blue-600 text-white font-semibold px-4 py-2.5 hover:bg-blue-700">
+            {% trans "Explain Concept" %}
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="abacusQuestion" class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Student Question (optional)" %}</label>
+        <textarea id="abacusQuestion" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+          placeholder="e.g. Why do we use complements in subtraction?"></textarea>
+      </div>
+
+      <div id="abacusAiOutput" class="hidden p-4 rounded-lg border border-blue-200 bg-blue-50">
+        <p class="text-xs uppercase tracking-wide text-blue-700 font-semibold mb-2">{% trans "AI Tutor Response" %}</p>
+        <pre id="abacusAiText" class="whitespace-pre-wrap text-sm text-gray-800"></pre>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/virtual_abacus.js' %}"></script>
+  <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return '';
+    }
+
+    async function askAbacusTutor() {
+      const topicEl = document.getElementById('abacusTopic');
+      const langEl = document.getElementById('abacusLanguage');
+      const qEl = document.getElementById('abacusQuestion');
+      const output = document.getElementById('abacusAiOutput');
+      const text = document.getElementById('abacusAiText');
+      if (!topicEl || !langEl || !qEl || !output || !text) return;
+
+      output.classList.remove('hidden');
+      text.textContent = 'Generating explanation...';
+
+      try {
+        const res = await fetch("{% url 'virtual_abacus_ai_tutor' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({
+            topic: topicEl.value,
+            question: qEl.value,
+            language: langEl.value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          text.textContent = data.error || 'Unable to generate explanation right now.';
+          return;
+        }
+        text.textContent = data.answer || 'No explanation available.';
+      } catch (err) {
+        text.textContent = 'Network error while contacting AI tutor.';
+      }
+    }
+  </script>
+{% endblock %}

@@ -15,6 +15,52 @@
     </a>
 </div>
 
+<div class="mb-6 bg-white border border-gray-200 rounded-xl p-5">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 class="text-lg font-semibold text-blue-700">Learning Resources</h2>
+        <span class="text-sm text-gray-500">
+          Teacher:
+          {% if assigned_teacher and assigned_teacher.teacher and assigned_teacher.teacher.user %}
+            {{ assigned_teacher.teacher.user.get_full_name }}
+          {% else %}
+            {{ subject.teacher.user.get_full_name }}
+          {% endif %}
+        </span>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm mb-4">
+        <a href="{% url 'chapter_list' subject.id %}?type=book" class="rounded-lg px-3 py-2 border {% if selected_type == 'book' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Books ({{ resource_counts.book }})</a>
+        <a href="{% url 'chapter_list' subject.id %}?type=note" class="rounded-lg px-3 py-2 border {% if selected_type == 'note' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Notes ({{ resource_counts.note }})</a>
+        <a href="{% url 'chapter_list' subject.id %}?type=video" class="rounded-lg px-3 py-2 border {% if selected_type == 'video' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Video Lessons ({{ resource_counts.video }})</a>
+        <a href="{% url 'chapter_list' subject.id %}?type=quiz" class="rounded-lg px-3 py-2 border {% if selected_type == 'quiz' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Quiz ({{ resource_counts.quiz }})</a>
+        <a href="{% url 'chapter_list' subject.id %}?type=worksheet" class="rounded-lg px-3 py-2 border {% if selected_type == 'worksheet' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Practice Worksheet ({{ resource_counts.worksheet }})</a>
+    </div>
+    <div class="space-y-3">
+      {% for resource in resources %}
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <p class="font-medium text-gray-800">{{ resource.title }}</p>
+            <p class="text-xs text-gray-500">{{ resource.get_resource_type_display }}{% if resource.section %} | {{ resource.section }}{% endif %}</p>
+          </div>
+          <div class="flex gap-2">
+            {% if resource.file %}
+            <a href="{{ resource.file.url }}" target="_blank" class="text-sm text-blue-600 hover:underline">Open File</a>
+            {% endif %}
+            {% if resource.external_url %}
+            <a href="{{ resource.external_url }}" target="_blank" class="text-sm text-blue-600 hover:underline">Open Link</a>
+            {% endif %}
+          </div>
+        </div>
+        {% if resource.description %}
+        <p class="text-sm text-gray-600 mt-1">{{ resource.description }}</p>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-600">No resources available for selected filter.</p>
+      {% endfor %}
+    </div>
+</div>
+
 <div class="grid grid-cols-1 gap-4">
     {% for chapter in chapters %}
     <a href="{% url 'chapter_detail' chapter.id %}" class="block group">
@@ -26,10 +72,8 @@
                     {{ chapter.chapter_number|default:"#" }}
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{
-                        chapter.name }}</h3>
-                    <p class="text-sm text-gray-500">{{ chapter.description|default:"No description"|truncatewords:15 }}
-                    </p>
+                    <h3 class="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ chapter.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ chapter.description|default:"No description"|truncatewords:15 }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">

@@ -1,68 +1,89 @@
 {% extends 'student/base_student.html' %}
-{% load static %}
+{% load i18n %}
 
-{% block title %}Virtual Abacus - EMESYS{% endblock %}
-{% block header %}Virtual Abacus{% endblock %}
-{% block subtitle %}Practice mental math with the abacus.{% endblock %}
-
-{% block extra_css %}
-  <!-- Abacus styling (keep in static/css/page-virtual_abacus.css) -->
-  <link rel="stylesheet" href="{% static 'css/page-virtual_abacus.css' %}">
-{% endblock %}
+{% block title %}{% trans "Class Notes" %} - EMESYS{% endblock %}
+{% block header %}{% trans "Class Notes" %}{% endblock %}
+{% block subtitle %}{% trans "Notes uploaded by teachers for your section." %}{% endblock %}
 
 {% block content %}
-<!-- Only the abacus part (controls + abacus display + value) — no page header/footer/feature sections -->
-<div class="main-wrapper">
-  <section class="hero" id="abacus">
-    <div class="container">
+<div class="bg-white border border-gray-200 rounded-xl p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-xl font-semibold text-blue-600">{% trans "Teacher Notes" %}</h3>
+    {% if student_section %}
+    <span class="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded-md">
+      {% trans "Section" %}: {{ student_section }}
+    </span>
+    {% endif %}
+  </div>
 
-      <div class="simulator-wrapper">
-        <!-- Controls -->
-        <div class="simulator-controls">
-          <div class="control-group">
-            <label for="mode">Mode:</label>
-            <select id="mode">
-              <option>Decimal (Base 10)</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label for="columns">Columns:</label>
-            <!-- keep 13 as default (you can allow user change if your JS supports it) -->
-            <input type="number" id="columns" min="13" max="13" value="13">
-          </div>
-
-          <span class="control-hint">Click beads to move them.</span>
-
-          <div class="button-group">
-            <button class="btn btn-reset" type="button" onclick="resetAbacus()">Reset</button>
-            <button class="btn btn-random" type="button" onclick="setRandomNumber()">Random Number</button>
-          </div>
-        </div>
-
-        <!-- Abacus Visualization (JS will populate this) -->
-        <div class="abacus-container">
-          <div class="abacus" id="abacusDisplay"></div>
-        </div>
-
-        <!-- Value Display -->
-        <div class="value-section">
-          <div class="value-display">
-            <span class="value-label">Value:</span>
-            <span class="value-number" id="valueDisplay">0</span>
-          </div>
-          <p class="value-tip">
-            Tip: Rightmost column is the ones place, then tens, hundreds, and so on.
-          </p>
-        </div>
+  <div class="space-y-3">
+    {% for note in notes_feed %}
+    <article class="rounded-lg border border-gray-200 p-4 bg-gray-50">
+      <div class="flex items-start justify-between gap-2">
+        <h4 class="font-semibold text-gray-800">{{ note.title }}</h4>
+        {% if note.subject %}
+        <span class="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded-md">{{ note.subject.name }}</span>
+        {% endif %}
       </div>
-
+      {% if note.content %}
+      <p class="text-sm text-gray-700 mt-2 whitespace-pre-wrap">{{ note.content|truncatewords:50 }}</p>
+      {% endif %}
+      <div class="mt-3 text-xs text-gray-500">
+        {{ note.teacher.user.get_full_name }} |
+        {% if note.section %}{{ note.section }}{% else %}{% trans "All Sections" %}{% endif %} |
+        {{ note.created_at|date:"M d, Y H:i" }}
+      </div>
+      {% if note.attachment %}
+      <div class="mt-2">
+        <a href="{{ note.attachment.url }}" target="_blank" class="text-sm text-blue-600 hover:underline">{% trans "Open Attachment" %}</a>
+      </div>
+      {% endif %}
+    </article>
+    {% empty %}
+    <div class="rounded-lg border border-dashed border-gray-300 p-6 text-sm text-gray-600 bg-white">
+      {% trans "No class notes available yet for your section." %}
     </div>
-  </section>
+    {% endfor %}
+  </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-  <!-- loads your abacus logic (make sure this file is at static/js/virtual_abacus.js) -->
-  <script src="{% static 'js/virtual_abacus.js' %}"></script>
+<div class="bg-white border border-gray-200 rounded-xl p-5 mt-6">
+  <h3 class="text-xl font-semibold text-blue-600 mb-2">{% trans "Class Resources" %}</h3>
+  <p class="text-sm text-gray-600 mb-4">{% trans "Resources uploaded from teacher section for your class." %}</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    {% for res in resource_feed %}
+    <article class="rounded-xl border border-gray-200 bg-gray-50 p-4 shadow-sm hover:shadow-lg transition-shadow duration-200">
+      <div class="flex items-start justify-between gap-2">
+        <h4 class="font-semibold text-gray-800">{{ res.title }}</h4>
+        <span class="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-2 py-1 rounded-md">
+          {{ res.get_resource_type_display }}
+        </span>
+      </div>
+      <p class="text-sm text-gray-600 mt-2">{{ res.subject.name }}</p>
+      {% if res.description %}
+      <p class="text-sm text-gray-700 mt-2">{{ res.description|truncatewords:30 }}</p>
+      {% endif %}
+      <div class="mt-3 text-xs text-gray-500">
+        {{ res.uploaded_by.user.get_full_name }} |
+        {% if res.section %}{{ res.section }}{% else %}{% trans "All Sections" %}{% endif %} |
+        {{ res.created_at|date:"M d, Y H:i" }}
+      </div>
+      <div class="mt-3">
+        {% if res.file %}
+        <a href="{{ res.file.url }}" target="_blank" class="text-sm text-blue-600 hover:underline">{% trans "Open File" %}</a>
+        {% elif res.external_url %}
+        <a href="{{ res.external_url }}" target="_blank" class="text-sm text-blue-600 hover:underline">{% trans "Open Link" %}</a>
+        {% else %}
+        <span class="text-sm text-gray-500">{% trans "No file/link attached" %}</span>
+        {% endif %}
+      </div>
+    </article>
+    {% empty %}
+    <div class="col-span-full rounded-lg border border-dashed border-gray-300 p-6 text-sm text-gray-600 bg-white">
+      {% trans "No class resources available yet for your section." %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

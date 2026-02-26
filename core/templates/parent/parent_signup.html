@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMESYS - Parent Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row">
+  <div class="flex-1 bg-white flex flex-col items-center justify-center p-8">
+    <a href="{% url 'portal-landing' %}">
+      <img src="{% static 'portal/Logo.png' %}" alt="EMESYS Logo" class="absolute left-8 top-8 h-24">
+    </a>
+    <img src="{% static 'portal/Teacher Assistence.jpg' %}" alt="Parent Illustration" class="w-full max-w-sm" />
+  </div>
+
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-cover bg-center"
+       style="background-image: url('{% static 'portal/5883.jpg' %}')">
+    <div class="bg-white/90 rounded-2xl p-8 w-full max-w-md shadow-xl">
+      <h1 class="text-3xl font-bold text-blue-600 mb-2 text-center">Parent Sign Up</h1>
+      <p class="text-gray-600 text-center mb-8">Create your parent account.</p>
+
+      {% if messages %}
+      <div class="space-y-2 mb-4">
+        {% for message in messages %}
+        <div class="p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'parent_signup' %}" class="space-y-4">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Full Name" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="email" name="email" placeholder="Email" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="tel" name="phone" placeholder="Phone" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="password" name="password" placeholder="Create Password" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="email" name="child_student_email" placeholder="Student Email (required)" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="text" name="relation" placeholder="Relation (Father/Mother/Guardian)" class="h-12 w-full border border-gray-300 rounded-xl px-4" />
+        <button type="submit" class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl">Sign Up</button>
+      </form>
+
+      <p class="text-center text-sm text-gray-600 mt-6">
+        Already have an account?
+        <a href="{% url 'parent_login' %}" class="text-blue-600 hover:underline font-medium">Login here</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

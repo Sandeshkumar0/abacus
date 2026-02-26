@@ -102,8 +102,7 @@
 
                 <div>
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{
-                            group.name }}</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ group.name }}</h3>
                         <span
                             class="status-badge text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wide">Active</span>
                     </div>
@@ -125,8 +124,13 @@
                         <span class="font-bold text-lg">{{ group.students.count }}</span>
                         <span class="text-sm ml-1 font-medium">Students</span>
                     </div>
-                    <span class="text-sm text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-md">{{
-                        group.created_at|date:"M d, Y" }}</span>
+                    <span class="text-sm text-gray-400 font-medium bg-gray-50 px-3 py-1 rounded-md">{{ group.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <a href="{% url 'group_competition' group.id %}"
+                        class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors">
+                        Leaderboard Competition
+                    </a>
                 </div>
             </div>
             {% endfor %}

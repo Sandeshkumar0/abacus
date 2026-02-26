@@ -1,0 +1,246 @@
+{% extends 'student/base_student.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Attendance Details" %} - EMESYS{% endblock %}
+{% block header %}{% trans "Attendance Details" %}{% endblock %}
+{% block subtitle %}{% trans "View attendance marked by teachers" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .att-shell {
+    background: #d8e2eb;
+    border: 1px solid #a8bacb;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .att-header {
+    background: linear-gradient(180deg, #b8c8d7 0%, #a8bccf 100%);
+    color: #111827;
+    font-size: 2rem;
+    font-style: italic;
+    font-weight: 700;
+    padding: 14px 20px;
+  }
+  .att-section-title {
+    background: #acc1d4;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-top: 1px solid #9fb3c4;
+    border-bottom: 1px solid #9fb3c4;
+  }
+  .att-panel {
+    padding: 10px 14px 14px;
+    background: #d4dee8;
+  }
+  .att-table th, .att-table td {
+    border: 1px solid #aebdcb;
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .att-table th {
+    background: #b9c4ce;
+    font-weight: 700;
+  }
+  .att-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (min-width: 900px) {
+    .att-kpis {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  .att-kpi {
+    background: #ffffff;
+    border: 1px solid #b6c5d3;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .att-kpi-label {
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+  .att-kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="att-shell">
+  <div class="att-header">{% trans "Student Details" %}</div>
+
+  <div class="p-4 bg-[#d9e3ed]">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2">
+        <div class="grid grid-cols-[220px_1fr] gap-y-2 text-[28px]">
+          <div class="font-semibold">{% trans "Student Name" %} :</div>
+          <div class="font-semibold">{{ student.user.get_full_name|default:"-" }}</div>
+          <div class="font-semibold">{% trans "Roll No." %} :</div>
+          <div class="font-semibold">{{ student.roll_number|default:"-" }}</div>
+          <div class="font-semibold">{% trans "Class" %} :</div>
+          <div class="font-semibold">{{ student.student_class|default:"-" }}</div>
+          <div class="font-semibold">{% trans "Section" %} :</div>
+          <div class="font-semibold">{% if student.section %}{{ student.section }}{% else %}-{% endif %}</div>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        {% if student.profile_picture %}
+        <img src="{{ student.profile_picture.url }}" alt="{% trans 'Student Photo' %}" class="h-[160px] w-[130px] object-cover border-2 border-[#8aa0b4] bg-white">
+        {% else %}
+        <div class="h-[160px] w-[130px] border-2 border-[#8aa0b4] bg-white flex items-center justify-center text-xs text-gray-500">
+          {% trans "No Photo" %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="att-section-title">{% trans "Select Year & Session" %}</div>
+  <div class="att-panel">
+    <form method="get" class="flex flex-wrap items-end gap-3">
+      <div>
+        <label for="year" class="block text-sm font-semibold">{% trans "Year" %}:</label>
+        <select id="year" name="year" class="border border-[#8fa4b8] bg-white px-2 py-1 min-w-[140px]">
+          <option value="">{% trans "All" %}</option>
+          {% for year in available_year_values %}
+          <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="session" class="block text-sm font-semibold">{% trans "Session" %}:</label>
+        <select id="session" name="session" class="border border-[#8fa4b8] bg-white px-2 py-1 min-w-[160px]">
+          <option value="">{% trans "All Sessions" %}</option>
+          <option value="odd" {% if selected_session == 'odd' %}selected{% endif %}>{% trans "Odd (Jul-Dec)" %}</option>
+          <option value="even" {% if selected_session == 'even' %}selected{% endif %}>{% trans "Even (Jan-Jun)" %}</option>
+        </select>
+      </div>
+      <button type="submit" class="bg-[#f3d97b] border border-[#7f6d3a] px-4 py-1 font-semibold">{% trans "Submit" %}</button>
+    </form>
+  </div>
+
+  <div class="att-section-title">{% trans "Attendance Details" %}</div>
+  <div class="att-panel overflow-auto">
+    {% if not class_teacher_assigned %}
+    <div class="mb-3 p-3 rounded border border-yellow-300 bg-yellow-50 text-yellow-800 text-sm">
+      {% trans "Class teacher is not assigned for your section yet. Attendance will appear here only after class teacher marks it." %}
+    </div>
+    {% endif %}
+
+    <div class="mb-3 text-sm text-gray-700 flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <span class="font-semibold">{% trans "Marked By Class Teacher" %}:</span> {{ class_teacher_name }}
+      </div>
+      <div>
+        <span class="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-700 text-xs font-semibold">Live Refresh: 20s</span>
+        {% if latest_marked_at %}
+        <span class="ml-2 text-xs text-gray-600">{% trans "Last Updated" %}: {{ latest_marked_at|date:"M d, Y H:i:s" }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="att-kpis mb-4">
+      <div class="att-kpi">
+        <div class="att-kpi-label">{% trans "Total Classes" %}</div>
+        <div class="att-kpi-value">{{ summary.total_days }}</div>
+      </div>
+      <div class="att-kpi">
+        <div class="att-kpi-label">{% trans "Present" %}</div>
+        <div class="att-kpi-value text-green-700">{{ summary.present }}</div>
+      </div>
+      <div class="att-kpi">
+        <div class="att-kpi-label">{% trans "Absent" %}</div>
+        <div class="att-kpi-value text-red-700">{{ summary.absent }}</div>
+      </div>
+      <div class="att-kpi">
+        <div class="att-kpi-label">{% trans "Late" %}</div>
+        <div class="att-kpi-value text-yellow-700">{{ summary.late }}</div>
+      </div>
+      <div class="att-kpi">
+        <div class="att-kpi-label">{% trans "Attendance %" %}</div>
+        <div class="att-kpi-value text-blue-700">{{ summary.percentage }}%</div>
+      </div>
+    </div>
+
+    <div class="mb-4 p-3 rounded border border-blue-200 bg-blue-50">
+      <div class="text-sm font-semibold text-blue-800 mb-2">
+        {% trans "Cumulative Report Till" %} {{ cumulative_summary.upto_date|date:"d-m-Y" }}
+      </div>
+      <div class="att-kpis">
+        <div class="att-kpi">
+          <div class="att-kpi-label">{% trans "Total Classes" %}</div>
+          <div class="att-kpi-value">{{ cumulative_summary.total_days }}</div>
+        </div>
+        <div class="att-kpi">
+          <div class="att-kpi-label">{% trans "Present" %}</div>
+          <div class="att-kpi-value text-green-700">{{ cumulative_summary.present }}</div>
+        </div>
+        <div class="att-kpi">
+          <div class="att-kpi-label">{% trans "Absent" %}</div>
+          <div class="att-kpi-value text-red-700">{{ cumulative_summary.absent }}</div>
+        </div>
+        <div class="att-kpi">
+          <div class="att-kpi-label">{% trans "Late" %}</div>
+          <div class="att-kpi-value text-yellow-700">{{ cumulative_summary.late }}</div>
+        </div>
+        <div class="att-kpi">
+          <div class="att-kpi-label">{% trans "Attendance %" %}</div>
+          <div class="att-kpi-value text-blue-700">{{ cumulative_summary.percentage }}%</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="att-table w-full text-sm">
+      <thead>
+        <tr>
+          <th>{% trans "Subject" %}</th>
+          <th>{% trans "No. of Absent" %}</th>
+          <th>{% trans "Faculty Name" %}</th>
+          <th>{% trans "Total Percentage" %}</th>
+          <th>{% trans "Total No. of Days" %}</th>
+          <th>{% trans "No. of Present" %}</th>
+          <th>{% trans "No. of Excuses" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in teacher_rows %}
+        <tr>
+          <td>{{ row.subject_name }}</td>
+          <td>{{ row.absent }}</td>
+          <td>{{ row.faculty_name }}</td>
+          <td>{{ row.total_percentage }}%</td>
+          <td>{{ row.total_days }}</td>
+          <td>{{ row.present }}</td>
+          <td>{{ row.excuses }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-gray-600">{% trans "No attendance records found for selected filters." %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="mt-4 text-sm font-semibold text-gray-800">
+      {% trans "Overall" %}: {{ summary.percentage }}% |
+      {% trans "Present" %}: {{ summary.present }} |
+      {% trans "Absent" %}: {{ summary.absent }} |
+      {% trans "Late" %}: {{ summary.late }} |
+      {% trans "Total Days" %}: {{ summary.total_days }}
+    </div>
+  </div>
+</div>
+<script>
+  setInterval(function () {
+    const params = new URLSearchParams(window.location.search);
+    window.location.search = params.toString();
+  }, 20000);
+</script>
+{% endblock %}

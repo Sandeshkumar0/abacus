@@ -1,0 +1,102 @@
+{% extends 'teacher/base_teacher.html' %}
+
+{% block title %}Manage Holidays - EMESYS{% endblock %}
+{% block header %}Add Holiday{% endblock %}
+{% block subtitle %}Create section holiday from teacher side{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <div class="xl:col-span-2 bg-white border border-gray-200 rounded-xl p-6">
+    <h2 class="text-lg font-semibold text-blue-600 mb-4">Create Holiday</h2>
+    {% if messages %}
+      {% for message in messages %}
+      <div class="mb-4 p-3 rounded-lg text-sm {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <input id="title" name="title" type="text" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500" placeholder="e.g. School Annual Day">
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <input id="date" name="date" type="date" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label for="holiday_type" class="block text-sm font-medium text-gray-700 mb-1">Holiday Type</label>
+          <select id="holiday_type" name="holiday_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+            <option value="section">Section Holiday</option>
+            {% if can_create_general %}
+            <option value="general">General Holiday</option>
+            {% endif %}
+          </select>
+        </div>
+      </div>
+
+      <div id="sectionWrap">
+        <label for="section_id" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
+        <select id="section_id" name="section_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+          <option value="">Select Section</option>
+          {% for section in sections %}
+          <option value="{{ section.id }}">{{ section.class_level }}{{ section.section }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+        <textarea id="description" name="description" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500" placeholder="Add details for students..."></textarea>
+      </div>
+
+      <button type="submit" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+        Add Holiday
+      </button>
+    </form>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6">
+    <h3 class="text-lg font-semibold text-blue-600 mb-4">Recent Holidays</h3>
+    <div class="space-y-3 max-h-[520px] overflow-auto">
+      {% for item in holidays_feed %}
+      <div class="border border-gray-200 rounded-lg p-3">
+        <div class="flex items-center justify-between gap-2">
+          <p class="font-medium text-gray-800">{{ item.title }}</p>
+          <span class="text-xs px-2 py-1 rounded-full {% if item.holiday_type == 'general' %}bg-blue-100 text-blue-700{% else %}bg-green-100 text-green-700{% endif %}">{{ item.get_holiday_type_display }}</span>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">{{ item.date|date:"M d, Y" }} {% if item.section %}| {{ item.section }}{% endif %}</p>
+        {% if item.description %}
+        <p class="text-sm text-gray-600 mt-2">{{ item.description }}</p>
+        {% endif %}
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-600">No holidays added yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const typeEl = document.getElementById('holiday_type');
+    const sectionWrap = document.getElementById('sectionWrap');
+    const sectionEl = document.getElementById('section_id');
+    if (!typeEl || !sectionWrap || !sectionEl) return;
+
+    function syncSectionVisibility() {
+      const isSection = typeEl.value === 'section';
+      sectionWrap.style.display = isSection ? '' : 'none';
+      sectionEl.required = isSection;
+      if (!isSection) sectionEl.value = '';
+    }
+
+    typeEl.addEventListener('change', syncSectionVisibility);
+    syncSectionVisibility();
+  })();
+</script>
+{% endblock %}

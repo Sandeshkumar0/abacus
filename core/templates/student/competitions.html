@@ -1,0 +1,85 @@
+{% extends 'student/base_student.html' %}
+
+{% block title %}Competitions{% endblock %}
+{% block header %}Group Competitions{% endblock %}
+{% block subtitle %}Answer quickly to rank higher on leaderboard{% endblock %}
+
+{% block content %}
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+{% if competition_items %}
+<div class="space-y-4">
+  {% for item in competition_items %}
+  <div class="bg-white rounded-xl border border-gray-200 p-5">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">{{ item.group_name }} - Q{{ item.question.id }}</h3>
+        <p class="text-sm text-gray-700">{{ item.question.description }}</p>
+      </div>
+      {% if item.submitted %}
+      <span class="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700">Submitted</span>
+      {% else %}
+      <span class="text-xs px-3 py-1 rounded-full bg-yellow-100 text-yellow-700">Not Submitted</span>
+      {% endif %}
+    </div>
+
+    <div class="mt-3">
+      <textarea data-question="{{ item.question.id }}" class="w-full border border-gray-300 rounded p-3" rows="3"
+        placeholder="Write your answer here...">{{ item.answer_text }}</textarea>
+      <div class="mt-3 flex items-center justify-between">
+        <input type="file" class="answer-file text-sm text-gray-600" data-question="{{ item.question.id }}">
+        <button type="button" onclick="submitCompetitionAnswer('{{ item.question.id }}')"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          {% if item.submitted %}Resubmit{% else %}Submit{% endif %}
+        </button>
+      </div>
+      {% if item.submitted_at %}
+      <p class="mt-2 text-xs text-gray-500">Last submitted at {{ item.submitted_at|date:"M d, Y H:i:s" }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-600">
+  No active competitions right now.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitCompetitionAnswer(questionId) {
+  const textarea = document.querySelector(`textarea[data-question="${questionId}"]`);
+  const fileInput = document.querySelector(`input.answer-file[data-question="${questionId}"]`);
+  const answer = textarea?.value?.trim();
+  const file = fileInput?.files[0];
+
+  if (!answer && !file) {
+    alert("Please enter an answer or upload a file.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("question_id", questionId);
+  formData.append("answer", answer || "");
+  if (file) formData.append("answer_file", file);
+
+  fetch('/dashboard/student/submit-answer/', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': document.getElementById('csrf-token').value },
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'success') {
+      alert("Competition answer submitted successfully.");
+      window.location.reload();
+    } else {
+      alert(data.message || "Submission failed.");
+    }
+  })
+  .catch(() => alert("Error submitting answer."));
+}
+</script>
+{% endblock %}

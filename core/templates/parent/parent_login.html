@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMESYS - Parent Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen flex bg-white">
+  <div class="hidden lg:flex lg:w-1/2 flex-col bg-white min-h-screen">
+    <div class="p-8">
+      <a href="{% url 'portal-landing' %}">
+        <img src="{% static 'portal/Logo.png' %}" alt="EMESYS Logo" class="absolute left-8 top-8 h-24" />
+      </a>
+    </div>
+    <div class="flex-1 flex items-center justify-center">
+      <img src="{% static 'portal/Teacher Assistence.jpg' %}" alt="Parent Illustration" class="w-4/5 max-w-lg" />
+    </div>
+  </div>
+
+  <div class="flex-1 lg:w-1/2 flex items-center justify-center p-8 bg-cover bg-center"
+       style="background-image: url('{% static 'portal/bg-wave.png' %}');">
+    <div class="w-full max-w-md bg-white/90 rounded-2xl p-8 shadow-xl">
+      <h1 class="text-3xl font-bold text-blue-600 mb-2 text-center">Parent Login</h1>
+      <p class="text-gray-600 text-center mb-8">Login to monitor your child progress.</p>
+      <form method="POST" action="{% url 'parent_login' %}" class="space-y-5">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Enter Email" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        <input type="password" name="password" placeholder="Password" class="h-12 w-full border border-gray-300 rounded-xl px-4" required />
+        {% if error %}<p class="text-red-600 text-sm">{{ error }}</p>{% endif %}
+        <label class="flex items-center gap-2 text-sm text-gray-600">
+          <input name="remember_me" type="checkbox" {% if remember_me %}checked{% endif %} />
+          Keep me logged in
+        </label>
+        <button type="submit" class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl">Log in</button>
+      </form>
+      <p class="text-center text-sm text-gray-600 mt-6">
+        Don't have a parent account?
+        <a href="{% url 'parent_signup' %}" class="text-blue-600 hover:underline font-medium">Create New Account</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

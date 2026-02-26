@@ -3,6 +3,11 @@
 /* Notification Bell Icon */
 .notification-bell {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
     font-size: 24px;
     color: #333;
@@ -15,8 +20,8 @@
 
 #notification-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -10px;
+    right: -10px;
     background: #dc3545;
     color: white;
     border-radius: 50%;
@@ -135,6 +140,7 @@
 }
 
 .notification-item {
+    position: relative;
     padding: 15px;
     border-bottom: 1px solid #f0f0f0;
     transition: background 0.2s;
@@ -200,13 +206,14 @@
 /* Notification Status Dot (replacing connection status) */
 #connection-status {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: -8px;
+    right: 6px;
     width: 10px;
     height: 10px;
     border-radius: 50%;
     border: 2px solid white;
     z-index: 5;
+    pointer-events: none;
 }
 
 #connection-status.unread {

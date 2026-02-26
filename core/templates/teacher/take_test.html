@@ -61,6 +61,27 @@ Create and schedule exams for students
           class="w-full px-4 py-3 bg-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
       </div>
     </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2">Section</label>
+        <select id="sectionSelect"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-bluePrimary">
+          <option value="">Select Section</option>
+          {% for section in sections %}
+          <option value="{{ section.id }}">{{ section.class_level }}{{ section.section }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
+        <input id="timerEnabled" type="checkbox" class="h-4 w-4">
+        <label for="timerEnabled" class="text-gray-700 font-semibold">Enable Timer</label>
+      </div>
+      <div>
+        <label class="block text-gray-700 font-semibold mb-2">Duration (minutes)</label>
+        <input id="durationMinutes" type="number" min="1" placeholder="e.g. 60"
+          class="w-full px-4 py-3 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-bluePrimary" />
+      </div>
+    </div>
 
     <!-- Subject/Chapter Selection moved to AI Modal -->
   </div>
@@ -153,6 +174,8 @@ Create and schedule exams for students
             <option value="Class 8">Class 8</option>
             <option value="Class 9">Class 9</option>
             <option value="Class 10">Class 10</option>
+            <option value="Class 11">Class 11</option>
+            <option value="Class 12">Class 12</option>
           </select>
         </div>
 
@@ -229,6 +252,7 @@ Create and schedule exams for students
             <div class="mt-3 space-y-2 text-sm text-gray-600">
               <p>📅 <strong>Due Date:</strong> {{ exam.due_date|date:"M d, Y - h:i A" }}</p>
               <p>📊 <strong>Total Marks:</strong> {{ exam.total_marks }}</p>
+              <p>⏱ <strong>Timer:</strong> {% if exam.timer_enabled %}Enabled ({{ exam.duration_minutes }} min){% else %}Disabled{% endif %}</p>
               <p>❓ <strong>Questions:</strong> {{ exam.questions.count }}</p>
               <p>📝 <strong>Created:</strong> {{ exam.created_at|date:"M d, Y" }}</p>
             </div>
@@ -365,8 +389,9 @@ Create and schedule exams for students
     const examHeading = document.getElementById("examHeading").value.trim();
     const dueDate = document.getElementById("dueDate").value.trim();
     const totalMarks = document.getElementById("totalMarks").value.trim();
+    const sectionId = document.getElementById("sectionSelect").value;
 
-    if (!examHeading || !dueDate || !totalMarks || questions.length === 0) {
+    if (!examHeading || !dueDate || !totalMarks || !sectionId || questions.length === 0) {
       alert("⚠️ Please fill in all details and add at least one question.");
       return;
     }
@@ -376,6 +401,9 @@ Create and schedule exams for students
     formData.append("examHeading", examHeading);
     formData.append("dueDate", dueDate);
     formData.append("totalMarks", totalMarks);
+    formData.append("section_id", sectionId);
+    formData.append("timerEnabled", document.getElementById("timerEnabled").checked ? "true" : "false");
+    formData.append("durationMinutes", document.getElementById("durationMinutes").value.trim());
     formData.append("subject_id", document.getElementById("subjectSelect").value);
     formData.append("chapter_id", document.getElementById("chapterSelect").value);
 
@@ -587,3 +615,5 @@ Create and schedule exams for students
 </script>
 
 {% endblock %}
+
+

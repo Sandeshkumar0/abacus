@@ -28,8 +28,18 @@
   </div>
 </div>
 
+{% if timer_enabled and remaining_seconds != None %}
+<div class="bg-white shadow rounded-xl p-6 mb-8 border-l-4 border-red-500">
+  <div class="flex items-center justify-between">
+    <div class="text-sm text-gray-600">Exam Timer</div>
+    <div id="exam-timer" class="text-2xl font-bold text-red-600" data-remaining="{{ remaining_seconds }}">00:00</div>
+  </div>
+  <p class="text-xs text-gray-500 mt-2">Exam will auto-submit when timer reaches 00:00.</p>
+</div>
+{% endif %}
 
-<form method="post" enctype="multipart/form-data">
+
+<form method="post" enctype="multipart/form-data" id="attemptExamForm">
   {% csrf_token %}
   <div class="questions">
     {% for q in questions %}
@@ -107,6 +117,35 @@ function submitThenDownload(questionId) {
   });
 }
 </script>
+
+{% if timer_enabled and remaining_seconds != None %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const timerEl = document.getElementById("exam-timer");
+  const form = document.getElementById("attemptExamForm");
+  if (!timerEl || !form) return;
+
+  let remaining = parseInt(timerEl.dataset.remaining || "0", 10);
+  const format = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+  timerEl.textContent = format(remaining);
+
+  const tick = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) {
+      timerEl.textContent = "00:00";
+      clearInterval(tick);
+      form.submit();
+      return;
+    }
+    timerEl.textContent = format(remaining);
+  }, 1000);
+});
+</script>
+{% endif %}
 
 <!-- MathJax -->
 <script>

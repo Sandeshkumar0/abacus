@@ -1,9 +1,9 @@
 {% extends 'student/base_student.html' %}
 {% load static %}
 
-{% block title %}Responses to Your Queries - Emesys{% endblock %}
-{% block header %}Responses to Your Queries{% endblock %}
-{% block subtitle %}See responses provided by teachers to your submitted queries{% endblock %}
+{% block title %}Messages & Announcements - Emesys{% endblock %}
+{% block header %}Messages & Announcements{% endblock %}
+{% block subtitle %}Teacher messages and principal/admin announcements{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'portal/css/respond.css' %}">
@@ -11,31 +11,144 @@
 
 {% block content %}
 <div class="px-4 py-6">
-  <div class="grid gap-6">
-    {% for query in queries %}
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <div class="flex justify-between items-center mb-2">
-        <h3 class="text-xl font-semibold text-blue-600">Query Submitted on {{ query.submitted_at|date:"M d, Y H:i" }}</h3>
-        <span class="text-sm text-gray-500">Response from {{ query.teacher_name }}</span>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-sm text-gray-600">
+      Messages come from teacher <span class="font-semibold text-gray-700">Post Class Message</span> and admin/principal <span class="font-semibold text-gray-700">Announcements</span>.
+    </p>
+    <form method="post" class="hidden">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="clear_all">
+      <button type="submit" class="px-3 py-2 rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 text-sm font-medium">
+        Clear Messages
+      </button>
+    </form>
+  </div>
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h3 class="text-xl font-semibold text-blue-600">Teacher Messages</h3>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="clear_teacher">
+          <button type="submit" class="px-3 py-2 rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 text-xs font-medium">
+            Clear Teacher Messages
+          </button>
+        </form>
       </div>
-
-      <p class="mb-4 text-gray-800 whitespace-pre-wrap"><strong>Query:</strong> {{ query.query_text }}</p>
-
-      {% if query.query_image %}
-      <div class="mb-4">
-        <a href="{{ query.query_image }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
-          View Attached File
-        </a>
-      </div>
-      {% endif %}
-
-      <div class="bg-gray-100 p-4 rounded-md text-gray-800">
-        <strong>Response:</strong> {{ query.response }}
+      <div class="space-y-4">
+        {% for msg in teacher_messages_feed %}
+        <div class="p-4 rounded-lg border {% if msg.is_important %}border-red-200 bg-red-50{% else %}border-gray-100 bg-gray-50{% endif %}">
+          <div class="flex justify-between items-center mb-1">
+            <h4 class="font-semibold text-gray-800">{{ msg.title }}</h4>
+            {% if msg.is_important %}
+            <span class="text-xs font-semibold text-red-600">Important</span>
+            {% endif %}
+          </div>
+          <p class="mb-2 text-gray-800 whitespace-pre-wrap">{{ msg.body }}</p>
+          <div class="text-xs text-gray-500">
+            From {{ msg.sender }} | {{ msg.section }} | {{ msg.created_at|date:"M d, Y H:i" }}
+          </div>
+          <div class="mt-3 pt-3 border-t border-gray-200 flex flex-wrap items-center gap-3 text-sm">
+            <form method="post" class="inline">
+              {% csrf_token %}
+              <input type="hidden" name="item_type" value="message">
+              <input type="hidden" name="item_id" value="{{ msg.id }}">
+              <input type="hidden" name="action" value="like">
+              <button type="submit" class="text-blue-600 hover:text-blue-800 font-medium">
+                {% if msg.is_liked %}Liked{% else %}Like{% endif %} ({{ msg.likes_count }})
+              </button>
+            </form>
+            <button type="button" class="text-blue-600 hover:text-blue-800 font-medium notification-comment-toggle" data-target="msg-{{ forloop.counter }}">Comment ({{ msg.comments_count }})</button>
+          </div>
+          <div id="msg-{{ forloop.counter }}" class="hidden mt-3">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="item_type" value="message">
+              <input type="hidden" name="item_id" value="{{ msg.id }}">
+              <input type="hidden" name="action" value="comment">
+              <textarea name="comment_text" class="w-full rounded-lg border border-gray-300 p-2 text-sm" rows="2" placeholder="Write a comment...">{{ msg.comment_text }}</textarea>
+              <button type="submit" class="mt-2 px-3 py-1 rounded-md bg-blue-600 text-white text-xs">Save Comment</button>
+            </form>
+          </div>
+        </div>
+        {% empty %}
+        <div class="text-sm text-gray-600">No teacher messages yet.</div>
+        {% endfor %}
       </div>
     </div>
-    {% empty %}
-    <div class="text-center text-gray-600 mt-8">No responded queries yet.</div>
-    {% endfor %}
+
+    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h3 class="text-xl font-semibold text-blue-600">Principal/Admin Announcements</h3>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="clear_announcements">
+          <button type="submit" class="px-3 py-2 rounded-lg border border-red-300 text-red-700 bg-red-50 hover:bg-red-100 text-xs font-medium">
+            Clear Announcements
+          </button>
+        </form>
+      </div>
+      <div class="space-y-4">
+        {% for ann in announcements_feed %}
+        <div class="p-4 rounded-lg border border-blue-100 bg-blue-50">
+          <div class="flex justify-between items-center mb-1">
+            <h4 class="font-semibold text-gray-800">{{ ann.title }}</h4>
+            <span class="text-xs font-semibold text-blue-700">{{ ann.source }}</span>
+          </div>
+          <p class="mb-2 text-gray-800 whitespace-pre-wrap">{{ ann.body }}</p>
+          <div class="text-xs text-gray-500">
+            From {{ ann.sender }} | {{ ann.section }} | {{ ann.created_at|date:"M d, Y H:i" }}
+          </div>
+          {% if ann.source == "Announcement" %}
+          <div class="mt-3 pt-3 border-t border-blue-200 flex flex-wrap items-center gap-3 text-sm">
+            <form method="post" class="inline">
+              {% csrf_token %}
+              <input type="hidden" name="item_type" value="announcement">
+              <input type="hidden" name="item_id" value="{{ ann.id }}">
+              <input type="hidden" name="action" value="like">
+              <button type="submit" class="text-blue-600 hover:text-blue-800 font-medium">
+                {% if ann.is_liked %}Liked{% else %}Like{% endif %} ({{ ann.likes_count }})
+              </button>
+            </form>
+            <button type="button" class="text-blue-600 hover:text-blue-800 font-medium notification-comment-toggle" data-target="ann-{{ forloop.counter }}">Comment ({{ ann.comments_count }})</button>
+          </div>
+          <div id="ann-{{ forloop.counter }}" class="hidden mt-3">
+            <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="item_type" value="announcement">
+              <input type="hidden" name="item_id" value="{{ ann.id }}">
+              <input type="hidden" name="action" value="comment">
+              <textarea name="comment_text" class="w-full rounded-lg border border-gray-300 p-2 text-sm" rows="2" placeholder="Write a comment...">{{ ann.comment_text }}</textarea>
+              <button type="submit" class="mt-2 px-3 py-1 rounded-md bg-blue-600 text-white text-xs">Save Comment</button>
+            </form>
+          </div>
+          {% else %}
+          <div class="mt-3 pt-3 border-t border-blue-200 text-xs text-blue-700 font-medium">
+            Holiday notice
+          </div>
+          {% endif %}
+        </div>
+        {% empty %}
+        <div class="text-sm text-gray-600">No principal/admin announcements yet.</div>
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".notification-comment-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const targetId = btn.getAttribute("data-target");
+        const box = document.getElementById(targetId);
+        if (box) {
+          box.classList.toggle("hidden");
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'parent/base_parent.html' %}
+{% block title %}Performance{% endblock %}
+{% block header %}Performance{% endblock %}
+{% block subtitle %}Child assignment results and feedback{% endblock %}
+{% block content %}
+<div class="bg-white border rounded-xl p-4 mb-6">
+  <form method="get" class="flex items-center gap-2">
+    <label class="text-sm font-semibold text-gray-700" for="child_id">Child</label>
+    <select id="child_id" name="child_id" class="border rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
+      {% for child in children %}
+      <option value="{{ child.pk }}" {% if selected_child and child.pk == selected_child.pk %}selected{% endif %}>
+        {{ child.user.get_full_name }} ({{ child.roll_number }})
+      </option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="bg-white border rounded-xl p-6">
+  <div class="space-y-4">
+    {% for ans in answers %}
+    <div class="rounded-xl border border-gray-200 bg-white p-4">
+      <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+        <div>
+          <p class="text-base font-semibold text-gray-900">{{ ans.student.user.get_full_name }}</p>
+          <p class="text-xs text-gray-500 mt-1">
+            Roll: {{ ans.student.roll_number }} | Q#{{ ans.question.id }} | Submitted: {{ ans.submitted_at|date:"d M Y, h:i A" }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          {% if ans.marks_obtained != None %}
+          <span class="inline-flex items-center rounded-full bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1">
+            Marks: {{ ans.marks_obtained }}{% if ans.question.max_marks %}/{{ ans.question.max_marks }}{% endif %}
+          </span>
+          {% else %}
+          <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1">
+            Not graded
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mt-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+        <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">Assignment</p>
+        <p class="text-sm text-gray-800">{{ ans.question.description|default:"Assignment description not available."|truncatewords:28 }}</p>
+      </div>
+
+      <div class="mt-3 p-3 rounded-lg bg-indigo-50 border border-indigo-100">
+        <p class="text-xs uppercase tracking-wide text-indigo-600 mb-1">Teacher Remark</p>
+        {% if ans.remarks %}
+        <p class="text-sm text-indigo-900" id="teacher-remark-{{ ans.id }}">{{ ans.remarks }}</p>
+        {% else %}
+        <p class="text-sm text-indigo-700" id="teacher-remark-{{ ans.id }}">No remark added by teacher yet.</p>
+        {% endif %}
+      </div>
+
+      <div id="explain-result-box-{{ ans.id }}" class="mt-3 p-3 rounded-lg border border-blue-200 bg-blue-50">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-1">
+          <p class="text-xs uppercase tracking-wide text-blue-700">AI Summary</p>
+          <div class="flex items-center gap-2">
+            <label for="explain-language-{{ ans.id }}" class="text-sm text-gray-700">Language</label>
+            <select id="explain-language-{{ ans.id }}" class="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white">
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
+              <option value="odia">Odia</option>
+            </select>
+            <button
+              type="button"
+              onclick="explainAssignmentResult({{ ans.id }})"
+              class="inline-flex items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-semibold px-3 py-1.5 hover:bg-blue-700">
+              Explain Result
+            </button>
+          </div>
+        </div>
+        <p id="explain-result-text-{{ ans.id }}" class="text-sm text-blue-900">Click "Explain Result" to generate summary.</p>
+      </div>
+
+      <div id="simplified-remark-box-{{ ans.id }}" class="mt-3 p-3 rounded-lg border border-violet-200 bg-violet-50">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-1">
+          <p class="text-xs uppercase tracking-wide text-violet-700">Simplified Remark</p>
+          <div class="flex items-center gap-2">
+            <label for="remark-language-{{ ans.id }}" class="text-sm text-gray-700">Language</label>
+            <select id="remark-language-{{ ans.id }}" class="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white">
+              <option value="english">English</option>
+              <option value="hindi">Hindi</option>
+              <option value="odia">Odia</option>
+            </select>
+            <button
+              type="button"
+              onclick="simplifyRemark({{ ans.id }})"
+              class="inline-flex items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-semibold px-3 py-1.5 hover:bg-indigo-700">
+              Simplify Remark
+            </button>
+          </div>
+        </div>
+        <p id="simplified-remark-text-{{ ans.id }}" class="text-sm text-violet-900">Choose language and click "Simplify Remark".</p>
+      </div>
+
+      {% if ans.answer_text or ans.answer_file %}
+      <details class="mt-3">
+        <summary class="cursor-pointer text-sm font-medium text-gray-700">View submitted answer</summary>
+        <div class="mt-2 p-3 rounded-lg bg-gray-50 border border-gray-100">
+          {% if ans.answer_text %}
+          <p class="text-sm text-gray-700 whitespace-pre-line">{{ ans.answer_text|truncatewords:80 }}</p>
+          {% endif %}
+          {% if ans.answer_file %}
+          <a href="{{ ans.answer_file.url }}" class="inline-block mt-2 text-sm text-blue-600 hover:underline" target="_blank" rel="noopener">
+            Open attached file
+          </a>
+          {% endif %}
+        </div>
+      </details>
+      {% endif %}
+    </div>
+    {% empty %}
+    <p class="text-gray-500">No performance data available.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return '';
+  }
+
+  async function explainAssignmentResult(answerId) {
+    const langSelect = document.getElementById(`explain-language-${answerId}`);
+    const lang = langSelect ? langSelect.value : 'english';
+    const box = document.getElementById(`explain-result-box-${answerId}`);
+    const text = document.getElementById(`explain-result-text-${answerId}`);
+    if (!box || !text) return;
+
+    box.classList.remove('hidden');
+    text.textContent = 'Generating summary...';
+
+    try {
+      const res = await fetch("{% url 'parent_assignment_explain' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ answer_id: answerId, language: lang })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        text.textContent = data.error || 'Failed to generate summary.';
+        return;
+      }
+      text.textContent = data.explanation || 'No summary available.';
+    } catch (err) {
+      text.textContent = 'Network error while generating summary.';
+    }
+  }
+
+  async function simplifyRemark(answerId) {
+    const langSelect = document.getElementById(`remark-language-${answerId}`);
+    const lang = langSelect ? langSelect.value : 'english';
+    const box = document.getElementById(`simplified-remark-box-${answerId}`);
+    const text = document.getElementById(`simplified-remark-text-${answerId}`);
+    if (!box || !text) return;
+
+    box.classList.remove('hidden');
+    text.textContent = 'Simplifying remark...';
+
+    try {
+      const res = await fetch("{% url 'parent_assignment_simplify_remark' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ answer_id: answerId, language: lang })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        text.textContent = data.error || 'Failed to simplify remark.';
+        return;
+      }
+      text.textContent = data.simplified || 'No simplified remark available.';
+    } catch (err) {
+      text.textContent = 'Network error while simplifying remark.';
+    }
+  }
+</script>
+{% endblock %}

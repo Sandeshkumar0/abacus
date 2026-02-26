@@ -1,124 +1,83 @@
-<!-- templates/portal/Landing_Page.html -->
 <!DOCTYPE html>
 {% load static %}
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EMESYS – Sign-in</title>
+  <title>EMESYS - Sign-in</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.bunny.net" />
   <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
   <style>
     html, body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-    .tab-active-student { @apply bg-blue-500 text-white; }
-    .tab-active-teacher { @apply bg-orange-500 text-white; }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-white via-[#e3eeff] to-[#b6d0ee]">
-
-  <!-- Header -->
   <header class="w-full bg-white/80 backdrop-blur-sm border-b border-blue-100">
-  <div class="container mx-auto px-4 py-1 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <!-- updated static path -->
+    <div class="container mx-auto px-4 py-1 flex items-center justify-between">
       <img src="{% static 'portal/Logo.png' %}" alt="EMESYS Logo" class="w-[105px] h-[75px] object-contain rounded-lg" />
     </div>
-  </div>
-</header>
+  </header>
 
-<body class="min-h-screen bg-gradient-to-b from-[#e3eeff] via-[#e8f1ff] to-[#c7dbf7]">
-
-  <!-- Main content -->
-  <main class="flex items-center justify-center px-4 py-12 min-h-[calc(100vh-80px)]">
-    <div class="w-full max-w-6xl">
-
-      <!-- Welcome -->
-      <div class="text-center mb-12">
+  <main class="px-4 py-10">
+    <div class="w-full max-w-7xl mx-auto">
+      <div class="text-center mb-10">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Welcome to EMESYS</h1>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
           Your comprehensive educational management system. Choose your role to get started.
         </p>
       </div>
 
+      <!-- Top image strip -->
+      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-8 items-stretch">
+        <div class="bg-white border border-slate-200 h-72 p-4 flex items-center justify-center">
+          <img src="{% static 'portal/Teacher.jpg' %}" alt="Teacher" class="h-full w-full object-contain" />
+        </div>
+        <div class="bg-white border border-slate-200 h-72 p-4 flex items-center justify-center">
+          <img src="{% static 'portal/parent_hug_student.svg' %}"
+               alt="Parent hugging student" class="h-full w-full object-contain" />
+        </div>
+        <div class="bg-white border border-slate-200 h-72 p-4 flex items-center justify-center">
+          <img src="{% static 'portal/studednt.jpg' %}" alt="Student" class="h-full w-full object-contain" />
+        </div>
+      </div>
+
       <!-- Role cards -->
-      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-12 items-stretch">
-        <!-- Teacher card -->
-        <div class="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 cursor-pointer rounded-xl bg-white h-full flex flex-col">
-          <div class="pt-8 pb-6 px-8 flex-1 flex flex-col">
-            <div class="text-center flex-1 flex flex-col">
-              <div class="w-56 h-56 mx-auto mb-6 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-blue-100 overflow-hidden">
-                <!-- updated static path -->
-                <img src="{% static 'portal/Teacher.jpg' %}" alt="Teacher Illustration" class="w-48 h-48 object-contain rounded-full" />
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">I am a Teacher</h3>
-              <p class="text-gray-600 mb-6">Manage your classes, students, and curriculum</p>
-              <div class="flex gap-3 mt-auto">
-                <!-- these URL names are defined in your accounts.urls (no namespace) -->
-                <a href="{% url 'teacher_login' %}"
-                  class="w-1/2 py-3 rounded-lg bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white font-medium text-center transition">
-                  Login
-                </a>
-                <a href="{% url 'teacher_signup' %}"
-                  class="w-1/2 py-3 rounded-lg border border-orange-400 text-orange-500 font-medium bg-white hover:bg-orange-50 text-center transition">
-                  Sign Up
-                </a>
-              </div>
-            </div>
+      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12 items-stretch">
+        <div class="group hover:shadow-xl transition-all duration-300 border-2 hover:border-orange-200 bg-white p-6 min-h-[230px]">
+          <h3 class="text-3xl font-bold text-orange-500 mb-4 text-center">For Teachers</h3>
+          <p class="text-gray-600 text-center mb-6">Manage your classes, students, and curriculum.</p>
+          <div class="flex gap-3">
+            <a href="{% url 'teacher_login' %}" class="w-1/2 py-3 rounded-lg bg-gradient-to-r from-orange-400 to-yellow-400 text-white font-medium text-center">Login</a>
+            <a href="{% url 'teacher_signup' %}" class="w-1/2 py-3 rounded-lg border border-orange-400 text-orange-500 font-medium text-center">Sign Up</a>
           </div>
         </div>
-        <!-- Student card -->
-        <div class="group hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-200 cursor-pointer rounded-xl bg-white h-full flex flex-col">
-          <div class="pt-8 pb-6 px-8 flex-1 flex flex-col">
-            <div class="text-center flex-1 flex flex-col">
-              <div class="w-56 h-56 mx-auto mb-6 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-blue-100 overflow-hidden">
-                <!-- updated static path -->
-                <img src="{% static 'portal/studednt.jpg' %}" alt="Student Illustration" class="w-48 h-48 object-contain rounded-full" />
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">I am a Student</h3>
-              <p class="text-gray-600 mb-6">Access your courses, assignments, and progress</p>
-              <div class="flex gap-3 mt-auto">
-                <a href="{% url 'student_login' %}"
-                  class="w-1/2 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white font-medium text-center transition">
-                  Login
-                </a>
-                <a href="{% url 'student_signup' %}"
-                  class="w-1/2 py-3 rounded-lg border border-blue-400 text-blue-500 font-medium bg-white hover:bg-blue-50 text-center transition">
-                  Sign Up
-                </a>
-              </div>
-            </div>
+
+        <div class="group hover:shadow-xl transition-all duration-300 border-2 hover:border-green-200 bg-white p-6 min-h-[230px]">
+          <h3 class="text-3xl font-bold text-green-600 mb-4 text-center">For Parents</h3>
+          <p class="text-gray-600 text-center mb-6">Track your child learning, exam portions, and messages.</p>
+          <div class="flex gap-3">
+            <a href="{% url 'parent_login' %}" class="w-1/2 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium text-center">Login</a>
+            <a href="{% url 'parent_signup' %}" class="w-1/2 py-3 rounded-lg border border-green-500 text-green-600 font-medium text-center">Sign Up</a>
+          </div>
+        </div>
+
+        <div class="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-200 bg-white p-6 min-h-[230px]">
+          <h3 class="text-3xl font-bold text-blue-500 mb-4 text-center">For Students</h3>
+          <p class="text-gray-600 text-center mb-6">Access your courses, assignments, and progress.</p>
+          <div class="flex gap-3">
+            <a href="{% url 'student_login' %}" class="w-1/2 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-400 text-white font-medium text-center">Login</a>
+            <a href="{% url 'student_signup' %}" class="w-1/2 py-3 rounded-lg border border-blue-400 text-blue-500 font-medium text-center">Sign Up</a>
           </div>
         </div>
       </div>
+    </div>
   </main>
 
-  <!-- Footer -->
   <footer class="bg-white/80 backdrop-blur-sm border-t border-blue-100 py-2">
     <div class="container mx-auto px-4 text-center">
       <p class="text-gray-600">© 2025 EMESYS Educational Management System. All rights reserved.</p>
     </div>
   </footer>
-
-  <!-- Simple tab-switching script -->
-  <script>
-    const triggers = document.querySelectorAll('[data-tab-trigger]');
-    const contents = document.querySelectorAll('[data-tab-content]');
-
-    triggers.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.dataset.tabTrigger;
-
-        // swap active button styles
-        triggers.forEach(t => t.classList.remove('tab-active-student', 'tab-active-teacher'));
-        btn.classList.add(target === 'student' ? 'tab-active-student' : 'tab-active-teacher');
-
-        // show / hide content panes
-        contents.forEach(c => {
-          c.classList.toggle('hidden', c.dataset.tabContent !== target);
-        });
-      });
-    });
-  </script>
 </body>
 </html>

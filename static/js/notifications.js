@@ -64,13 +64,10 @@ class NotificationManager {
     }
 
     showNotification(notification) {
-        // Update unread count
+        // Update unread count + status indicator in one place
         const badge = document.getElementById('notification-badge');
-        if (badge) {
-            const current = parseInt(badge.textContent) || 0;
-            badge.textContent = current + 1;
-            badge.style.display = 'inline-block';
-        }
+        const current = badge ? (parseInt(badge.textContent) || 0) : 0;
+        this.updateUnreadCount(current + 1);
 
         // Show toast notification
         this.showToast(notification);
@@ -156,6 +153,11 @@ class NotificationManager {
         const list = document.getElementById('notifications-list');
         if (!list) return;
 
+        const emptyState = list.querySelector('.no-notifications');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
         const item = this.createNotificationElement(notification);
         list.insertBefore(item, list.firstChild);
     }
@@ -164,6 +166,7 @@ class NotificationManager {
         const div = document.createElement('div');
         div.className = `notification-item ${notification.is_read ? 'read' : 'unread'}`;
         div.dataset.notificationId = notification.id;
+        div.dataset.isRead = notification.is_read ? '1' : '0';
         div.innerHTML = `
             <div class="notification-content">
                 <strong>${notification.title}</strong>
@@ -173,22 +176,37 @@ class NotificationManager {
             ${notification.link ? `<a href="${notification.link}" class="notification-link">View</a>` : ''}
         `;
 
-        // Mark as read when clicked
-        div.addEventListener('click', (e) => {
-            if (!notification.is_read) {
-                this.markAsRead(notification.id);
-                div.classList.remove('unread');
-                div.classList.add('read');
+        const markReadIfNeeded = () => {
+            if (div.dataset.isRead === '1') return;
 
-                // Update unread count
-                const badge = document.getElementById('notification-badge');
-                if (badge) {
-                    const current = parseInt(badge.textContent) || 0;
-                    const newCount = Math.max(0, current - 1);
-                    this.updateUnreadCount(newCount);
-                }
-            }
+            this.markAsRead(notification.id);
+            div.dataset.isRead = '1';
+            div.classList.remove('unread');
+            div.classList.add('read');
+
+            const badge = document.getElementById('notification-badge');
+            const current = badge ? (parseInt(badge.textContent) || 0) : 0;
+            this.updateUnreadCount(Math.max(0, current - 1));
+        };
+
+        // Mark as read when notification item is clicked
+        div.addEventListener('click', () => {
+            markReadIfNeeded();
         });
+
+        // Ensure mark-as-read happens before navigating to linked page
+        const link = div.querySelector('.notification-link');
+        if (link) {
+            link.addEventListener('click', (e) => {
+                if (div.dataset.isRead === '0') {
+                    e.preventDefault();
+                    markReadIfNeeded();
+                    setTimeout(() => {
+                        window.location.href = link.href;
+                    }, 120);
+                }
+            });
+        }
 
         return div;
     }
@@ -196,10 +214,16 @@ class NotificationManager {
     displayNotificationsList(notifications) {
         const list = document.getElementById('notifications-list');
         if (!list) return;
+        list.innerHTML = '';
 
-        list.innerHTML = notifications.length > 0
-            ? notifications.map(n => this.createNotificationElement(n).outerHTML).join('')
-            : '<p class="no-notifications">No notifications yet</p>';
+        if (!notifications.length) {
+            list.innerHTML = '<p class="no-notifications">No notifications yet</p>';
+            return;
+        }
+
+        notifications.forEach((notification) => {
+            list.appendChild(this.createNotificationElement(notification));
+        });
     }
 
     updateConnectionStatus(connected) {

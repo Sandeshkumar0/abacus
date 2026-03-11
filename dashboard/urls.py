@@ -35,6 +35,7 @@ urlpatterns = [
     path('student/give-test/', views.give_test, name='give_test'),
     path('student/holiday-calendar/', views.holiday_calendar, name='holiday_calendar'),
     path('student/attendance/', views.student_attendance, name='student_attendance'),
+    path('student/performance-graph/', views.student_performance_graph, name='student_performance_graph'),
     path('student/practice-questions/', views.practice_questions_page, name='practice_questions_page'),
     path('student/practice-questions/generate/', views.generate_practice_questions, name='generate_practice_questions'),
     path('teacher/give-remarks/', views.give_remarks, name='give_remarks'),

@@ -1,5 +1,6 @@
 from datetime import date
 import json
+import re
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Q, Sum
@@ -33,19 +34,91 @@ def _fallback_explanation(ans):
     remark = (ans.remarks or "").strip()
     if ans.marks_obtained is None:
         return (
-            "Problem: Assignment has been submitted, but it is not graded yet.\n"
-            "Next Step: Ask the teacher for evaluation and help your child revise this topic for 15 minutes daily."
+            "What went well: Assignment has been submitted.\n"
+            "Needs support: It is not graded yet.\n"
+            "Parent action this week: First connect with the teacher for evaluation, then do 15 minutes revision daily, and finally ask your child to explain the topic in simple words."
         )
 
     if not remark:
         return (
-            f"Problem: Score is {marks_text}, but detailed teacher feedback is not available yet.\n"
-            "Next Step: Review the assignment once, solve 3 similar questions, and ask the teacher where improvement is needed."
+            f"What went well: Score is {marks_text}.\n"
+            "Needs support: Detailed teacher feedback is not available yet.\n"
+            "Parent action this week: First review this answer together, then solve 3 similar questions, and finally ask the teacher where improvement is most needed."
+        )
+
+    simple_remark = _simplify_text_for_parent(remark)
+    return (
+        f"What went well: Score is {marks_text}.\n"
+        f"Needs support: {simple_remark}\n"
+        "Parent action this week: First revise the concept, then practice 3 similar problems with full working, and finally recheck once before next submission."
+    )
+
+
+def _simplify_text_for_parent(text):
+    value = (text or "").strip()
+    if not value:
+        return ""
+    replacements = {
+        "However,": "But",
+        "beneficial": "helpful",
+        "demonstrate a full understanding": "show full understanding",
+        "including": "adding",
+        "consider": "please try to",
+        "future responses": "next answers",
+        "quadratic expression": "equation",
+    }
+    for src, dst in replacements.items():
+        value = value.replace(src, dst)
+    value = re.sub(r"\s+", " ", value).strip()
+    sentences = re.split(r"(?<=[.!?])\s+", value)
+    compact = " ".join(sentences[:2]).strip() if sentences else value
+    if len(compact) > 180:
+        compact = compact[:177].rstrip() + "..."
+    return compact
+
+
+def _extract_support_text(source_text):
+    text = (source_text or "").strip()
+    if not text:
+        return ""
+    # Remove known labels if AI returns structured output.
+    text = re.sub(r"(?i)what went well\s*:\s*", "", text)
+    text = re.sub(r"(?i)parent action this week\s*:\s*.*$", "", text)
+    m = re.search(r"(?i)needs support\s*:\s*(.+)", text)
+    if m:
+        text = m.group(1).strip()
+    return _simplify_text_for_parent(text)
+
+
+def _make_parent_friendly_review(ans, source_text="", language="english"):
+    marks_text = "Not graded yet"
+    if ans.marks_obtained is not None:
+        if ans.question and ans.question.max_marks:
+            marks_text = f"{ans.marks_obtained}/{ans.question.max_marks}"
+        else:
+            marks_text = f"{ans.marks_obtained}"
+
+    support_text = _extract_support_text(source_text) or _simplify_text_for_parent(ans.remarks or "")
+
+    if ans.marks_obtained is None:
+        well = "Assignment is submitted."
+    else:
+        well = f"Score is {marks_text}."
+
+    if not support_text:
+        support_text = "Child should show steps clearly and avoid small mistakes."
+
+    if language == "hindi":
+        return (
+            f"Kya accha raha: {well}\n"
+            f"Kahan support chahiye: {support_text}\n"
+            "Is hafte parent kya kare: Pehle 15 minute daily revision karayein, phir 3 milte-julte sawal full working ke saath practice karayein, aur akhir me bachche se samjhane ko bolein."
         )
 
     return (
-        f"Problem: Score is {marks_text}. Key feedback: {remark}\n"
-        "Next Step: Revise this concept, practice similar problems with full steps, and recheck mistakes before next submission."
+        f"What went well: {well}\n"
+        f"Needs support: {support_text}\n"
+        "Parent action this week: First do 15 minutes revision daily, then practice 3 similar questions with full working, and finally ask your child to explain how the answer was made."
     )
 
 
@@ -53,13 +126,13 @@ def _fallback_explanation_localized(ans, language):
     base = _fallback_explanation(ans)
     if language == "hindi":
         return (
-            "Problem: असाइनमेंट में सुधार की जरूरत है।\n"
-            "Next Step: इसी टॉपिक को दोहराएं, step-by-step हल लिखने की प्रैक्टिस करें, और अगली बार जमा करने से पहले answer check करें।"
+            "Hindi (simple):\n"
+            + base
         )
     if language == "odia":
         return (
-            "Problem: ଏହି assignment ରେ ଆଉ ଭଲ କରିବା ଆବଶ୍ୟକ।\n"
-            "Next Step: ଏହି topic କୁ ପୁନଃ ପଢନ୍ତୁ, step-by-step ସମାଧାନ ଲେଖିବାର practice କରନ୍ତୁ, ଏବଂ ପୁନଃ ଯାଞ୍ଚ କରି submit କରନ୍ତୁ।"
+            "Odia (simple):\n"
+            + base
         )
     return base
 
@@ -77,33 +150,33 @@ def _fallback_simplified_remark(remark, language):
     if language == "hindi":
         parts = []
         if is_correct:
-            parts.append("उत्तर काफी हद तक सही है।")
+            parts.append("Answer is in the right direction.")
         if needs_steps:
-            parts.append("अगली बार पूरा step-by-step solution भी लिखना जरूरी है।")
+            parts.append("Next time, write full step-by-step solution.")
         if needs_practice:
-            parts.append("थोड़ी और practice और revision से performance बेहतर होगी।")
+            parts.append("More practice and revision will improve performance.")
         if not parts:
-            parts.append("शिक्षक का सुझाव: उत्तर को और साफ़ और step-wise तरीके से लिखें।")
-        return " ".join(parts)
+            parts.append("Teacher suggestion: write the answer clearly in steps.")
+        return "Hindi (simple): " + " ".join(parts)
 
     if language == "odia":
         parts = []
         if is_correct:
-            parts.append("ଉତ୍ତରଟି ଅଧିକାଂଶ ଭାଗରେ ଠିକ୍ ଅଛି।")
+            parts.append("Answer is in the right direction.")
         if needs_steps:
-            parts.append("ପରବର୍ତ୍ତୀ ବାର ପୂର୍ଣ୍ଣ step-by-step ସମାଧାନ ଲେଖିବା ଆବଶ୍ୟକ।")
+            parts.append("Next time, write full step-by-step solution.")
         if needs_practice:
-            parts.append("ଅଧିକ practice ଏବଂ revision କଲେ ଫଳ ଆଉ ଭଲ ହେବ।")
+            parts.append("More practice and revision will improve performance.")
         if not parts:
-            parts.append("ଶିକ୍ଷକଙ୍କ ସୁପାରିଶ: ଉତ୍ତରକୁ ସ୍ପଷ୍ଟ ଏବଂ step-wise ଭାବରେ ଲେଖ।")
-        return " ".join(parts)
+            parts.append("Teacher suggestion: write the answer clearly in steps.")
+        return "Odia (simple): " + " ".join(parts)
 
-    simple = text
-    simple = simple.replace("However,", "But")
-    simple = simple.replace("beneficial", "helpful")
+    simple = text.replace("However,", "But").replace("beneficial", "helpful")
     simple = simple.replace("demonstrate a full understanding", "show full understanding")
     simple = simple.replace("including", "adding")
-    return simple[:220]
+    if len(simple) > 220:
+        simple = simple[:217].rstrip() + "..."
+    return f"In simple words: {simple}"
 
 
 def _get_parent_profile(user):
@@ -397,6 +470,9 @@ def parent_assignment_explain(request):
         "english": "English",
         "hindi": "Hindi",
         "odia": "Odia",
+        "tamil": "Tamil",
+        "punjabi": "Punjabi",
+        "bengali": "Bengali",
     }
     if language not in allowed_languages:
         language = "english"
@@ -420,13 +496,14 @@ def parent_assignment_explain(request):
     teacher_remark = (ans.remarks or "").strip()
 
     prompt = (
-        "You are a school counselor assistant writing for a parent.\n"
-        "Explain this assignment result in very simple language.\n"
+        "You are a parent-counselor assistant.\n"
+        "Write feedback so any parent can understand quickly in a warm, supportive tone.\n"
         f"Language: {allowed_languages[language]}\n"
-        "Output exactly two short sections with these labels:\n"
-        "Problem: ...\n"
-        "Next Step: ...\n"
-        "Keep practical, gentle, and specific. Max 90 words total.\n\n"
+        "Output exactly these 3 lines:\n"
+        "What went well: ...\n"
+        "Needs support: ...\n"
+        "Parent action this week: ...\n"
+        "Use very simple words. Keep practical advice in sequence (first..., then..., finally...) but do not use numbered/bulleted steps. Max 110 words total.\n\n"
         f"Student: {student_name}\n"
         f"Assignment Question ID: {ans.question_id}\n"
         f"Marks: {marks_text}\n"
@@ -434,18 +511,14 @@ def parent_assignment_explain(request):
     )
 
     try:
-        from .ai_utils import client, clean_ai_text
+        from .ai_utils import client, clean_ai_text, groq_complete
 
         if not client:
             return JsonResponse({"explanation": _fallback_explanation_localized(ans, language)})
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=220,
-        )
-        raw = response.choices[0].message.content
-        return JsonResponse({"explanation": clean_ai_text(raw)})
+        raw = groq_complete(prompt, max_tokens=180, temperature=0.2, cache_ttl=900)
+        cleaned = clean_ai_text(raw)
+        return JsonResponse({"explanation": _make_parent_friendly_review(ans, cleaned, language=language)})
     except Exception:
         return JsonResponse({"explanation": _fallback_explanation_localized(ans, language)})
 
@@ -476,6 +549,9 @@ def parent_assignment_simplify_remark(request):
         "english": "English",
         "hindi": "Hindi",
         "odia": "Odia",
+        "tamil": "Tamil",
+        "punjabi": "Punjabi",
+        "bengali": "Bengali",
     }
     if language not in allowed_languages:
         language = "english"
@@ -493,24 +569,20 @@ def parent_assignment_simplify_remark(request):
     prompt = (
         "Rewrite the teacher remark for a parent in very simple words.\n"
         f"Language: {target_language}\n"
-        "Keep meaning same, tone respectful, max 60 words.\n"
-        "Return only the simplified text.\n\n"
+        "Keep same meaning, warm tone, and max 2 short sentences (60 words max).\n"
+        "Avoid technical terms. Return only the simplified text.\n\n"
         f"Teacher remark:\n{original_remark}"
     )
 
     try:
-        from .ai_utils import client, clean_ai_text
+        from .ai_utils import client, clean_ai_text, groq_complete
 
         if not client:
             return JsonResponse({"simplified": _fallback_simplified_remark(original_remark, language)})
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=180,
-        )
-        raw = response.choices[0].message.content
-        return JsonResponse({"simplified": clean_ai_text(raw)})
+        raw = groq_complete(prompt, max_tokens=140, temperature=0.2, cache_ttl=900)
+        cleaned = clean_ai_text(raw)
+        return JsonResponse({"simplified": _simplify_text_for_parent(cleaned)})
     except Exception:
         return JsonResponse({"simplified": _fallback_simplified_remark(original_remark, language)})
 
@@ -692,3 +764,4 @@ def parent_exam_portion(request):
             "exams": exams,
         },
     )
+

@@ -112,6 +112,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "core.context_processors.student_sidebar_context",
             ],
         },
     },
@@ -161,6 +162,7 @@ LANGUAGES = [
     ("hi", "Hindi"),
     ("ta", "Tamil"),
     ("or", "Odia"),
+    ("pa", "Punjabi"),
     ("bn", "Bengali"),
 ]
 LOCALE_PATHS = [

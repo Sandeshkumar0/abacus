@@ -20,9 +20,29 @@
   </div>
 </div>
 
-<!-- Student Table -->
-<div class="student-table">
-  <!-- Table Header -->
+<div style="margin: 0 0 1rem 0;">
+  <input
+    id="studentSearchInput"
+    type="text"
+    placeholder="Search by roll no, name, or email..."
+    style="width: 100%; max-width: 460px; padding: 0.7rem 0.9rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem;"
+  >
+</div>
+
+<div class="student-table" style="margin-bottom: 1.5rem;">
+  <div class="table-header table-row">
+    <div class="table-cell" style="font-weight:700;">Class Teacher Students</div>
+    <div class="table-cell" style="text-align:right;">
+      {% if class_teacher_sections %}
+      Sections:
+      {% for sec in class_teacher_sections %}
+      <span style="display:inline-block; margin-left:6px;">{{ sec }}</span>
+      {% endfor %}
+      {% else %}
+      No class-teacher section assigned
+      {% endif %}
+    </div>
+  </div>
   <div class="table-header table-row">
     <div class="table-cell">Roll No:</div>
     <div class="table-cell">Name</div>
@@ -30,8 +50,50 @@
     <div class="table-cell">Actions</div>
   </div>
 
-  <!-- Table Rows -->
-  {% for student in students %}
+  {% for student in class_teacher_students %}
+  <div class="table-row searchable-row" data-search="{{ student.roll_number }} {{ student.user.full_name }} {{ student.user.email }}">
+    <div class="table-cell">{{ student.roll_number }}</div>
+    <div class="table-cell">{{ student.user.full_name }}</div>
+    <div class="table-cell">{{ student.user.email }}</div>
+    <div class="table-cell">
+      <div class="action-buttons">
+        <a href="{% url 'view_student' student.user.id %}" class="btn-table">View</a>
+        <a href="{% url 'edit_student' student.user.id %}" class="btn-table">Edit</a>
+        <button class="btn-table delete" onclick="deleteStudent({{ student.user.id }}, '{{ student.user.full_name }}')">Delete</button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="table-row searchable-row" data-search="{{ student.roll_number }} {{ student.user.full_name }} {{ student.user.email }}">
+    <div class="table-cell" colspan="4" style="text-align: center; padding: 1.5rem;">
+      No students found in class-teacher sections.
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="student-table">
+  <div class="table-header table-row">
+    <div class="table-cell" style="font-weight:700;">Assigned Section Students</div>
+    <div class="table-cell" style="text-align:right;">
+      {% if assigned_sections %}
+      Sections:
+      {% for sec in assigned_sections %}
+      <span style="display:inline-block; margin-left:6px;">{{ sec }}</span>
+      {% endfor %}
+      {% else %}
+      No additional assigned sections
+      {% endif %}
+    </div>
+  </div>
+  <div class="table-header table-row">
+    <div class="table-cell">Roll No:</div>
+    <div class="table-cell">Name</div>
+    <div class="table-cell">Email</div>
+    <div class="table-cell">Actions</div>
+  </div>
+
+  {% for student in assigned_section_students %}
   <div class="table-row">
     <div class="table-cell">{{ student.roll_number }}</div>
     <div class="table-cell">{{ student.user.full_name }}</div>
@@ -40,30 +102,24 @@
       <div class="action-buttons">
         <a href="{% url 'view_student' student.user.id %}" class="btn-table">View</a>
         <a href="{% url 'edit_student' student.user.id %}" class="btn-table">Edit</a>
-        <button class="btn-table delete"
-          onclick="deleteStudent({{ student.user.id }}, '{{ student.user.full_name }}')">Delete</button>
+        <button class="btn-table delete" onclick="deleteStudent({{ student.user.id }}, '{{ student.user.full_name }}')">Delete</button>
       </div>
     </div>
   </div>
   {% empty %}
   <div class="table-row">
-    <div class="table-cell" colspan="4" style="text-align: center; padding: 2rem;">
-      No students found. Click "Add Student" to add your first student.
+    <div class="table-cell" colspan="4" style="text-align: center; padding: 1.5rem;">
+      No students found in assigned sections.
     </div>
   </div>
   {% endfor %}
 </div>
 
-<!-- Pagination -->
 <div class="pagination">
-  <div class="pagination-info">Showing 1–{{ students|length }} Students</div>
-  <div class="pagination-controls">
-    <button class="pagination-btn" disabled>Previous</button>
-    <div class="pagination-numbers">
-      <button class="page-number active">1</button>
-    </div>
-    <button class="pagination-btn" disabled>Next</button>
-  </div>
+  <div class="pagination-info">Total Visible Students: {{ total_students }}</div>
+</div>
+<div id="searchNoResult" style="display:none; margin-top: 0.75rem; color: #64748b; font-size: 0.95rem;">
+  No students match your search.
 </div>
 
 <!-- Add Student Modal -->
@@ -86,8 +142,19 @@
         <input type="tel" id="phone" name="phone" required>
       </div>
       <div class="form-group">
+        <label for="section_id">Section *</label>
+        <select id="section_id" name="section_id" required>
+          <option value="">Select section</option>
+          {% for section in sections_for_add %}
+          <option value="{{ section.id }}" data-class="{{ section.class_level }}">
+            {{ section.class_level }}{{ section.section }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
         <label for="student_class">Class *</label>
-        <input type="text" id="student_class" name="student_class" placeholder="e.g., 10th Grade" required>
+        <input type="text" id="student_class" name="student_class" placeholder="Auto from section" readonly required>
       </div>
       <div class="form-group">
         <label for="dob">Date of Birth</label>
@@ -154,7 +221,8 @@
     color: #333;
   }
 
-  .form-group input {
+  .form-group input,
+  .form-group select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
@@ -162,7 +230,8 @@
     font-size: 1rem;
   }
 
-  .form-group input:focus {
+  .form-group input:focus,
+  .form-group select:focus {
     outline: none;
     border-color: #1d4ed8;
     box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
@@ -219,6 +288,15 @@
     }
   });
 
+  const sectionSelect = document.getElementById('section_id');
+  const classInput = document.getElementById('student_class');
+  if (sectionSelect && classInput) {
+    sectionSelect.addEventListener('change', function () {
+      const selected = this.options[this.selectedIndex];
+      classInput.value = selected ? (selected.getAttribute('data-class') || '') : '';
+    });
+  }
+
   // Delete student function
   async function deleteStudent(studentId, studentName) {
     if (!confirm(`Are you sure you want to delete ${studentName}? This action cannot be undone.`)) {
@@ -256,6 +334,28 @@
     if (event.target === modal) {
       closeAddStudentModal();
     }
-  }
+  };
+
+  // Search filter
+  (function () {
+    const input = document.getElementById('studentSearchInput');
+    const rows = Array.from(document.querySelectorAll('.searchable-row'));
+    const noResult = document.getElementById('searchNoResult');
+    if (!input || !rows.length) return;
+
+    input.addEventListener('input', function () {
+      const q = (input.value || '').trim().toLowerCase();
+      let visible = 0;
+      rows.forEach((row) => {
+        const hay = (row.getAttribute('data-search') || '').toLowerCase();
+        const match = !q || hay.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible += 1;
+      });
+      if (noResult) {
+        noResult.style.display = visible === 0 ? 'block' : 'none';
+      }
+    });
+  })();
 </script>
 {% endblock %}

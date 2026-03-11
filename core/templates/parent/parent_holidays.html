@@ -1,7 +1,8 @@
 {% extends 'parent/base_parent.html' %}
-{% block title %}Holiday Calendar{% endblock %}
-{% block header %}Holiday Calendar{% endblock %}
-{% block subtitle %}Academic and public holidays{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Holiday Calendar" %}{% endblock %}
+{% block header %}{% trans "Holiday Calendar" %}{% endblock %}
+{% block subtitle %}{% trans "Academic and public holidays" %}{% endblock %}
 {% block content %}
 <style>
   .holiday-shell {
@@ -53,8 +54,8 @@
     <div class="flex items-center justify-between mb-4">
       <h2 id="monthLabel" class="text-4xl font-semibold text-gray-900"></h2>
       <div class="flex items-center gap-2">
-        <button id="prevMonthBtn" class="holiday-nav-btn" type="button" aria-label="Previous month">&#8249;</button>
-        <button id="nextMonthBtn" class="holiday-nav-btn" type="button" aria-label="Next month">&#8250;</button>
+        <button id="prevMonthBtn" class="holiday-nav-btn" type="button" aria-label="{% trans 'Previous month' %}">&#8249;</button>
+        <button id="nextMonthBtn" class="holiday-nav-btn" type="button" aria-label="{% trans 'Next month' %}">&#8250;</button>
       </div>
     </div>
     <div class="holiday-grid text-lg font-semibold text-gray-500 mb-3">
@@ -69,7 +70,7 @@
       <span id="monthHolidayCount" class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700"></span>
     </div>
     <div id="monthHolidayList" class="space-y-3">
-      <p class="text-gray-500">No holidays found.</p>
+      <p class="text-gray-500">{% trans "No holidays found." %}</p>
     </div>
   </div>
 </div>
@@ -151,7 +152,7 @@
       });
       monthHolidayCount.textContent = `${monthHolidays.length} holiday${monthHolidays.length === 1 ? "" : "s"}`;
       if (!monthHolidays.length) {
-        listEl.innerHTML = '<p class="text-gray-500">No holidays in this month.</p>';
+        listEl.innerHTML = '<p class="text-gray-500">{% trans "No holidays in this month." %}</p>';
         return;
       }
       listEl.innerHTML = monthHolidays.map(h => {

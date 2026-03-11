@@ -6,11 +6,7 @@
 <!-- Quick Overview Section -->
 <div class="bg-white rounded-xl p-6 mb-6 border-l-8 shadow-xs" style="border-color: #0656a5;">
   <h2 class="text-2xl font-semibold text-blue-600 mb-2">Quick Overview</h2>
-  <p class="text-sm text-gray-600 leading-relaxed">
-    Access all your educational management tools from the central board,
-    monitor student progress, manage assignments, and streamline your
-    teaching workflow.
-  </p>
+  <p class="text-sm text-gray-600 leading-relaxed">{{ quick_overview_text }}</p>
 </div>
 
 <!-- Statistics Cards Grid -->
@@ -48,18 +44,17 @@
     <div class="p-6">
       <h3 class="text-lg font-semibold text-blue-600 mb-4">Recent Activity</h3>
       <div class="space-y-3">
+        {% for item in recent_activity %}
         <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-          <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <span class="text-sm text-gray-700">New assignment submitted by John Doe</span>
+          <div class="w-2 h-2 {% if item.color == 'green' %}bg-green-500{% elif item.color == 'yellow' %}bg-yellow-500{% else %}bg-blue-500{% endif %} rounded-full"></div>
+          <span class="text-sm text-gray-700">{{ item.text }}</span>
         </div>
+        {% empty %}
         <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-          <span class="text-sm text-gray-700">Query resolved for Mathematics</span>
+          <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+          <span class="text-sm text-gray-700">No recent activity yet.</span>
         </div>
-        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-          <div class="w-2 h-2 bg-yellow-500 rounded-full"></div>
-          <span class="text-sm text-gray-700">Upcoming test scheduled for next week</span>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </div>

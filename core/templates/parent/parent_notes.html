@@ -1,15 +1,16 @@
 {% extends 'parent/base_parent.html' %}
-{% block title %}Class Notes{% endblock %}
-{% block header %}Class Notes{% endblock %}
-{% block subtitle %}Notes and learning resources{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Class Notes" %}{% endblock %}
+{% block header %}{% trans "Class Notes" %}{% endblock %}
+{% block subtitle %}{% trans "Notes and learning resources" %}{% endblock %}
 {% block content %}
 <div class="bg-white border rounded-xl p-6">
-  <p class="text-gray-600 mb-3">Class notes for linked children can be shared here by teachers.</p>
+  <p class="text-gray-600 mb-3">{% trans "Class notes for linked children can be shared here by teachers." %}</p>
   <div class="space-y-2">
     {% for child in children %}
     <div class="p-3 bg-gray-50 rounded-lg">{{ child.user.get_full_name }} ({{ child.roll_number }})</div>
     {% empty %}
-    <p class="text-gray-500">No linked children found.</p>
+    <p class="text-gray-500">{% trans "No linked children found." %}</p>
     {% endfor %}
   </div>
 </div>

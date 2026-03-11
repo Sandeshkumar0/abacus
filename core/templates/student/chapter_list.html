@@ -35,12 +35,16 @@
         <a href="{% url 'chapter_list' subject.id %}?type=worksheet" class="rounded-lg px-3 py-2 border {% if selected_type == 'worksheet' %}bg-blue-50 border-blue-300 text-blue-700{% else %}bg-gray-50 border-gray-200 text-gray-700{% endif %}">Practice Worksheet ({{ resource_counts.worksheet }})</a>
     </div>
     <div class="space-y-3">
-      {% for resource in resources %}
+      {% for row in resource_rows %}
+      {% with resource=row.resource %}
       <div class="border border-gray-200 rounded-lg p-3">
         <div class="flex items-center justify-between gap-2">
           <div>
             <p class="font-medium text-gray-800">{{ resource.title }}</p>
             <p class="text-xs text-gray-500">{{ resource.get_resource_type_display }}{% if resource.section %} | {{ resource.section }}{% endif %}</p>
+            {% if row.quiz_meta %}
+            <p class="text-xs text-blue-600 mt-1">Chapter: {{ row.quiz_meta.chapter_name|default:"-" }} | Questions: {{ row.quiz_meta.questions_count }}</p>
+            {% endif %}
           </div>
           <div class="flex gap-2">
             {% if resource.file %}
@@ -51,10 +55,11 @@
             {% endif %}
           </div>
         </div>
-        {% if resource.description %}
-        <p class="text-sm text-gray-600 mt-1">{{ resource.description }}</p>
+        {% if row.display_description %}
+        <p class="text-sm text-gray-600 mt-1">{{ row.display_description }}</p>
         {% endif %}
       </div>
+      {% endwith %}
       {% empty %}
       <p class="text-sm text-gray-600">No resources available for selected filter.</p>
       {% endfor %}

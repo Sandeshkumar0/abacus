@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!doctype html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Parent Logout</title>
+  <title>{% trans "Parent Logout" %}</title>
   <style>
     body { margin:0; font-family: Arial, sans-serif; background:#f3f4f6; }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.65); display:flex; align-items:center; justify-content:center; }
@@ -18,12 +18,12 @@
 <body>
   <div class="overlay">
     <div class="card">
-      <img src="{% static 'portal/logout.png' %}" alt="Logout icon" width="72" />
-      <h2>Logout</h2>
-      <p>Are you sure you want to logout?</p>
+      <img src="{% static 'portal/logout.png' %}" alt="{% trans 'Logout icon' %}" width="72" />
+      <h2>{% trans "Logout" %}</h2>
+      <p>{% trans "Are you sure you want to logout?" %}</p>
       <div class="actions">
-        <form method="post">{% csrf_token %}<button type="submit" class="logout">Logout</button></form>
-        <a class="btn cancel" href="{% url 'parent_dashboard' %}">Cancel</a>
+        <form method="post">{% csrf_token %}<button type="submit" class="logout">{% trans "Logout" %}</button></form>
+        <a class="btn cancel" href="{% url 'parent_dashboard' %}">{% trans "Cancel" %}</a>
       </div>
     </div>
   </div>

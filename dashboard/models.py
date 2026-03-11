@@ -288,6 +288,29 @@ class SubjectTeacherAssignment(models.Model):
         if not self.section_id or not self.subject_id:
             return
 
+        # Only one teacher should handle a subject in a section at a time.
+        existing = (
+            SubjectTeacherAssignment.objects
+            .filter(subject=self.subject, section=self.section)
+            .exclude(pk=self.pk)
+            .select_related("teacher__user")
+            .first()
+        )
+        if existing:
+            teacher_name = (
+                existing.teacher.user.get_full_name()
+                or existing.teacher.user.email
+                or "another teacher"
+            )
+            raise ValidationError(
+                {
+                    "section": (
+                        f"{self.section} is already assigned to {teacher_name} "
+                        f"for subject '{self.subject.name}'."
+                    )
+                }
+            )
+
         section_level = self._normalize_class_level(self.section.class_level)
         subject_level = self._normalize_class_level(self.subject.class_level)
 

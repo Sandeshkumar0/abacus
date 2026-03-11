@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-{% load static %}
-<html lang="en">
+{% load static i18n %}
+<html lang="{{ LANGUAGE_CODE }}">
 
 <head>
   <meta charset="UTF-8" />
@@ -63,8 +63,8 @@
       <!-- Brand / headline -->
       <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-blue-600 mb-2">Student Login</h1>
-          <p class="text-gray-600">Please login to continue to your account.</p>
+          <h1 class="text-3xl font-bold text-blue-600 mb-2">{% trans "Student Login" %}</h1>
+          <p class="text-gray-600">{% trans "Please login to continue to your account." %}</p>
         </div>
 
         <form method="POST" action="{% url 'student_login' %}" id="login-form" class="space-y-6">
@@ -73,7 +73,7 @@
           <!-- Email -->
           <div class="relative">
             <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
-            <input id="email" type="email" name="email" placeholder="Enter Email"
+            <input id="email" type="email" name="email" placeholder="{% trans 'Enter Email' %}"
               class="pl-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
               required />
           </div>
@@ -82,12 +82,12 @@
           <div>
             <div class="relative">
               <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5"></i>
-              <input id="password" type="password" name="password" placeholder="Password"
+              <input id="password" type="password" name="password" placeholder="{% trans 'Password' %}"
                 class="pl-12 pr-12 h-12 w-full border-gray-200 rounded-xl focus:outline-none focus:ring focus:ring-blue-200"
                 required />
               <button type="button" id="toggle-pass"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                aria-label="Toggle password visibility">
+                aria-label="{% trans 'Toggle password visibility' %}">
                 <i data-lucide="eye"></i>
               </button>
             </div>
@@ -95,27 +95,27 @@
             <p class="text-red-600 text-sm font-medium">{{ error }}</p>
             {% endif %}
             <div class="text-right mt-1">
-              <a href="{% url 'password_reset' %}" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">Forgot Password?</a>
+              <a href="{% url 'password_reset' %}" class="text-sm text-blue-600 hover:text-blue-700 hover:underline">{% trans "Forgot Password?" %}</a>
             </div>
           </div>
 
           <!-- Submit -->
           <button type="submit"
             class="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg transition-all duration-200">
-            Log in
+            {% trans "Log in" %}
           </button>
 
           <!-- Keep me logged in -->
           <label for="keep" class="flex items-center space-x-2 cursor-pointer select-none">
             <input id="keep" name="remember_me" type="checkbox" class="rounded border-gray-300 accent-blue-600" {% if remember_me %}checked{% endif %} />
-            <span class="text-sm text-gray-600">Keep me logged in</span>
+            <span class="text-sm text-gray-600">{% trans "Keep me logged in" %}</span>
           </label>
 
           <!-- Account link -->
           <p class="text-center text-sm text-gray-600 pt-2">
-            Don't Have an Account?
+            {% trans "Don't Have an Account?" %}
             <a href="{% url 'student_signup' %}"
-              class="text-blue-600 hover:text-blue-700 hover:underline font-medium">Create New Account</a>
+              class="text-blue-600 hover:text-blue-700 hover:underline font-medium">{% trans "Create New Account" %}</a>
           </p>
         </form>
       </div>

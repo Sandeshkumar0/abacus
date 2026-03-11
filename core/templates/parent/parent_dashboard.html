@@ -1,14 +1,15 @@
 {% extends 'parent/base_parent.html' %}
+{% load i18n %}
 
-{% block title %}Parent Dashboard{% endblock %}
-{% block header %}Parent Dashboard{% endblock %}
-{% block subtitle %}Track attendance, exams, assignments, messages, and announcements{% endblock %}
+{% block title %}{% trans "Parent Dashboard" %}{% endblock %}
+{% block header %}{% trans "Parent Dashboard" %}{% endblock %}
+{% block subtitle %}{% trans "Track attendance, exams, assignments, messages, and announcements" %}{% endblock %}
 
 {% block content %}
 <div class="bg-white border rounded-xl p-4 mb-6">
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
     <form method="get" class="flex items-center gap-2">
-      <label class="text-sm font-semibold text-gray-700" for="child_id">Child</label>
+      <label class="text-sm font-semibold text-gray-700" for="child_id">{% trans "Child" %}</label>
       <select id="child_id" name="child_id" class="border rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
         {% for child in children %}
         <option value="{{ child.pk }}" {% if selected_child and child.pk == selected_child.pk %}selected{% endif %}>
@@ -23,64 +24,64 @@
 {% if selected_child %}
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
   <div class="bg-white border rounded-xl p-4">
-    <p class="text-sm text-gray-500">Attendance %</p>
+    <p class="text-sm text-gray-500">{% trans "Attendance %" %}</p>
     <p class="text-2xl font-bold text-blue-600">{{ attendance_pct }}%</p>
   </div>
   <div class="bg-white border rounded-xl p-4">
-    <p class="text-sm text-gray-500">Late Count</p>
+    <p class="text-sm text-gray-500">{% trans "Late Count" %}</p>
     <p class="text-2xl font-bold text-orange-600">{{ late_count }}</p>
   </div>
   <div class="bg-white border rounded-xl p-4">
-    <p class="text-sm text-gray-500">Upcoming Exams</p>
+    <p class="text-sm text-gray-500">{% trans "Upcoming Exams" %}</p>
     <p class="text-2xl font-bold text-purple-600">{{ upcoming_exams_count }}</p>
   </div>
   <div class="bg-white border rounded-xl p-4">
-    <p class="text-sm text-gray-500">Pending Assignments</p>
+    <p class="text-sm text-gray-500">{% trans "Pending Assignments" %}</p>
     <p class="text-2xl font-bold text-red-600">{{ pending_assignments_count }}</p>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-3">Monthly Summary</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-3">{% trans "Monthly Summary" %}</h3>
     <div class="grid grid-cols-2 gap-3 text-sm">
-      <div class="p-3 bg-green-50 rounded-lg">Present: <span class="font-semibold">{{ monthly_summary.present }}</span></div>
-      <div class="p-3 bg-red-50 rounded-lg">Absent: <span class="font-semibold">{{ monthly_summary.absent }}</span></div>
-      <div class="p-3 bg-yellow-50 rounded-lg">Late: <span class="font-semibold">{{ monthly_summary.late }}</span></div>
-      <div class="p-3 bg-blue-50 rounded-lg">Total Days: <span class="font-semibold">{{ monthly_summary.total }}</span></div>
+      <div class="p-3 bg-green-50 rounded-lg">{% trans "Present" %}: <span class="font-semibold">{{ monthly_summary.present }}</span></div>
+      <div class="p-3 bg-red-50 rounded-lg">{% trans "Absent" %}: <span class="font-semibold">{{ monthly_summary.absent }}</span></div>
+      <div class="p-3 bg-yellow-50 rounded-lg">{% trans "Late" %}: <span class="font-semibold">{{ monthly_summary.late }}</span></div>
+      <div class="p-3 bg-blue-50 rounded-lg">{% trans "Total Days" %}: <span class="font-semibold">{{ monthly_summary.total }}</span></div>
     </div>
   </div>
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-3">Performance Graph</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-3">{% trans "Performance Graph" %}</h3>
     <canvas id="parentPerformanceChart" height="140"></canvas>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">Pending Assignments</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "Pending Assignments" %}</h3>
     <div class="space-y-2">
       {% for q in pending_assignments %}
       <div class="p-3 rounded-lg bg-blue-50">
         <p class="font-semibold text-sm">{{ q.description|truncatewords:12 }}</p>
-        <p class="text-xs text-gray-500 mt-1">Due: {{ q.due_date|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "Due" %}: {{ q.due_date|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500 text-sm">No pending assignments.</p>
+      <p class="text-gray-500 text-sm">{% trans "No pending assignments." %}</p>
       {% endfor %}
     </div>
   </div>
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">Upcoming Exams</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "Upcoming Exams" %}</h3>
     <div class="space-y-2">
       {% for exam in upcoming_exams %}
       <div class="p-3 rounded-lg bg-purple-50">
         <p class="font-semibold text-sm">{{ exam.title }}</p>
         <p class="text-xs text-gray-600">{{ exam.subject.name|default:"N/A" }}{% if exam.chapter %} | {{ exam.chapter.name }}{% endif %}</p>
-        <p class="text-xs text-gray-500 mt-1">Due: {{ exam.due_date|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "Due" %}: {{ exam.due_date|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500 text-sm">No upcoming exams.</p>
+      <p class="text-gray-500 text-sm">{% trans "No upcoming exams." %}</p>
       {% endfor %}
     </div>
   </div>
@@ -88,37 +89,37 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">Class Messages</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "Class Messages" %}</h3>
     <div class="space-y-2">
       {% for item in teacher_messages_feed %}
       <div class="p-3 rounded-lg bg-yellow-50">
         <p class="font-semibold">{{ item.title }}</p>
         <p class="text-sm text-gray-700">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">From {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "From" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500">No class messages.</p>
+      <p class="text-gray-500">{% trans "No class messages." %}</p>
       {% endfor %}
     </div>
   </div>
   <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">General Announcements</h3>
+    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "General Announcements" %}</h3>
     <div class="space-y-2">
       {% for item in announcements_feed %}
       <div class="p-3 rounded-lg bg-green-50">
         <p class="font-semibold">{{ item.title }}</p>
         <p class="text-sm text-gray-700">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">By {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "By" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500">No announcements.</p>
+      <p class="text-gray-500">{% trans "No announcements." %}</p>
       {% endfor %}
     </div>
   </div>
 </div>
 {% else %}
 <div class="bg-white border rounded-xl p-6 text-gray-600">
-  No linked student found. Link a student profile from admin first.
+  {% trans "No linked student found. Link a student profile from admin first." %}
 </div>
 {% endif %}
 
@@ -141,7 +142,7 @@
       data: {
         labels: labels,
         datasets: [{
-          label: "Performance %",
+          label: "{% trans 'Performance %' %}",
           data: values,
           borderColor: "#2563eb",
           backgroundColor: "rgba(37, 99, 235, 0.15)",

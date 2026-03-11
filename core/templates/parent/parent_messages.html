@@ -1,11 +1,16 @@
 {% extends 'parent/base_parent.html' %}
-{% block title %}Messages{% endblock %}
-{% block header %}Messages{% endblock %}
-{% block subtitle %}Class messages and announcements{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Messages" %}{% endblock %}
+{% block header %}{% trans "Messages" %}{% endblock %}
+{% block subtitle %}{% trans "Class messages and announcements" %}{% endblock %}
 {% block content %}
+{% trans "Failed to clear teacher messages." as msg_clear_teacher_failed %}
+{% trans "Failed to clear announcements." as msg_clear_announcements_failed %}
+{% trans "No teacher messages available." as msg_no_teacher_messages %}
+{% trans "No announcements available." as msg_no_announcements %}
 <div class="bg-white border rounded-xl p-4 mb-6">
   <form method="get" class="flex items-center gap-2">
-    <label class="text-sm font-semibold text-gray-700" for="child_id">Child</label>
+    <label class="text-sm font-semibold text-gray-700" for="child_id">{% trans "Child" %}</label>
     <select id="child_id" name="child_id" class="border rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
       {% for child in children %}
       <option value="{{ child.pk }}" {% if selected_child and child.pk == selected_child.pk %}selected{% endif %}>
@@ -19,9 +24,9 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
   <div class="bg-white border rounded-xl p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-blue-600">Teacher/Class Messages</h3>
+      <h3 class="text-lg font-semibold text-blue-600">{% trans "Teacher/Class Messages" %}</h3>
       <button type="button" onclick="clearTeacherMessages()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
-        Clear
+        {% trans "Clear" %}
       </button>
     </div>
     <div id="teacher-messages-list" class="space-y-3">
@@ -29,19 +34,19 @@
       <div class="p-3 rounded-lg bg-yellow-50">
         <p class="font-semibold">{{ item.title }}</p>
         <p class="text-sm text-gray-600">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">From {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "From" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500">No teacher messages available.</p>
+      <p class="text-gray-500">{% trans "No teacher messages available." %}</p>
       {% endfor %}
     </div>
   </div>
 
   <div class="bg-white border rounded-xl p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-blue-600">General Announcements</h3>
+      <h3 class="text-lg font-semibold text-blue-600">{% trans "General Announcements" %}</h3>
       <button type="button" onclick="clearAnnouncements()" class="text-sm font-semibold px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
-        Clear
+        {% trans "Clear" %}
       </button>
     </div>
     <div id="announcements-list" class="space-y-3">
@@ -49,17 +54,17 @@
       <div class="p-3 rounded-lg bg-green-50">
         <p class="font-semibold">{{ item.title }}</p>
         <p class="text-sm text-gray-600">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">By {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
+        <p class="text-xs text-gray-500 mt-1">{% trans "By" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
       </div>
       {% empty %}
-      <p class="text-gray-500">No announcements available.</p>
+      <p class="text-gray-500">{% trans "No announcements available." %}</p>
       {% endfor %}
     </div>
   </div>
 </div>
 
 <div class="bg-white border rounded-xl p-6 mt-6">
-  <h3 class="text-lg font-semibold text-blue-600 mb-4">System Notifications</h3>
+  <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "System Notifications" %}</h3>
   <div class="space-y-3">
     {% for item in notifications_feed %}
     <div class="p-3 rounded-lg {% if item.is_read %}bg-gray-50{% else %}bg-blue-50{% endif %}">
@@ -68,11 +73,16 @@
       <p class="text-xs text-gray-500 mt-1">{{ item.created_at|date:"d M Y, h:i A" }}</p>
     </div>
     {% empty %}
-    <p class="text-gray-500">No system notifications available.</p>
+    <p class="text-gray-500">{% trans "No system notifications available." %}</p>
     {% endfor %}
   </div>
 </div>
 <script>
+  const MSG_CLEAR_TEACHER_FAILED = "{{ msg_clear_teacher_failed|escapejs }}";
+  const MSG_CLEAR_ANNOUNCEMENTS_FAILED = "{{ msg_clear_announcements_failed|escapejs }}";
+  const MSG_NO_TEACHER_MESSAGES = "{{ msg_no_teacher_messages|escapejs }}";
+  const MSG_NO_ANNOUNCEMENTS = "{{ msg_no_announcements|escapejs }}";
+
   function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -98,11 +108,11 @@
     })
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Failed to clear teacher messages.');
-        list.innerHTML = '<p class="text-gray-500">No teacher messages available.</p>';
+        if (!res.ok) throw new Error(data.error || MSG_CLEAR_TEACHER_FAILED);
+        list.innerHTML = `<p class="text-gray-500">${MSG_NO_TEACHER_MESSAGES}</p>`;
       })
       .catch((err) => {
-        alert(err.message || 'Failed to clear teacher messages.');
+        alert(err.message || MSG_CLEAR_TEACHER_FAILED);
       });
   }
 
@@ -119,11 +129,11 @@
     })
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || 'Failed to clear announcements.');
-        list.innerHTML = '<p class="text-gray-500">No announcements available.</p>';
+        if (!res.ok) throw new Error(data.error || MSG_CLEAR_ANNOUNCEMENTS_FAILED);
+        list.innerHTML = `<p class="text-gray-500">${MSG_NO_ANNOUNCEMENTS}</p>`;
       })
       .catch((err) => {
-        alert(err.message || 'Failed to clear announcements.');
+        alert(err.message || MSG_CLEAR_ANNOUNCEMENTS_FAILED);
       });
   }
 </script>

@@ -13,11 +13,14 @@ import json
 import ast
 import re
 import os
+import random
 import mimetypes
 import logging
 import io
 import base64
+import hashlib
 from django.db import models as djmodels
+from django.core.cache import cache
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
@@ -39,6 +42,48 @@ if GROQ_API_KEY:
     )
 else:
     logger.warning("⚠️ GROQ_API_KEY not configured. AI features will not work.")
+
+
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+
+def groq_complete(
+    prompt: str,
+    max_tokens: int = 500,
+    temperature: float = 0.3,
+    cache_ttl: int = 600,
+    system_prompt: str = "",
+) -> str:
+    """Shared Groq text completion with lightweight caching for repeated prompts."""
+    if not client:
+        raise RuntimeError("Groq API not configured.")
+
+    normalized_prompt = (prompt or "").strip()
+    if not normalized_prompt:
+        return ""
+
+    normalized_system = (system_prompt or "").strip()
+    key_raw = f"{GROQ_MODEL}|{max_tokens}|{temperature}|{normalized_system}|{normalized_prompt}"
+    cache_key = "groq:txt:" + hashlib.sha1(key_raw.encode("utf-8")).hexdigest()
+    cached = cache.get(cache_key)
+    if isinstance(cached, str) and cached:
+        return cached
+
+    messages = []
+    if normalized_system:
+        messages.append({"role": "system", "content": normalized_system})
+    messages.append({"role": "user", "content": normalized_prompt})
+
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+    text = (response.choices[0].message.content or "").strip()
+    if text:
+        cache.set(cache_key, text, timeout=cache_ttl)
+    return text
 
 
 MATH_KEYWORDS = {
@@ -69,6 +114,180 @@ def clean_ai_text(text: str) -> str:
     text = re.sub(r"\*(.*?)\*", r"\1", text)
     text = text.replace("##", "").replace("#", "")
     return text.strip()
+
+
+def compact_teacher_feedback(text: str, max_lines: int = 3, max_chars: int = 220) -> str:
+    """Normalize AI feedback into short teacher-style remarks."""
+    cleaned = clean_ai_text(text or "")
+    if not cleaned:
+        return ""
+    lines = [re.sub(r"\s+", " ", ln).strip(" -•\t") for ln in cleaned.splitlines() if ln.strip()]
+    if not lines:
+        lines = [re.sub(r"\s+", " ", cleaned).strip()]
+    lines = lines[:max_lines]
+    compact = "\n".join(lines).strip()
+    if len(compact) > max_chars:
+        compact = compact[: max_chars - 3].rstrip(" ,.;:") + "..."
+    return compact
+
+
+def _strip_code_fences(text: str) -> str:
+    cleaned = (text or "").strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    return cleaned.strip()
+
+
+def _extract_json_candidate(text: str, prefer: str = "object") -> str:
+    src = _strip_code_fences(text)
+    if prefer == "array":
+        start = src.find("[")
+        end = src.rfind("]")
+    else:
+        start = src.find("{")
+        end = src.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return src[start : end + 1]
+    return src
+
+
+def parse_json_payload(raw_text: str, prefer: str = "object"):
+    candidate = _extract_json_candidate(raw_text, prefer=prefer)
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        return ast.literal_eval(candidate)
+
+
+def _coerce_exam_questions(items, expected_total: int = 0):
+    if not isinstance(items, list):
+        return []
+    out = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        q_type = str(item.get("type") or "Medium").strip().title()
+        if q_type not in {"Easy", "Medium", "Hard"}:
+            q_type = "Medium"
+        marks_default = {"Easy": 2, "Medium": 5, "Hard": 10}[q_type]
+        try:
+            marks = int(item.get("marks", marks_default) or marks_default)
+        except Exception:
+            marks = marks_default
+        text = str(item.get("text") or "").strip()
+        if not text:
+            continue
+        out.append(
+            {
+                "text": text,
+                "marks": marks,
+                "type": q_type,
+                "latex": str(item.get("latex") or "").strip(),
+            }
+        )
+    if expected_total > 0:
+        return out[:expected_total]
+    return out
+
+
+def _coerce_weak_practice_questions(items, weak_subtopics):
+    if not isinstance(items, list):
+        return []
+    weak_lookup = {str(x or "").strip().lower(): str(x or "").strip() for x in (weak_subtopics or []) if str(x or "").strip()}
+    out = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        text = str(item.get("text") or "").strip()
+        if not text:
+            continue
+        subtopic_raw = str(item.get("subtopic") or "").strip()
+        subtopic = weak_lookup.get(subtopic_raw.lower(), "")
+        if not subtopic:
+            subtopic = next(iter(weak_lookup.values()), "General")
+        difficulty = str(item.get("difficulty") or "Medium").strip().title()
+        if difficulty not in {"Easy", "Medium", "Hard"}:
+            difficulty = "Medium"
+        try:
+            marks = int(item.get("marks", 5) or 5)
+        except Exception:
+            marks = 5
+        out.append(
+            {
+                "text": text,
+                "subtopic": subtopic,
+                "difficulty": difficulty,
+                "marks": marks,
+            }
+        )
+    return out[:5]
+
+
+def _coerce_syllabus_subjects(payload):
+    subjects = []
+    if isinstance(payload, dict):
+        subjects = payload.get("subjects") or []
+    elif isinstance(payload, list):
+        subjects = payload
+    if not isinstance(subjects, list):
+        return []
+    out = []
+    for row in subjects:
+        if not isinstance(row, dict):
+            continue
+        name = str(row.get("name") or "").strip()
+        if not name:
+            continue
+        chapters = row.get("chapters") or []
+        if not isinstance(chapters, list):
+            chapters = []
+        normalized_chapters = [str(c or "").strip() for c in chapters if str(c or "").strip()][:8]
+        out.append({"name": name, "chapters": normalized_chapters})
+    return out
+
+
+def _coerce_topic_learning_payload(payload):
+    if not isinstance(payload, dict):
+        return [], []
+    flashcards = payload.get("flashcards") or []
+    practice_questions = payload.get("practice_questions") or []
+    norm_flash = []
+    for row in flashcards:
+        if not isinstance(row, dict):
+            continue
+        q = str(row.get("question") or "").strip()
+        a = str(row.get("answer") or "").strip()
+        if q and a:
+            norm_flash.append({"question": q, "answer": a})
+    norm_practice = []
+    for row in practice_questions:
+        if not isinstance(row, dict):
+            continue
+        q_type = str(row.get("type") or "Short").strip().title()
+        if q_type not in {"Mcq", "Short"}:
+            q_type = "Short"
+        q_type = "MCQ" if q_type == "Mcq" else "Short"
+        question = str(row.get("question") or "").strip()
+        answer = str(row.get("answer") or "").strip()
+        if not question:
+            continue
+        options = row.get("options") if q_type == "MCQ" else []
+        if not isinstance(options, list):
+            options = []
+        options = [str(x or "").strip() for x in options if str(x or "").strip()][:6]
+        norm_practice.append(
+            {
+                "type": q_type,
+                "question": question,
+                "options": options if q_type == "MCQ" else [],
+                "answer": answer or "Student specific",
+            }
+        )
+    return norm_flash[:10], norm_practice[:5]
 
 
 def normalize_steps_and_answer(text: str) -> str:
@@ -342,11 +561,16 @@ def generate_remark_feedback(request):
         return JsonResponse({"error": "Question and answer required."}, status=400)
 
     base_prompt = (
-        f"You are a careful grader / teacher.\n\n"
-        f"Question: {question_text}\n\n"
-        f"Student's Answer: {student_answer_text}\n\n"
-        f"Provide short, constructive feedback as a teacher's remark: point out errors (if any), "
-        f"give a concise explanation of the issue, and suggest exact improvements or next steps."
+        "You are a real school teacher writing remarks in a marks register.\n"
+        "Keep feedback short and practical.\n"
+        "Output rules:\n"
+        "1) 2 to 3 very short lines only.\n"
+        "2) First line: correctness in simple words.\n"
+        "3) Second line: exact mistake or strength.\n"
+        "4) Third line: one clear improvement step.\n"
+        "5) No long explanation, no emojis, no markdown.\n\n"
+        f"Question: {question_text}\n"
+        f"Student's Answer: {student_answer_text}"
     )
 
     try:
@@ -355,11 +579,12 @@ def generate_remark_feedback(request):
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=messages,
-            max_tokens=500
+            max_tokens=140,
+            temperature=0.3,
         )
 
         raw = response.choices[0].message.content
-        return JsonResponse({"feedback": clean_ai_text(raw)})
+        return JsonResponse({"feedback": compact_teacher_feedback(raw)})
     except Exception as e:
         logger.exception("generate_remark_feedback error: %s", e)
         return JsonResponse({"error": str(e)}, status=500)
@@ -409,37 +634,85 @@ def generate_practice_questions(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid request"}, status=400)
 
-    if not client:
-        return JsonResponse({"error": "Groq API not configured."}, status=500)
-
     topic = request.POST.get("topic", "").strip()
     difficulty = request.POST.get("difficulty", "Medium").strip()
 
     if not topic:
         return JsonResponse({"error": "Topic is required."}, status=400)
 
+    level_raw = (difficulty or "Medium").strip().lower()
+    level_map = {
+        "simple": "Easy",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "difficult": "Hard",
+    }
+    level = level_map.get(level_raw, "Medium")
+
+    def _fallback_questions() -> str:
+        rng = random.SystemRandom()
+        if level == "Easy":
+            pool = [
+                f"1. Write the meaning of {topic} in one line. (Easy)",
+                f"Identify one basic formula/rule used in {topic}. (Easy)",
+                f"Solve a very basic example of {topic} with 2-3 steps. (Easy)",
+                f"Fill in the blank: The first step in {topic} is ________. (Easy)",
+                f"State two common terms used in {topic}. (Easy)",
+                f"List two mistakes beginners make in {topic}. (Easy)",
+                f"Give one real-life situation where {topic} is used. (Easy)",
+                f"Define any two keywords related to {topic}. (Easy)",
+                f"Match the concept and definition for {topic}. (Easy)",
+            ]
+        elif level == "Hard":
+            pool = [
+                f"Solve a multi-step application problem based on {topic} and justify each step. (Hard)",
+                f"Compare two methods to solve a {topic} problem and discuss efficiency. (Hard)",
+                f"Find and correct errors in a deliberately incorrect solution for {topic}. (Hard)",
+                f"Create a higher-order problem from {topic} combining two sub-concepts, then solve it. (Hard)",
+                f"Prove/derive a key result used in {topic}, then apply it to one non-trivial example. (Hard)",
+                f"Design a real-world case study for {topic} and solve it mathematically. (Hard)",
+                f"Build a challenging problem in {topic} with constraints, then optimize the solution steps. (Hard)",
+                f"Given two different answers to the same {topic} problem, validate which one is correct and why. (Hard)",
+                f"Transform a standard {topic} question into an advanced variant and solve it. (Hard)",
+            ]
+        else:
+            pool = [
+                f"Explain {topic} with one worked example of moderate difficulty. (Medium)",
+                f"Solve a standard problem from {topic} using step-by-step reasoning. (Medium)",
+                f"Choose the correct method for a {topic} problem and explain why. (Medium)",
+                f"Convert a word problem into a {topic}-based form and solve it. (Medium)",
+                f"Analyze a partial solution in {topic} and complete the missing steps. (Medium)",
+                f"Classify three {topic} questions into easy/medium/hard with reasons. (Medium)",
+                f"Solve one mixed-concept question that uses {topic} with a related chapter idea. (Medium)",
+                f"Create one quiz-style MCQ and one short-answer question on {topic}. (Medium)",
+                f"Spot and fix two errors in a medium-level {topic} solution. (Medium)",
+            ]
+        selected = rng.sample(pool, 5)
+        lines = [f"{idx}. {q}" for idx, q in enumerate(selected, start=1)]
+        return "\n".join(lines)
+
     try:
+        variation_id = random.SystemRandom().randint(100000, 999999)
         prompt = (
-            f"You are an expert tutor. Create 5 {difficulty}-level practice questions "
+            f"You are an expert tutor. Create 5 {level}-level practice questions "
             f"on the topic '{topic}' for a student. "
+            f"Generate a fresh set different from previous attempts. Variation ID: {variation_id}. "
             f"Format the output as a numbered list. "
             f"Do not provide the answers immediately, just the questions."
         )
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=800
-        )
-        
-        raw = response.choices[0].message.content
+        if not client:
+            return JsonResponse({"questions": _fallback_questions(), "source": "fallback"})
+
+        raw = groq_complete(prompt, max_tokens=600, temperature=0.8, cache_ttl=0)
         if raw:
             return JsonResponse({"questions": clean_ai_text(raw)})
         
-        return JsonResponse({"error": "No questions generated."}, status=500)
+        return JsonResponse({"questions": _fallback_questions(), "source": "fallback"})
     except Exception as e:
         logger.exception("generate_practice_questions error: %s", e)
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"questions": _fallback_questions(), "source": "fallback"})
 
 
 @csrf_exempt
@@ -489,18 +762,15 @@ def topic_learning_content(request):
             "- practice_questions: array of 5 objects with keys 'type' (MCQ/Short), 'question', 'options' (for MCQ only), and 'answer'."
         )
         try:
-            response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=1800,
-                temperature=0.3,
+            raw_text = groq_complete(
+                prompt,
+                max_tokens=1200,
+                temperature=0.2,
+                cache_ttl=1800,
+                system_prompt="Return valid JSON only. No markdown. No comments.",
             )
-            raw_text = (response.choices[0].message.content or "").strip()
-            json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
-            payload_text = json_match.group(0) if json_match else raw_text
-            payload = json.loads(payload_text)
-            flashcards = payload.get("flashcards", []) or []
-            practice_questions = payload.get("practice_questions", []) or []
+            payload = parse_json_payload(raw_text, prefer="object")
+            flashcards, practice_questions = _coerce_topic_learning_payload(payload)
         except Exception as exc:
             logger.warning("topic_learning_content AI parse fallback used: %s", exc)
 
@@ -589,66 +859,18 @@ def generate_exam_questions(request):
     )
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500,
-            temperature=0.7
+        raw_text = groq_complete(
+            prompt,
+            max_tokens=1200,
+            temperature=0.2,
+            cache_ttl=900,
+            system_prompt="Return valid JSON array only. No markdown. No extra text.",
         )
-        
-        raw_text = response.choices[0].message.content
-        
-        # Use regex to find the JSON array block since models can be chatty
-        import re
-        import json
-        import ast
-        
-        json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-        
-        cleaned_text = ""
-        questions_json = []
-
-        if json_match:
-            try:
-                cleaned_text = json_match.group(0)
-                questions_json = json.loads(cleaned_text)
-            except json.JSONDecodeError:
-                # If regex fails (e.g. multiple blocks or malformed), try cleaning the raw text
-                cleaned_text = raw_text.strip()
-                if cleaned_text.startswith("```json"):
-                    cleaned_text = cleaned_text[7:]
-                elif cleaned_text.startswith("```"):
-                    cleaned_text = cleaned_text[3:]
-                
-                if cleaned_text.endswith("```"):
-                    cleaned_text = cleaned_text[:-3]
-                cleaned_text = cleaned_text.strip()
-        else:
-             # Fallback to standard cleaning if regex finds nothing
-            cleaned_text = raw_text.strip()
-            if cleaned_text.startswith("```json"):
-                cleaned_text = cleaned_text[7:]
-            elif cleaned_text.startswith("```"):
-                cleaned_text = cleaned_text[3:]
-            
-            if cleaned_text.endswith("```"):
-                cleaned_text = cleaned_text[:-3]
-            cleaned_text = cleaned_text.strip()
-
-        try:
-            if not questions_json:
-                questions_json = json.loads(cleaned_text)
-            
-            if not isinstance(questions_json, list):
-                 return JsonResponse({"error": "AI returned invalid format (not a list)."}, status=500)
-            return JsonResponse({"questions": questions_json})
-        except json.JSONDecodeError:
-            # Fallback: try ast.literal_eval for Python-style lists/dicts (single quotes)
-            try:
-                questions_json = ast.literal_eval(cleaned_text)
-            except (ValueError, SyntaxError) as e:
-                logger.error(f"JSON/AST Parse Error: {e} | Text: {raw_text}")
-                return JsonResponse({"error": "Failed to parse AI response."}, status=500)
+        parsed = parse_json_payload(raw_text, prefer="array")
+        questions_json = _coerce_exam_questions(parsed, expected_total=total_count)
+        if not questions_json:
+            return JsonResponse({"error": "Failed to parse AI response."}, status=500)
+        return JsonResponse({"questions": questions_json})
             
     except Exception as e:
         logger.exception("generate_exam_questions error: %s", e)
@@ -716,24 +938,18 @@ def suggest_syllabus(request):
                 "{\"subjects\": [{\"name\": \"Subject\", \"chapters\": [\"Topic 1\", \"Topic 2\"]}]}"
             )
             try:
-                response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=700,
-                    temperature=0.4,
+                raw_text = groq_complete(
+                    prompt,
+                    max_tokens=650,
+                    temperature=0.2,
+                    cache_ttl=1800,
+                    system_prompt="Return valid JSON object only. No markdown. No extra text.",
                 )
-                raw_text = response.choices[0].message.content or ""
-                cleaned = clean_ai_text(raw_text).strip()
-                if cleaned.startswith("```json"):
-                    cleaned = cleaned[7:]
-                elif cleaned.startswith("```"):
-                    cleaned = cleaned[3:]
-                if cleaned.endswith("```"):
-                    cleaned = cleaned[:-3]
-                ai_payload = json.loads(cleaned.strip())
+                ai_payload = parse_json_payload(raw_text, prefer="object")
+                normalized_subjects = _coerce_syllabus_subjects(ai_payload)
                 ai_map = {
-                    (item.get("name") or "").strip().lower(): (item.get("chapters") or [])
-                    for item in (ai_payload.get("subjects") or [])
+                    item["name"].lower(): item["chapters"]
+                    for item in normalized_subjects
                 }
                 for item in result_subjects:
                     if not item["chapters"]:
@@ -754,39 +970,18 @@ def suggest_syllabus(request):
     )
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1000,
-            temperature=0.7
+        raw_text = groq_complete(
+            prompt,
+            max_tokens=850,
+            temperature=0.2,
+            cache_ttl=1800,
+            system_prompt="Return valid JSON object only. No markdown. No extra text.",
         )
-        
-        raw_text = response.choices[0].message.content
-        cleaned = clean_ai_text(raw_text)
-        
-        # JSON cleanup
-        import json
-        if cleaned.startswith("```json"):
-            cleaned = cleaned[7:]
-        elif cleaned.startswith("```"):
-            cleaned = cleaned[3:]
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3]
-            
-        try:
-            data = json.loads(cleaned.strip())
-            data["source"] = "ai"
-            return JsonResponse(data)
-        except json.JSONDecodeError:
-            try:
-                import ast
-                data = ast.literal_eval(cleaned.strip())
-                if isinstance(data, dict):
-                    data["source"] = "ai"
-                return JsonResponse(data)
-            except Exception as e:
-                logger.error(f"JSON/AST Parse Error in suggest_syllabus: {e} | Text: {raw_text}")
-                return JsonResponse({"error": "Failed to parse AI response."}, status=500)
+        payload = parse_json_payload(raw_text, prefer="object")
+        subjects = _coerce_syllabus_subjects(payload)
+        if not subjects:
+            return JsonResponse({"error": "Failed to parse AI response."}, status=500)
+        return JsonResponse({"subjects": subjects, "source": "ai"})
     except Exception as e:
         logger.exception("suggest_syllabus error: %s", e)
         return JsonResponse({"error": str(e)}, status=500)
@@ -964,13 +1159,7 @@ def generate_class_report(request):
             f"4. **Action Plan**: 3 concrete steps for the next week.\n"
         )
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500
-        )
-        
-        raw = response.choices[0].message.content
+        raw = groq_complete(prompt, max_tokens=1000, temperature=0.2, cache_ttl=1200)
         return JsonResponse({"report": clean_ai_text(raw)})
 
     except Exception as e:
@@ -1027,42 +1216,20 @@ def generate_weak_topic_practice(request):
 
     try:
         logger.info("Calling Groq API for practice questions...")
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500,
-            temperature=0.7
+        raw_text = groq_complete(
+            prompt,
+            max_tokens=1100,
+            temperature=0.25,
+            cache_ttl=900,
+            system_prompt="Return valid JSON array only. No markdown. No extra text.",
         )
-        
-        raw_text = response.choices[0].message.content
         logger.info(f"Groq API response received: {raw_text[:200]}...")
-        
-        # Robust JSON parsing
-        
-        json_match = re.search(r'\[.*\]', raw_text, re.DOTALL)
-        cleaned_text = ""
-        questions_json = []
-
-        if json_match:
-             cleaned_text = json_match.group(0)
-        else:
-             cleaned_text = clean_ai_text(raw_text)
-             # Strip markdown
-             if cleaned_text.startswith("```json"): cleaned_text = cleaned_text[7:]
-             if cleaned_text.startswith("```"): cleaned_text = cleaned_text[3:]
-             if cleaned_text.endswith("```"): cleaned_text = cleaned_text[:-3]
-
-        try:
-             questions_json = json.loads(cleaned_text.strip())
-             logger.info(f"Successfully parsed {len(questions_json)} questions")
-        except json.JSONDecodeError as je:
-             logger.warning(f"JSON parse failed, trying ast.literal_eval: {je}")
-             try:
-                 questions_json = ast.literal_eval(cleaned_text.strip())
-                 logger.info(f"Successfully parsed with ast: {len(questions_json)} questions")
-             except Exception as e:
-                 logger.error(f"JSON Parse Error (Weak Practice): {e} | Text: {raw_text}")
-                 return JsonResponse({"error": "Failed to parse AI response. Please try again."}, status=500)
+        parsed = parse_json_payload(raw_text, prefer="array")
+        questions_json = _coerce_weak_practice_questions(parsed, weak_subtopics)
+        if not questions_json:
+            logger.error("JSON Parse Error (Weak Practice): empty parsed list | Text: %s", raw_text[:300])
+            return JsonResponse({"error": "Failed to parse AI response. Please try again."}, status=500)
+        logger.info(f"Successfully parsed {len(questions_json)} questions")
         
         # Persist generated questions so refresh does not reset practice set.
         persisted_questions = []
@@ -1176,14 +1343,7 @@ def analyze_student_performance(request):
     )
 
     try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=150,
-            temperature=0.7
-        )
-        
-        insight = response.choices[0].message.content.strip()
+        insight = groq_complete(prompt, max_tokens=120, temperature=0.2, cache_ttl=600).strip()
         return JsonResponse({"insight": clean_ai_text(insight)})
         
     except Exception as e:

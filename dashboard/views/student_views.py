@@ -32,6 +32,8 @@ from ..models import (
 )
 from ..services.dashboard_metrics import get_student_metrics
 
+QUIZ_JSON_PREFIX = "__QUIZ_JSON__:"
+
 
 def _normalize_class_level(value):
     text = str(value or "").strip().lower()
@@ -49,6 +51,22 @@ def _teacher_display_name(teacher_profile):
     if full_name:
         return full_name
     return (teacher_profile.user.email or "").strip()
+
+
+def _parse_quiz_description_blob(raw_text: str):
+    text = str(raw_text or "").strip()
+    if not text.startswith(QUIZ_JSON_PREFIX):
+        return None
+    payload_text = text[len(QUIZ_JSON_PREFIX):].strip()
+    if not payload_text:
+        return None
+    try:
+        payload = json.loads(payload_text)
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return payload
 
 
 def _section_teacher_names_by_subject(section, subject_ids):
@@ -560,6 +578,299 @@ def student_dashboard(request):
     }
     
     return render(request, 'student/student_dashboard.html', context)
+
+
+@login_required(login_url='student_login')
+def student_performance_graph(request):
+    """Dedicated performance graph page for students (dashboard-independent)."""
+    try:
+        student_profile = StudentProfile.objects.get(user=request.user)
+    except StudentProfile.DoesNotExist:
+        messages.error(request, "Student profile not found.")
+        return redirect("student_dashboard")
+
+    accessible_subjects_qs = get_accessible_subjects(request.user).order_by("name")
+
+    # Performance by chapter from graded assignments + exams.
+    from collections import defaultdict
+    performance_map = defaultdict(lambda: {"name": "", "total_obtained": 0, "total_max": 0, "ncert": ""})
+
+    graded_assignments = StudentAnswer.objects.filter(
+        student=student_profile,
+        remarks__isnull=False,
+    ).select_related("question__chapter")
+    for ans in graded_assignments:
+        chapter = ans.question.chapter
+        if not chapter:
+            continue
+        performance_map[chapter.id]["name"] = chapter.name
+        performance_map[chapter.id]["ncert"] = chapter.ncert_reference
+        if ans.marks_obtained is not None:
+            performance_map[chapter.id]["total_obtained"] += ans.marks_obtained
+        performance_map[chapter.id]["total_max"] += ans.question.max_marks
+
+    graded_exams = Exam.objects.filter(
+        answers__student=student_profile,
+        answers__marks_obtained__isnull=False,
+    ).distinct().select_related("chapter")
+    for exam in graded_exams:
+        if not exam.chapter:
+            continue
+        obtained = ExamAnswer.objects.filter(
+            exam=exam,
+            student=student_profile,
+        ).aggregate(sum_marks=Sum("marks_obtained"))["sum_marks"] or 0
+        max_marks = exam.total_marks
+        performance_map[exam.chapter.id]["name"] = exam.chapter.name
+        performance_map[exam.chapter.id]["ncert"] = exam.chapter.ncert_reference
+        performance_map[exam.chapter.id]["total_obtained"] += obtained
+        performance_map[exam.chapter.id]["total_max"] += max_marks
+
+    performance_data = []
+    for _, data in performance_map.items():
+        percentage = (data["total_obtained"] / data["total_max"]) * 100 if data["total_max"] > 0 else 0
+        if percentage >= 75:
+            status = "Strong"
+            color = "green"
+        elif percentage >= 50:
+            status = "Moderate"
+            color = "yellow"
+        else:
+            status = "Weak"
+            color = "red"
+        performance_data.append(
+            {
+                "chapter_name": data["name"],
+                "ncert_link": data["ncert"],
+                "percentage": round(percentage, 1),
+                "status": status,
+                "color": color,
+            }
+        )
+    performance_data.sort(key=lambda x: x["percentage"], reverse=True)
+
+    # Subject-level summary + series.
+    subject_performance_qs = StudentSubjectPerformance.objects.filter(
+        student=student_profile
+    ).select_related("subject").order_by("subject__name")
+
+    subject_performance_rows = []
+    total_obtained_all = 0.0
+    total_marks_all = 0.0
+    strong_count = 0
+    weak_count = 0
+    top_subject_name = ""
+    top_subject_percentage = -1.0
+    for row in subject_performance_qs:
+        percentage = round(float(row.percentage or 0), 1)
+        if percentage >= 75:
+            color = "green"
+            strong_count += 1
+        elif percentage >= 40:
+            color = "yellow"
+        else:
+            color = "red"
+            weak_count += 1
+
+        subject_performance_rows.append(
+            {
+                "subject_name": row.subject.name,
+                "percentage": percentage,
+                "marks_obtained": row.marks_obtained,
+                "total_marks": row.total_marks,
+                "ai_remark": row.ai_remark,
+                "color": color,
+            }
+        )
+        total_obtained_all += float(row.marks_obtained or 0)
+        total_marks_all += float(row.total_marks or 0)
+        if percentage > top_subject_percentage:
+            top_subject_percentage = percentage
+            top_subject_name = row.subject.name
+
+    overall_percentage = round((total_obtained_all / total_marks_all) * 100, 1) if total_marks_all > 0 else 0
+    subject_performance_summary = {
+        "overall_percentage": overall_percentage,
+        "total_subjects": len(subject_performance_rows),
+        "strong_count": strong_count,
+        "weak_count": weak_count,
+        "top_subject_name": top_subject_name,
+        "top_subject_percentage": round(top_subject_percentage, 1) if top_subject_percentage >= 0 else 0,
+    }
+
+    selected_perf_subject = (request.GET.get("perf_subject") or "").strip()
+    selected_perf_days = (request.GET.get("perf_days") or "all").strip().lower()
+    if selected_perf_days not in {"all", "30", "90"}:
+        selected_perf_days = "all"
+    cutoff_dt = None
+    cutoff_date = None
+    if selected_perf_days != "all":
+        cutoff_dt = timezone.now() - timedelta(days=int(selected_perf_days))
+        cutoff_date = cutoff_dt.date()
+
+    selected_subject_id = int(selected_perf_subject) if selected_perf_subject.isdigit() else None
+
+    subject_metrics_map = {}
+    for sub in accessible_subjects_qs:
+        if selected_subject_id and sub.id != selected_subject_id:
+            continue
+        subject_metrics_map[sub.id] = {
+            "subject_name": sub.name,
+            "assignment_count": 0,
+            "assignment_obtained": 0.0,
+            "assignment_total": 0.0,
+            "test_count": 0,
+            "test_obtained": 0.0,
+            "test_total": 0.0,
+            "result_count": 0,
+            "result_obtained": 0.0,
+            "result_total": 0.0,
+        }
+
+    assignment_answers = StudentAnswer.objects.filter(
+        student=student_profile,
+        question__subject__isnull=False,
+    ).select_related("question__subject", "question")
+    if cutoff_dt:
+        assignment_answers = assignment_answers.filter(submitted_at__gte=cutoff_dt)
+    if selected_subject_id:
+        assignment_answers = assignment_answers.filter(question__subject_id=selected_subject_id)
+    for ans in assignment_answers:
+        sid = ans.question.subject_id
+        if not sid:
+            continue
+        row = subject_metrics_map.setdefault(
+            sid,
+            {
+                "subject_name": ans.question.subject.name,
+                "assignment_count": 0,
+                "assignment_obtained": 0.0,
+                "assignment_total": 0.0,
+                "test_count": 0,
+                "test_obtained": 0.0,
+                "test_total": 0.0,
+                "result_count": 0,
+                "result_obtained": 0.0,
+                "result_total": 0.0,
+            },
+        )
+        row["assignment_count"] += 1
+        max_marks = float(ans.question.max_marks or 0)
+        if max_marks > 0 and ans.marks_obtained is not None:
+            row["assignment_obtained"] += float(ans.marks_obtained or 0)
+            row["assignment_total"] += max_marks
+
+    exam_subject_rows = (
+        ExamAnswer.objects.filter(
+            student=student_profile,
+            exam__subject__isnull=False,
+        )
+        .filter(**({"submitted_at__gte": cutoff_dt} if cutoff_dt else {}))
+        .filter(**({"exam__subject_id": selected_subject_id} if selected_subject_id else {}))
+        .values("exam_id", "exam__subject_id", "exam__subject__name", "exam__total_marks")
+        .annotate(obtained=Sum("marks_obtained"))
+    )
+    for item in exam_subject_rows:
+        sid = item.get("exam__subject_id")
+        if not sid:
+            continue
+        row = subject_metrics_map.setdefault(
+            sid,
+            {
+                "subject_name": item.get("exam__subject__name") or f"Subject {sid}",
+                "assignment_count": 0,
+                "assignment_obtained": 0.0,
+                "assignment_total": 0.0,
+                "test_count": 0,
+                "test_obtained": 0.0,
+                "test_total": 0.0,
+                "result_count": 0,
+                "result_obtained": 0.0,
+                "result_total": 0.0,
+            },
+        )
+        row["test_count"] += 1
+        total_marks = float(item.get("exam__total_marks") or 0)
+        if total_marks > 0:
+            row["test_obtained"] += float(item.get("obtained") or 0)
+            row["test_total"] += total_marks
+
+    teacher_result_rows = (
+        SchoolExamResult.objects.filter(
+            student=student_profile,
+            subject__isnull=False,
+        )
+        .filter(**({"subject_id": selected_subject_id} if selected_subject_id else {}))
+        .filter(
+            Q(exam_date__gte=cutoff_date)
+            | Q(exam_date__isnull=True, created_at__gte=cutoff_dt)
+            if cutoff_dt
+            else Q()
+        )
+        .values("subject_id", "subject__name")
+        .annotate(
+            result_count=Count("id"),
+            obtained=Sum("marks_obtained"),
+            total=Sum("total_marks"),
+        )
+    )
+    for item in teacher_result_rows:
+        sid = item.get("subject_id")
+        if not sid:
+            continue
+        row = subject_metrics_map.setdefault(
+            sid,
+            {
+                "subject_name": item.get("subject__name") or f"Subject {sid}",
+                "assignment_count": 0,
+                "assignment_obtained": 0.0,
+                "assignment_total": 0.0,
+                "test_count": 0,
+                "test_obtained": 0.0,
+                "test_total": 0.0,
+                "result_count": 0,
+                "result_obtained": 0.0,
+                "result_total": 0.0,
+            },
+        )
+        row["result_count"] = int(item.get("result_count") or 0)
+        row["result_obtained"] += float(item.get("obtained") or 0)
+        row["result_total"] += float(item.get("total") or 0)
+
+    subject_metrics_rows = []
+    for row in sorted(subject_metrics_map.values(), key=lambda x: x["subject_name"].lower()):
+        if row["assignment_count"] == 0 and row["test_count"] == 0 and row["result_count"] == 0:
+            continue
+        assignment_pct = round((row["assignment_obtained"] / row["assignment_total"]) * 100, 1) if row["assignment_total"] > 0 else 0
+        test_pct = round((row["test_obtained"] / row["test_total"]) * 100, 1) if row["test_total"] > 0 else 0
+        teacher_result_pct = round((row["result_obtained"] / row["result_total"]) * 100, 1) if row["result_total"] > 0 else 0
+        subject_metrics_rows.append(
+            {
+                "subject_name": row["subject_name"],
+                "assignment_count": row["assignment_count"],
+                "test_count": row["test_count"],
+                "result_count": row["result_count"],
+                "assignment_percentage": assignment_pct,
+                "test_percentage": test_pct,
+                "result_percentage": teacher_result_pct,
+            }
+        )
+
+    performance_subject_options = [{"id": sub.id, "name": sub.name} for sub in accessible_subjects_qs]
+
+    return render(
+        request,
+        "student/performance_graph.html",
+        {
+            "performance_data": performance_data,
+            "subject_performance_rows": subject_performance_rows,
+            "subject_performance_summary": subject_performance_summary,
+            "subject_metrics_rows": subject_metrics_rows,
+            "performance_subject_options": performance_subject_options,
+            "selected_perf_subject": selected_perf_subject,
+            "selected_perf_days": selected_perf_days,
+        },
+    )
 
 
 @login_required
@@ -1181,6 +1492,9 @@ def virtual_abacus_ai_tutor(request):
         "english": "English",
         "hindi": "Hindi",
         "odia": "Odia",
+        "tamil": "Tamil",
+        "punjabi": "Punjabi",
+        "bengali": "Bengali",
     }
     if language not in allowed_languages:
         language = "english"
@@ -1226,17 +1540,12 @@ def virtual_abacus_ai_tutor(request):
     )
 
     try:
-        from .ai_utils import client, clean_ai_text
+        from .ai_utils import client, clean_ai_text, groq_complete
 
         if not client:
             return JsonResponse({"answer": fallback_text(topic, question, language)})
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=350,
-        )
-        raw = response.choices[0].message.content
+        raw = groq_complete(prompt, max_tokens=280, temperature=0.2, cache_ttl=900)
         return JsonResponse({"answer": clean_ai_text(raw)})
     except Exception:
         return JsonResponse({"answer": fallback_text(topic, question, language)})
@@ -1284,7 +1593,6 @@ def student_attendance(request):
         )
 
     selected_year = request.GET.get("year", "").strip()
-    selected_session = request.GET.get("session", "").strip()
 
     # Strict scope:
     # 1) Only this logged-in student's attendance
@@ -1331,14 +1639,6 @@ def student_attendance(request):
         selected_year = available_year_values[0]
         attendance_qs = attendance_qs.filter(date__year=int(selected_year))
 
-    # Session mapping:
-    # `odd`: Jul-Dec
-    # `even`: Jan-Jun
-    if selected_session == "odd":
-        attendance_qs = attendance_qs.filter(date__month__gte=7, date__month__lte=12)
-    elif selected_session == "even":
-        attendance_qs = attendance_qs.filter(date__month__gte=1, date__month__lte=6)
-
     total_days = attendance_qs.count()
     present_count = attendance_qs.filter(status=AttendanceRecord.STATUS_PRESENT).count()
     absent_count = attendance_qs.filter(status=AttendanceRecord.STATUS_ABSENT).count()
@@ -1377,7 +1677,6 @@ def student_attendance(request):
         "class_teacher_assigned": bool(class_teacher),
         "latest_marked_at": latest_marked_at,
         "selected_year": selected_year,
-        "selected_session": selected_session,
         "available_year_values": available_year_values,
         "teacher_rows": teacher_rows,
         "summary": {
@@ -1405,6 +1704,7 @@ def subject_list(request):
     subjects = list(get_accessible_subjects(request.user))
     student = StudentProfile.objects.filter(user=request.user).select_related("section").first()
     section = student.section if student else None
+    subject_ids = [subject.id for subject in subjects]
     section_teacher_map = _section_teacher_names_by_subject(section, [subject.id for subject in subjects])
 
     subject_cards = []
@@ -1430,13 +1730,37 @@ def subject_list(request):
                 "resource_counts": resource_counts,
             }
         )
-    return render(request, 'student/subject_list.html', {'subject_cards': subject_cards})
+
+    notes_feed = SubjectResource.objects.filter(
+        subject_id__in=subject_ids,
+        resource_type=SubjectResource.TYPE_NOTE,
+        is_published=True,
+    ).select_related("subject", "section", "uploaded_by__user").order_by("-created_at")
+    if section:
+        notes_feed = notes_feed.filter(Q(section=section) | Q(section__isnull=True))
+    notes_feed = list(notes_feed[:12])
+
+    return render(
+        request,
+        'student/subject_list.html',
+        {
+            'subject_cards': subject_cards,
+            'notes_feed': notes_feed,
+            'student_section': section,
+        },
+    )
 
 
 @login_required
 def chapter_list(request, subject_id):
     """List chapters for a specific subject."""
-    subject = get_object_or_404(get_accessible_subjects(request.user), id=subject_id)
+    subject = get_accessible_subjects(request.user).filter(id=subject_id).first()
+    if not subject:
+        if Subject.objects.filter(id=subject_id).exists():
+            messages.error(request, "This subject is not available for your current section.")
+        else:
+            messages.error(request, "Subject not found.")
+        return redirect("subject_list")
     chapters = Chapter.objects.filter(subject=subject)
     student = StudentProfile.objects.filter(user=request.user).select_related("section").first()
     section = student.section if student else None
@@ -1448,6 +1772,30 @@ def chapter_list(request, subject_id):
         resources = resources.filter(Q(section=section) | Q(section__isnull=True))
     if selected_type in valid_types:
         resources = resources.filter(resource_type=selected_type)
+
+    resource_rows = []
+    for res in resources:
+        display_description = res.description
+        quiz_meta = None
+        if res.resource_type == SubjectResource.TYPE_QUIZ:
+            payload = _parse_quiz_description_blob(res.description)
+            if payload:
+                questions = payload.get("questions") or []
+                chapter_name = str(payload.get("chapter_name") or "").strip()
+                quiz_meta = {
+                    "chapter_name": chapter_name,
+                    "questions_count": len(questions),
+                }
+                display_description = f"MCQ quiz with {len(questions)} questions."
+                if chapter_name:
+                    display_description += f" Chapter: {chapter_name}."
+        resource_rows.append(
+            {
+                "resource": res,
+                "display_description": display_description,
+                "quiz_meta": quiz_meta,
+            }
+        )
 
     all_resource_qs = SubjectResource.objects.filter(subject=subject, is_published=True)
     if section:
@@ -1468,6 +1816,7 @@ def chapter_list(request, subject_id):
         'subject': subject,
         'chapters': chapters,
         'resources': resources,
+        'resource_rows': resource_rows,
         'selected_type': selected_type,
         'resource_counts': resource_counts,
         'assigned_teacher': assigned_teacher,
@@ -1480,7 +1829,16 @@ def chapter_detail(request, chapter_id):
     """
     The Intelligence Panel & Practice Area for a Chapter.
     """
-    chapter = get_object_or_404(Chapter.objects.filter(subject__in=get_accessible_subjects(request.user)), id=chapter_id)
+    chapter = Chapter.objects.filter(
+        id=chapter_id,
+        subject__in=get_accessible_subjects(request.user),
+    ).first()
+    if not chapter:
+        if Chapter.objects.filter(id=chapter_id).exists():
+            messages.error(request, "This chapter is not available for your current section.")
+        else:
+            messages.error(request, "Chapter not found.")
+        return redirect("subject_list")
     chapter_subject_name = (chapter.subject.name or "").strip()
     chapter_subject_lower = chapter_subject_name.lower()
     try:

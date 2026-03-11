@@ -23,8 +23,8 @@
       </div>
       <div>
         <label for="section_id" class="block text-sm font-medium text-gray-700 mb-1">Section</label>
-        <select id="section_id" name="section_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
-          <option value="">All Sections</option>
+        <select id="section_id" name="section_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+          <option value="">Select Section</option>
           {% for section in sections %}
           <option value="{{ section.id }}">{{ section.class_level }}{{ section.section }}</option>
           {% endfor %}
@@ -32,8 +32,8 @@
       </div>
       <div>
         <label for="subject_id" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-        <select id="subject_id" name="subject_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
-          <option value="">No Subject Tag</option>
+        <select id="subject_id" name="subject_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+          <option value="">Select Subject</option>
           {% for subject in subjects %}
           <option value="{{ subject.id }}">{{ subject.name }}{% if subject.class_level %} ({{ subject.class_level }}){% endif %}</option>
           {% endfor %}

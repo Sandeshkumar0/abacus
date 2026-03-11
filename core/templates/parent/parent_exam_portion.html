@@ -1,18 +1,19 @@
 {% extends 'parent/base_parent.html' %}
-{% block title %}Exam Portion{% endblock %}
-{% block header %}Exam Portion{% endblock %}
-{% block subtitle %}Upcoming and assigned exams{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Exam Portion" %}{% endblock %}
+{% block header %}{% trans "Exam Portion" %}{% endblock %}
+{% block subtitle %}{% trans "Upcoming and assigned exams" %}{% endblock %}
 {% block content %}
 <div class="bg-white border rounded-xl p-6">
   <div class="space-y-3">
     {% for exam in exams %}
     <div class="p-3 rounded-lg bg-orange-50">
       <p class="font-semibold">{{ exam.title }}</p>
-      <p class="text-sm text-gray-600">Subject: {{ exam.subject.name|default:"N/A" }} | Chapter: {{ exam.chapter.name|default:"N/A" }}</p>
-      <p class="text-xs text-gray-500 mt-1">Due: {{ exam.due_date|date:"d M Y, h:i A" }}</p>
+      <p class="text-sm text-gray-600">{% trans "Subject" %}: {{ exam.subject.name|default:"N/A" }} | {% trans "Chapter" %}: {{ exam.chapter.name|default:"N/A" }}</p>
+      <p class="text-xs text-gray-500 mt-1">{% trans "Due" %}: {{ exam.due_date|date:"d M Y, h:i A" }}</p>
     </div>
     {% empty %}
-    <p class="text-gray-500">No exam portion records available.</p>
+    <p class="text-gray-500">{% trans "No exam portion records available." %}</p>
     {% endfor %}
   </div>
 </div>

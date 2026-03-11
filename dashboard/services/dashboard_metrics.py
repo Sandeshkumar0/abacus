@@ -96,14 +96,16 @@ def get_teacher_metrics(user):
     )
 
     now = timezone.now()
-    students_qs = StudentProfile.objects.filter(assigned_teacher=teacher_profile).select_related("user")
+    # Use role-based access rules so class/section-assigned teachers also see
+    # correct student counts (not only directly assigned_teacher rows).
+    from dashboard.access_control import get_accessible_students
+
+    students_qs = get_accessible_students(user).select_related("user")
     student_ids = list(students_qs.values_list("user_id", flat=True))
 
     total_students = len(student_ids)
     active_assignments = Question.objects.filter(teacher=teacher_profile).count()
-    pending_queries = Query.objects.filter(student__assigned_teacher=teacher_profile).filter(
-        Q(response__isnull=True) | Q(response="")
-    ).count()
+    pending_queries = Query.objects.filter(student__in=students_qs).filter(Q(response__isnull=True) | Q(response="")).count()
     upcoming_tests = Exam.objects.filter(teacher=teacher_profile, due_date__gte=now).count()
 
     grading_backlog = StudentAnswer.objects.filter(
@@ -155,7 +157,9 @@ def get_teacher_at_risk_students(user, limit=10):
         user=user,
         defaults={"aadhar_id": "Not Provided", "phone": "Not Provided"},
     )
-    students = StudentProfile.objects.filter(assigned_teacher=teacher_profile).select_related("user")
+    from dashboard.access_control import get_accessible_students
+
+    students = get_accessible_students(user).select_related("user")
 
     risk_rows = []
     for student in students:

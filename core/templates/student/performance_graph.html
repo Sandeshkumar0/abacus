@@ -1,0 +1,137 @@
+{% extends 'student/base_student.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Performance Graph" %} - EMESYS{% endblock %}
+{% block header %}{% trans "Performance Graph" %}{% endblock %}
+{% block subtitle %}{% trans "Track only your academic performance" %}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <form method="get" class="bg-white border border-gray-200 rounded-xl p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Subject" %}</label>
+      <select name="perf_subject" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <option value="">{% trans "All Subjects" %}</option>
+        {% for sub in performance_subject_options %}
+        <option value="{{ sub.id }}" {% if selected_perf_subject == sub.id|stringformat:'s' %}selected{% endif %}>{{ sub.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">{% trans "Duration" %}</label>
+      <select name="perf_days" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <option value="all" {% if selected_perf_days == 'all' %}selected{% endif %}>{% trans "All Time" %}</option>
+        <option value="30" {% if selected_perf_days == '30' %}selected{% endif %}>{% trans "Last 30 Days" %}</option>
+        <option value="90" {% if selected_perf_days == '90' %}selected{% endif %}>{% trans "Last 90 Days" %}</option>
+      </select>
+    </div>
+    <div class="flex items-end">
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">{% trans "Apply Filter" %}</button>
+    </div>
+  </form>
+
+  <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Overall %" %}</p>
+      <p class="text-3xl font-bold text-blue-700 mt-1">{{ subject_performance_summary.overall_percentage|default:0 }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Total Subjects" %}</p>
+      <p class="text-3xl font-bold text-slate-800 mt-1">{{ subject_performance_summary.total_subjects|default:0 }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Strong Subjects" %}</p>
+      <p class="text-3xl font-bold text-emerald-700 mt-1">{{ subject_performance_summary.strong_count|default:0 }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{% trans "Weak Subjects" %}</p>
+      <p class="text-3xl font-bold text-red-700 mt-1">{{ subject_performance_summary.weak_count|default:0 }}</p>
+    </div>
+  </section>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <h3 class="text-lg font-semibold text-gray-800 mb-3">{% trans "Subject Performance Graph" %}</h3>
+    <div class="space-y-3">
+      {% for row in subject_metrics_rows %}
+      <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+        <div class="flex justify-between items-center text-sm mb-2">
+          <span class="font-semibold text-gray-800">{{ row.subject_name }}</span>
+          <span class="text-gray-500">
+            A:{{ row.assignment_count }} | T:{{ row.test_count }} | R:{{ row.result_count }}
+          </span>
+        </div>
+        <div class="space-y-2">
+          <div>
+            <div class="flex justify-between text-xs text-gray-600 mb-1">
+              <span>{% trans "Assignments" %}</span><span>{{ row.assignment_percentage }}%</span>
+            </div>
+            <div class="w-full bg-blue-100 rounded h-2"><div class="bg-blue-600 h-2 rounded" style="width: {{ row.assignment_percentage }}%;"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-gray-600 mb-1">
+              <span>{% trans "Tests" %}</span><span>{{ row.test_percentage }}%</span>
+            </div>
+            <div class="w-full bg-emerald-100 rounded h-2"><div class="bg-emerald-600 h-2 rounded" style="width: {{ row.test_percentage }}%;"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-gray-600 mb-1">
+              <span>{% trans "Teacher Results" %}</span><span>{{ row.result_percentage }}%</span>
+            </div>
+            <div class="w-full bg-violet-100 rounded h-2"><div class="bg-violet-600 h-2 rounded" style="width: {{ row.result_percentage }}%;"></div></div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-sm text-gray-500">{% trans "No performance records available for selected filters." %}</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <h3 class="text-lg font-semibold text-gray-800 mb-3">{% trans "Chapter Performance" %}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+      {% for row in performance_data %}
+      <article class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+        <div class="flex items-center justify-between">
+          <h4 class="font-semibold text-gray-800">{{ row.chapter_name|default:"-" }}</h4>
+          <span class="text-xs px-2 py-1 rounded {% if row.color == 'green' %}bg-emerald-100 text-emerald-700{% elif row.color == 'yellow' %}bg-amber-100 text-amber-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ row.status }}
+          </span>
+        </div>
+        <p class="text-2xl font-bold text-blue-700 mt-2">{{ row.percentage }}%</p>
+      </article>
+      {% empty %}
+      <p class="text-sm text-gray-500 col-span-full">{% trans "No chapter-wise graded performance available." %}</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-white border border-gray-200 rounded-xl p-5">
+    <h3 class="text-lg font-semibold text-gray-800 mb-3">{% trans "Subject Performance Details" %}</h3>
+    <div class="overflow-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-3 py-2 text-left text-gray-700">{% trans "Subject" %}</th>
+            <th class="px-3 py-2 text-left text-gray-700">{% trans "Score" %}</th>
+            <th class="px-3 py-2 text-left text-gray-700">{% trans "Remark" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in subject_performance_rows %}
+          <tr class="border-b border-gray-100">
+            <td class="px-3 py-2 font-medium text-gray-800">{{ row.subject_name }}</td>
+            <td class="px-3 py-2 text-gray-700">{{ row.marks_obtained }}/{{ row.total_marks }} ({{ row.percentage }}%)</td>
+            <td class="px-3 py-2 text-gray-600">{{ row.ai_remark|default:"-" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="px-3 py-6 text-center text-gray-500">{% trans "No subject-level performance data available." %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

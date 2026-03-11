@@ -13,6 +13,95 @@
     body {
       background: #f8fafc !important;
       margin: 0;
+      color: #0f172a;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    body.app-dark {
+      background: #0b1220 !important;
+      color: #e2e8f0 !important;
+    }
+
+    body.app-dark .sidebar,
+    body.app-dark .main-content header,
+    body.app-dark .main-content main {
+      background: #111827 !important;
+      color: #e2e8f0 !important;
+    }
+
+    body.app-dark .menu-item span,
+    body.app-dark .text-blue-600,
+    body.app-dark .text-gray-600 {
+      color: #e2e8f0 !important;
+    }
+
+    .topbar-menu-panel {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      width: 240px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+      z-index: 60;
+      display: none;
+    }
+
+    .topbar-menu-panel.show {
+      display: block;
+    }
+
+    body.app-dark .topbar-menu-panel {
+      background: #111827;
+      border-color: #334155;
+    }
+
+    .menu-card-title {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .menu-card-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    body.app-dark .menu-card-title {
+      color: #94a3b8;
+    }
+
+    body.app-dark .menu-card-value {
+      color: #e2e8f0;
+    }
+
+    .menu-panel-btn {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8fafc;
+      color: #0f172a;
+      text-align: left;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+    }
+
+    .menu-panel-btn + .menu-panel-btn {
+      margin-top: 8px;
+    }
+
+    body.app-dark .menu-panel-btn {
+      background: #1f2937;
+      border-color: #475569;
+      color: #e2e8f0;
     }
 
     .sidebar {
@@ -147,6 +236,43 @@
       padding-left: 8px;
       padding-right: 8px;
     }
+
+    .digital-clock-footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.28);
+      background: transparent;
+      padding: 10px 16px 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .digital-clock-box {
+      font-family: "Courier New", monospace;
+      background: transparent;
+      color: #64748b;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 12px;
+      min-width: 0;
+      justify-content: flex-end;
+      letter-spacing: 0.5px;
+    }
+
+    .digital-clock-time {
+      font-size: 20px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: #334155;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .digital-clock-date {
+      font-size: 14px;
+      color: #64748b;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
@@ -264,7 +390,7 @@
             <h1 class="text-3xl font-semibold text-blue-600 ">{% block header %}{% trans "Welcome" %}{% endblock %}</h1>
             <p class="text-sm text-gray-600">{% block subtitle %}{% trans "Manage your dashboard" %}{% endblock %}</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4 relative">
             <form action="{% url 'set_language' %}" method="post">
               {% csrf_token %}
               <input type="hidden" name="next" value="{{ request.get_full_path }}">
@@ -300,20 +426,32 @@
               </div>
             </div>
             <!-- Settings Icon -->
-            <a href="{% url 'teacher_profile_edit' %}" class="p-2 text-gray-400 hover:text-gray-600" title="{% trans 'Settings' %}">
+            <button type="button" id="teacher-settings-btn" class="p-2 text-gray-400 hover:text-gray-600" title="{% trans 'Settings' %}">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path
                   d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15-.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
-            </a>
+            </button>
             <!-- User Icon -->
-            <a href="{% url 'teacher_profile' %}" class="p-2 text-gray-400 hover:text-gray-600">
+            <button type="button" id="teacher-profile-btn" class="p-2 text-gray-400 hover:text-gray-600">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-            </a>
+            </button>
+            <div id="teacher-settings-panel" class="topbar-menu-panel">
+              <div class="menu-card-title">Appearance</div>
+              <button type="button" id="teacher-theme-toggle" class="menu-panel-btn">Switch to Dark Mode</button>
+              <a href="{% url 'teacher_profile_edit' %}" class="menu-panel-btn">Edit Profile</a>
+            </div>
+            <div id="teacher-profile-panel" class="topbar-menu-panel" style="right: 4px;">
+              <div class="menu-card-title">Name</div>
+              <div class="menu-card-value">{{ request.user.get_full_name|default:request.user.email }}</div>
+              <div class="menu-card-title">Section</div>
+              <div class="menu-card-value">{{ request.user.teacherprofile.section|default:"Assigned Sections" }}</div>
+              <a href="{% url 'teacher_logout' %}" class="menu-panel-btn">Logout</a>
+            </div>
           </div>
         </div>
       </header>
@@ -323,6 +461,12 @@
       <main class="px-4 pt-6 pb-0">
         {% block content %}{% endblock %}
       </main>
+      <footer class="digital-clock-footer" data-no-runtime-translate="1">
+        <div class="digital-clock-box" aria-label="Current date and time">
+          <span id="teacher-digital-clock-time" class="digital-clock-time">--:--:--</span>
+          <span id="teacher-digital-clock-date" class="digital-clock-date">---</span>
+        </div>
+      </footer>
     </div>
   </div>
   <script src="{% static 'js/notifications.js' %}"></script>
@@ -340,13 +484,73 @@
       window.notificationManager.markAllAsRead();
     }
 
+    function updateTeacherDigitalClock() {
+      const timeEl = document.getElementById('teacher-digital-clock-time');
+      const dateEl = document.getElementById('teacher-digital-clock-date');
+      if (!timeEl || !dateEl) return;
+      const now = new Date();
+      timeEl.textContent = now.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      dateEl.textContent = now.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function setAppTheme(mode) {
+      const dark = mode === 'dark';
+      document.body.classList.toggle('app-dark', dark);
+      try { localStorage.setItem('dashboardTheme', dark ? 'dark' : 'light'); } catch (e) {}
+      const btn = document.getElementById('teacher-theme-toggle');
+      if (btn) btn.textContent = dark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+
+    function initTeacherTopbarMenus() {
+      const settingsBtn = document.getElementById('teacher-settings-btn');
+      const profileBtn = document.getElementById('teacher-profile-btn');
+      const settingsPanel = document.getElementById('teacher-settings-panel');
+      const profilePanel = document.getElementById('teacher-profile-panel');
+      const themeBtn = document.getElementById('teacher-theme-toggle');
+      if (!settingsBtn || !profileBtn || !settingsPanel || !profilePanel || !themeBtn) return;
+
+      settingsBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profilePanel.classList.remove('show');
+        settingsPanel.classList.toggle('show');
+      });
+
+      profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        settingsPanel.classList.remove('show');
+        profilePanel.classList.toggle('show');
+      });
+
+      themeBtn.addEventListener('click', function () {
+        const isDark = document.body.classList.contains('app-dark');
+        setAppTheme(isDark ? 'light' : 'dark');
+      });
+    }
+
     // Close dropdown when clicking outside
     document.addEventListener('click', function (event) {
       const widget = document.querySelector('.notification-widget');
       const dropdown = document.getElementById('notifications-dropdown');
+      const settingsPanel = document.getElementById('teacher-settings-panel');
+      const profilePanel = document.getElementById('teacher-profile-panel');
 
       if (widget && !widget.contains(event.target)) {
         dropdown.classList.remove('show');
+      }
+      if (settingsPanel && !settingsPanel.contains(event.target) && event.target.id !== 'teacher-settings-btn') {
+        settingsPanel.classList.remove('show');
+      }
+      if (profilePanel && !profilePanel.contains(event.target) && event.target.id !== 'teacher-profile-btn') {
+        profilePanel.classList.remove('show');
       }
     });
 
@@ -395,8 +599,14 @@
 
     window.addEventListener('resize', syncTeacherMainOffset);
     document.addEventListener('DOMContentLoaded', function () {
+      let savedTheme = 'light';
+      try { savedTheme = localStorage.getItem('dashboardTheme') || 'light'; } catch (e) {}
+      setAppTheme(savedTheme);
+      initTeacherTopbarMenus();
       initTeacherSidebarToggle();
       syncTeacherMainOffset();
+      updateTeacherDigitalClock();
+      setInterval(updateTeacherDigitalClock, 1000);
     });
   </script>
 </body>

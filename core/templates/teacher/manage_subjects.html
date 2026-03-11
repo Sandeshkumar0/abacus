@@ -7,10 +7,20 @@
 
 {% block content %}
 <div class="space-y-6">
-  <div class="flex justify-end">
-    <a href="{% url 'create_subject' %}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
-      {% trans "Add Subject" %}
-    </a>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 md:p-5">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">{% trans "Subject Setup" %}</h2>
+        <p class="text-sm text-gray-600">{% trans "Principal/Admin can create subjects, assign section teacher, and manage learning resources." %}</p>
+      </div>
+      {% if can_create_subject %}
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'create_subject' %}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+          {% trans "Add New Subject" %}
+        </a>
+      </div>
+      {% endif %}
+    </div>
   </div>
 
   {% if messages %}
@@ -52,7 +62,35 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-gray-600">{% trans "No subjects created yet." %}</td>
+            <td colspan="5" class="px-4 py-10">
+              <div class="max-w-3xl mx-auto">
+                <div class="text-center">
+                  <h3 class="text-base md:text-lg font-semibold text-gray-800">{% trans "No subjects created yet." %}</h3>
+                  <p class="text-sm text-gray-600 mt-1">{% trans "Start in 3 simple steps." %}</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
+                  <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                    <p class="text-xs font-semibold text-blue-700">{% trans "Step 1" %}</p>
+                    <p class="text-sm text-gray-700 mt-1">{% trans "Create a subject with class and section." %}</p>
+                  </div>
+                  <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                    <p class="text-xs font-semibold text-emerald-700">{% trans "Step 2" %}</p>
+                    <p class="text-sm text-gray-700 mt-1">{% trans "Assign the correct teacher for that section." %}</p>
+                  </div>
+                  <div class="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                    <p class="text-xs font-semibold text-amber-700">{% trans "Step 3" %}</p>
+                    <p class="text-sm text-gray-700 mt-1">{% trans "Open subject and upload Notes/Books/Video/Quiz/Worksheet." %}</p>
+                  </div>
+                </div>
+                {% if can_create_subject %}
+                <div class="flex justify-center mt-5">
+                  <a href="{% url 'create_subject' %}" class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+                    {% trans "Create First Subject" %}
+                  </a>
+                </div>
+                {% endif %}
+              </div>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

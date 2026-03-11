@@ -1,7 +1,8 @@
 {% extends 'parent/base_parent.html' %}
-{% block title %}Children{% endblock %}
-{% block header %}Children{% endblock %}
-{% block subtitle %}Linked student profiles{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Children" %}{% endblock %}
+{% block header %}{% trans "Children" %}{% endblock %}
+{% block subtitle %}{% trans "Linked student profiles" %}{% endblock %}
 {% block content %}
 <div class="bg-white border rounded-xl p-6">
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -15,11 +16,11 @@
       </div>
       {% endif %}
       <p class="font-semibold text-gray-800 leading-tight">{{ child.user.get_full_name }}</p>
-      <p class="text-sm text-gray-600 mt-1">Roll: {{ child.roll_number }}</p>
+      <p class="text-sm text-gray-600 mt-1">{% trans "Roll" %}: {{ child.roll_number }}</p>
       <p class="text-xs text-gray-500 mt-1">{{ child.student_class }}{% if child.section %} - {{ child.section }}{% endif %}</p>
     </div>
     {% empty %}
-    <p class="text-gray-500">No linked children found.</p>
+    <p class="text-gray-500">{% trans "No linked children found." %}</p>
     {% endfor %}
   </div>
 </div>

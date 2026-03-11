@@ -499,6 +499,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Normalize newlines
     raw = raw.replace(/\r\n/g, '\n').trim();
+    // Force line breaks when model returns all steps in one paragraph.
+    raw = raw.replace(/\s+(Step\s*\d+\s*[:\-])/gi, '\n$1');
+    raw = raw.replace(/\s+(Final\s*Answer\s*[:\-])/gi, '\n$1');
 
     // Some models output markdown bullets with leading spaces — keep them as lines
     const lines = raw.split('\n');
@@ -518,6 +521,29 @@ document.addEventListener('DOMContentLoaded', function () {
     let html = '';
 
     for (const blockLines of blocks) {
+      // If every line is Step/Final format, render line-by-line as structured blocks.
+      const isStepFinalOnly = blockLines.every((ln) => {
+        const t = ln.trim();
+        return /^Step\s*\d+\s*[:\-]/i.test(t) || /^Final\s*Answer\s*[:\-]/i.test(t);
+      });
+      if (isStepFinalOnly) {
+        for (const ln of blockLines) {
+          const t = ln.trim();
+          if (/^Final\s*Answer\s*[:\-]/i.test(t)) {
+            const rest = t.replace(/^Final\s*Answer\s*[:\-]\s*/i, '').trim();
+            html += `<div class="answer-paragraph">Final Answer:</div><div class="answer-final">${escapeHtml(cleanInline(rest))}</div>`;
+            continue;
+          }
+          const m = t.match(/^Step\s*(\d+)\s*[:\-]\s*(.*)$/i);
+          if (m) {
+            const stepNo = m[1];
+            const stepText = (m[2] || '').trim();
+            html += `<div class="answer-step">Step ${escapeHtml(stepNo)}: ${escapeHtml(cleanInline(stepText))}</div>`;
+          }
+        }
+        continue;
+      }
+
       // If block is list-like (every non-empty line starts with bullet/number) -> render list
       if (isListBlock(blockLines)) {
         // Determine ordered or unordered by first non-empty line

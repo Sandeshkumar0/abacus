@@ -19,11 +19,11 @@
       </div>
       {% endfor %}
     {% endif %}
-    <form method="post" enctype="multipart/form-data" class="space-y-4">
+    <form method="post" enctype="multipart/form-data" class="space-y-4" id="resourceForm">
       {% csrf_token %}
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Resource Type" %}</label>
-        <select name="resource_type" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        <select id="resourceType" name="resource_type" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
           <option value="">{% trans "Select Type" %}</option>
           {% for key, label in resource_choices %}
           <option value="{{ key }}">{{ label }}</option>
@@ -32,8 +32,8 @@
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Section" %}</label>
-        <select name="section_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
-          <option value="">{% trans "All Assigned Sections" %}</option>
+        <select name="section_id" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+          <option value="">{% trans "Select Assigned Section" %}</option>
           {% for assignment in section_assignments %}
           <option value="{{ assignment.section.id }}">{{ assignment.section }} ({{ assignment.teacher.user.get_full_name }})</option>
           {% endfor %}
@@ -43,15 +43,31 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Title" %}</label>
         <input name="title" type="text" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
       </div>
-      <div>
+      <div id="chapterWrap" style="display:none;">
+        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Syllabus Chapter (for quiz)" %}</label>
+        <select id="chapterId" name="chapter_id" class="w-full border border-gray-300 rounded-lg px-3 py-2">
+          <option value="">{% trans "Select Chapter" %}</option>
+          {% for chapter in chapters %}
+          <option value="{{ chapter.id }}">{{ chapter.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div id="descriptionWrap">
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Description" %}</label>
         <textarea name="description" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2"></textarea>
       </div>
-      <div>
+      <div id="quizBuilder" style="display:none;" class="space-y-3 border border-blue-100 rounded-lg p-3 bg-blue-50">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-semibold text-blue-700">{% trans "Quiz Questions (MCQ)" %}</h4>
+          <button type="button" id="addQuizQuestion" class="text-xs bg-blue-600 text-white px-2 py-1 rounded">{% trans "Add Question" %}</button>
+        </div>
+        <div id="quizQuestionsContainer" class="space-y-3"></div>
+      </div>
+      <div id="fileWrap">
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "File Upload" %}</label>
         <input name="file" type="file" class="w-full border border-gray-300 rounded-lg px-3 py-2">
       </div>
-      <div>
+      <div id="urlWrap">
         <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "External URL (for videos/quizzes)" %}</label>
         <input name="external_url" type="url" class="w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="https://...">
       </div>
@@ -73,16 +89,109 @@
     <hr class="my-4">
     <h4 class="font-semibold text-gray-800 mb-2">{% trans "Recent Uploads" %}</h4>
     <div class="space-y-3 max-h-[420px] overflow-auto">
-      {% for item in resources %}
+      {% for row in resource_rows %}
+      {% with item=row.resource %}
       <div class="border border-gray-200 rounded-lg p-3">
         <div class="font-medium text-gray-800">{{ item.title }}</div>
         <div class="text-xs text-gray-500">{{ item.get_resource_type_display }}{% if item.section %} | {{ item.section }}{% endif %}</div>
+        {% if row.quiz_meta %}
+        <div class="text-xs text-blue-600 mt-1">{% trans "Chapter" %}: {{ row.quiz_meta.chapter_name|default:"-" }} | {% trans "Questions" %}: {{ row.quiz_meta.questions_count }}</div>
+        {% endif %}
         <div class="text-xs text-gray-500">{{ item.uploaded_by.user.get_full_name }} | {{ item.created_at|date:"M d, Y h:i A" }}</div>
       </div>
+      {% endwith %}
       {% empty %}
       <p class="text-sm text-gray-600">{% trans "No resources uploaded yet." %}</p>
       {% endfor %}
     </div>
   </div>
 </div>
+
+<script>
+  function quizQuestionCard(index) {
+    return `
+      <div class="quiz-card border border-blue-200 rounded-md bg-white p-3">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs font-semibold text-blue-700">Question ${index + 1}</p>
+          <button type="button" class="remove-quiz-question text-xs text-red-600">Remove</button>
+        </div>
+        <textarea name="quiz_question[]" rows="2" class="w-full border border-gray-300 rounded px-2 py-1 mb-2" placeholder="Enter MCQ question"></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <input name="option_a[]" type="text" class="border border-gray-300 rounded px-2 py-1" placeholder="Option A">
+          <input name="option_b[]" type="text" class="border border-gray-300 rounded px-2 py-1" placeholder="Option B">
+          <input name="option_c[]" type="text" class="border border-gray-300 rounded px-2 py-1" placeholder="Option C">
+          <input name="option_d[]" type="text" class="border border-gray-300 rounded px-2 py-1" placeholder="Option D">
+        </div>
+        <div class="mt-2">
+          <label class="text-xs text-gray-600">Correct Option</label>
+          <select name="correct_option[]" class="w-full border border-gray-300 rounded px-2 py-1">
+            <option value="">Select correct option</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+      </div>
+    `;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const resourceType = document.getElementById("resourceType");
+    const chapterWrap = document.getElementById("chapterWrap");
+    const chapterId = document.getElementById("chapterId");
+    const descriptionWrap = document.getElementById("descriptionWrap");
+    const fileWrap = document.getElementById("fileWrap");
+    const urlWrap = document.getElementById("urlWrap");
+    const quizBuilder = document.getElementById("quizBuilder");
+    const quizContainer = document.getElementById("quizQuestionsContainer");
+    const addQuizBtn = document.getElementById("addQuizQuestion");
+
+    function ensureQuizCard() {
+      if (!quizContainer.children.length) {
+        quizContainer.insertAdjacentHTML("beforeend", quizQuestionCard(0));
+      }
+    }
+
+    function reindexQuizCards() {
+      const cards = quizContainer.querySelectorAll(".quiz-card");
+      cards.forEach((card, idx) => {
+        const header = card.querySelector("p");
+        if (header) header.textContent = `Question ${idx + 1}`;
+      });
+    }
+
+    function toggleQuizMode() {
+      const isQuiz = resourceType && resourceType.value === "quiz";
+      chapterWrap.style.display = isQuiz ? "" : "none";
+      descriptionWrap.style.display = isQuiz ? "none" : "";
+      quizBuilder.style.display = isQuiz ? "" : "none";
+      fileWrap.style.display = isQuiz ? "none" : "";
+      if (chapterId) chapterId.required = isQuiz;
+      if (isQuiz) ensureQuizCard();
+    }
+
+    if (resourceType) {
+      resourceType.addEventListener("change", toggleQuizMode);
+      toggleQuizMode();
+    }
+
+    if (addQuizBtn) {
+      addQuizBtn.addEventListener("click", function () {
+        const index = quizContainer.querySelectorAll(".quiz-card").length;
+        quizContainer.insertAdjacentHTML("beforeend", quizQuestionCard(index));
+      });
+    }
+
+    if (quizContainer) {
+      quizContainer.addEventListener("click", function (e) {
+        if (!e.target.classList.contains("remove-quiz-question")) return;
+        const cards = quizContainer.querySelectorAll(".quiz-card");
+        if (cards.length <= 1) return;
+        e.target.closest(".quiz-card")?.remove();
+        reindexQuizCards();
+      });
+    }
+  });
+</script>
 {% endblock %}

@@ -118,24 +118,6 @@
 
   <section class="glass-card p-5">
     <div class="flex items-center justify-between mb-3">
-      <h3 class="text-lg font-bold text-slate-900">{% trans "Live Inbox Stream" %}</h3>
-      <a href="{% url 'view_responded_queries' %}" class="text-sm font-semibold text-blue-700 hover:underline">{% trans "View Messages" %}</a>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {% for msg in messages_feed %}
-      <div class="p-3 rounded-lg border {% if msg.is_read %}border-slate-200 bg-slate-50{% else %}border-blue-200 bg-blue-50{% endif %}">
-        <p class="font-semibold text-slate-800">{{ msg.title }}</p>
-        <p class="text-sm text-slate-600 mt-1">{{ msg.message|truncatewords:20 }}</p>
-        <p class="text-xs text-slate-500 mt-1">{{ msg.created_at|date:"d M Y, h:i A" }}</p>
-      </div>
-      {% empty %}
-      <p class="text-sm text-slate-500">{% trans "No recent notifications." %}</p>
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="glass-card p-5">
-    <div class="flex items-center justify-between mb-3">
       <h3 class="text-lg font-bold text-slate-900">{% trans "Subject Explorer" %}</h3>
       <a href="{% url 'subject_list' %}" class="text-sm font-semibold text-blue-700 hover:underline">{% trans "Open Subjects" %}</a>
     </div>

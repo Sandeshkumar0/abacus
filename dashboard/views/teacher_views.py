@@ -7,11 +7,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, FileResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 from django.db.models import Q, Sum, Count
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.timezone import make_aware
 from django.db.utils import ProgrammingError, OperationalError
+from django.core.exceptions import ValidationError
 from datetime import datetime
 import json
 import os
@@ -29,6 +31,24 @@ from ..models import (
     TeacherMessageEngagement, AnnouncementEngagement, StudentMessageClearState
 )
 from ..services.dashboard_metrics import get_teacher_metrics
+
+QUIZ_JSON_PREFIX = "__QUIZ_JSON__:"
+
+
+def _parse_quiz_description_blob(raw_text: str):
+    text = str(raw_text or "").strip()
+    if not text.startswith(QUIZ_JSON_PREFIX):
+        return None
+    payload_text = text[len(QUIZ_JSON_PREFIX):].strip()
+    if not payload_text:
+        return None
+    try:
+        payload = json.loads(payload_text)
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return payload
 
 
 def _optional_ai_remark(student_name: str, subject_name: str, percentage: float, teacher_review: str = "") -> str:
@@ -74,6 +94,67 @@ def teacher_dashboard(request):
     active_assignments = metrics["active_assignments"]
     pending_queries = metrics["pending_queries"]
     upcoming_tests = metrics["upcoming_tests"]
+
+    sections = get_accessible_sections(request.user)
+    section_students = get_accessible_students(request.user)
+
+    recent_activity = []
+    recent_answers = (
+        StudentAnswer.objects.filter(question__teacher=teacher_profile)
+        .select_related("student_name", "question")
+        .order_by("-submitted_at")[:3]
+    )
+    for ans in recent_answers:
+        student_name = ans.student_name.get_full_name() if ans.student_name else "Student"
+        recent_activity.append(
+            {
+                "color": "blue",
+                "text": f"New assignment submitted by {student_name}",
+                "time": ans.submitted_at,
+            }
+        )
+
+    recent_queries = (
+        Query.objects.filter(student__in=section_students)
+        .select_related("student_name")
+        .order_by("-submitted_at")[:3]
+    )
+    for qry in recent_queries:
+        student_name = qry.student_name.get_full_name() if qry.student_name else "Student"
+        if qry.response:
+            text = f"Query resolved for {student_name}"
+            color = "green"
+        else:
+            text = f"New query raised by {student_name}"
+            color = "yellow"
+        recent_activity.append(
+            {
+                "color": color,
+                "text": text,
+                "time": qry.submitted_at,
+            }
+        )
+
+    next_exam = (
+        Exam.objects.filter(teacher=teacher_profile, due_date__gte=timezone.now())
+        .order_by("due_date")
+        .first()
+    )
+    if next_exam:
+        recent_activity.append(
+            {
+                "color": "yellow",
+                "text": f"Upcoming test: {next_exam.title} on {next_exam.due_date.strftime('%d %b, %Y')}",
+                "time": next_exam.created_at,
+            }
+        )
+
+    recent_activity = sorted(recent_activity, key=lambda x: x.get("time") or timezone.now(), reverse=True)[:6]
+
+    quick_overview_text = (
+        f"You currently manage {total_students} students across {sections.count()} sections. "
+        f"{active_assignments} assignments active, {pending_queries} pending queries, and {upcoming_tests} upcoming tests."
+    )
     
     context = {
         'total_students': total_students,
@@ -82,6 +163,8 @@ def teacher_dashboard(request):
         'upcoming_tests': upcoming_tests,
         'grading_backlog': metrics["grading_backlog"],
         'at_risk_students': metrics["at_risk_students"],
+        'recent_activity': recent_activity,
+        'quick_overview_text': quick_overview_text,
     }
     
     return render(request, 'teacher/teacher_dashboard.html', context)
@@ -318,28 +401,62 @@ def create_exam(request):
 
 @login_required
 def student_list(request):
-    """View list of students assigned to the teacher."""
+    """View students split by class-teacher sections vs other assigned sections."""
     teacher_profile, _ = TeacherProfile.objects.get_or_create(
         user=request.user,
         defaults={
-            'aadhar_id': 'Not Provided',
-            'phone': 'Not Provided'
-        }
+            "aadhar_id": "Not Provided",
+            "phone": "Not Provided",
+        },
     )
-    students = get_accessible_students(request.user).filter(assigned_teacher=teacher_profile)
-    return render(request, 'teacher/student_list.html', {'students': students})
+
+    all_students = get_accessible_students(request.user).order_by("roll_number", "user__full_name")
+    sections_for_add = get_accessible_sections(request.user)
+
+    homeroom_sections = Section.objects.filter(
+        Q(class_teacher=teacher_profile)
+        | Q(teacher_assignments__teacher=teacher_profile, teacher_assignments__is_class_teacher=True)
+    ).distinct()
+    homeroom_section_ids = set(homeroom_sections.values_list("id", flat=True))
+
+    class_teacher_students = all_students.filter(section_id__in=homeroom_section_ids).distinct()
+    assigned_section_students = all_students.exclude(section_id__in=homeroom_section_ids).distinct()
+
+    return render(
+        request,
+        'teacher/student_list.html',
+        {
+            'class_teacher_students': class_teacher_students,
+            'assigned_section_students': assigned_section_students,
+            'class_teacher_sections': homeroom_sections,
+            'assigned_sections': sections_for_add.exclude(id__in=homeroom_section_ids),
+            'total_students': all_students.count(),
+            'sections_for_add': sections_for_add,
+        },
+    )
 
 
 @login_required
 def add_student(request):
     """Add a new student to the teacher's class."""
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
+        name = (request.POST.get('name') or '').strip()
+        email = (request.POST.get('email') or '').strip()
+        phone = (request.POST.get('phone') or '').strip()
         password = request.POST.get('password', 'student123')  # Default password
-        student_class = request.POST.get('student_class')
+        student_class = (request.POST.get('student_class') or '').strip()
+        section_id = (request.POST.get('section_id') or '').strip()
         dob = request.POST.get('dob')
+
+        if not name or not email or not phone:
+            return JsonResponse({'status': 'error', 'message': 'Name, email and phone are required'})
+
+        sections = get_accessible_sections(request.user)
+        section = sections.filter(id=section_id).first() if section_id.isdigit() else None
+        if not section:
+            return JsonResponse({'status': 'error', 'message': 'Please select a valid section'})
+        if not student_class:
+            student_class = str(section.class_level).strip()
         
         # Check if email already exists
         if CustomUser.objects.filter(email=email).exists():
@@ -375,6 +492,7 @@ def add_student(request):
             user=user,
             phone=phone,
             student_class=student_class,
+            section=section,
             dob=parse_date(dob) if dob else None,
             roll_number=roll,
             assigned_teacher=teacher_profile
@@ -392,16 +510,8 @@ def add_student(request):
 @login_required
 def view_student(request, student_id):
     """View detailed information about a specific student."""
-    teacher_profile, _ = TeacherProfile.objects.get_or_create(
-        user=request.user,
-        defaults={
-            'aadhar_id': 'Not Provided',
-            'phone': 'Not Provided'
-        }
-    )
     student = get_accessible_students(request.user).filter(
         user_id=student_id,
-        assigned_teacher=teacher_profile
     ).first()
     if not student:
         messages.error(request, "Student not found or not permitted.")
@@ -422,10 +532,8 @@ def view_student(request, student_id):
 @login_required
 def edit_student(request, student_id):
     """Edit student information."""
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
     student = get_accessible_students(request.user).filter(
         user_id=student_id,
-        assigned_teacher=teacher_profile
     ).first()
     if not student:
         return JsonResponse({'status': 'error', 'message': 'Student not found or not permitted'}, status=404)
@@ -456,11 +564,9 @@ def edit_student(request, student_id):
 def delete_student(request, student_id):
     """Delete a student from the teacher's class."""
     if request.method == 'POST':
-        teacher_profile = TeacherProfile.objects.get(user=request.user)
         try:
             student = get_accessible_students(request.user).get(
                 user_id=student_id,
-                assigned_teacher=teacher_profile
             )
             user = student.user
             
@@ -480,9 +586,8 @@ def export_students_csv(request):
     """Export student list as CSV file."""
     import csv
     from django.http import HttpResponse
-    
-    teacher_profile = TeacherProfile.objects.get(user=request.user)
-    students = get_accessible_students(request.user).filter(assigned_teacher=teacher_profile)
+
+    students = get_accessible_students(request.user).order_by("roll_number", "user__full_name")
     
     # Create CSV response
     response = HttpResponse(content_type='text/csv')
@@ -1023,7 +1128,10 @@ def give_remarks(request):
     exam_owner_q = Q(exam__teacher=teacher_profile) | Q(exam__teacher_name=request.user)
     allowed_students = get_accessible_students(request.user).select_related("user", "section")
     allowed_subjects = get_accessible_subjects(request.user)
-    homeroom_sections = Section.objects.filter(class_teacher=teacher_profile)
+    homeroom_sections = Section.objects.filter(
+        Q(class_teacher=teacher_profile)
+        | Q(teacher_assignments__teacher=teacher_profile, teacher_assignments__is_class_teacher=True)
+    ).distinct()
     # For class teachers, manual school-result upload is restricted to their own class sections only.
     is_class_teacher_context = request.user.role == CustomUser.Role.CLASS_TEACHER or homeroom_sections.exists()
     manual_students = allowed_students
@@ -1305,9 +1413,25 @@ def lecture_notes(request):
     else:
         resources_qs = resources_qs.none()
 
+    resource_feed = list(resources_qs[:80])
+    for item in resource_feed:
+        if item.resource_type == SubjectResource.TYPE_QUIZ:
+            payload = _parse_quiz_description_blob(item.description)
+            if payload:
+                questions_count = len(payload.get("questions") or [])
+                chapter_name = str(payload.get("chapter_name") or "").strip()
+                summary = f"MCQ quiz with {questions_count} questions."
+                if chapter_name:
+                    summary += f" Chapter: {chapter_name}."
+                item.display_description = summary
+            else:
+                item.display_description = "MCQ quiz resource."
+        else:
+            item.display_description = item.description
+
     context = {
         "notes_feed": notes_qs[:50],
-        "resource_feed": resources_qs[:80],
+        "resource_feed": resource_feed,
         "student_section": student_profile.section,
     }
     return render(request, "student/lecture_notes.html", context)
@@ -1351,13 +1475,32 @@ def teacher_assigned_sections(request):
     if selected_scope not in valid_scopes:
         selected_scope = "all"
 
+    teacher_assignment_map = {
+        item.section_id: item
+        for item in TeacherSectionAssignment.objects.filter(
+            teacher=teacher_profile,
+            section_id__in=section_ids,
+        )
+    }
+    class_teacher_assignment_map = {}
+    for item in TeacherSectionAssignment.objects.filter(
+        section_id__in=section_ids,
+        is_class_teacher=True,
+    ).select_related("teacher__user"):
+        class_teacher_assignment_map.setdefault(item.section_id, item)
+
     section_rows = []
     for section in sections:
-        assignment = TeacherSectionAssignment.objects.filter(
-            teacher=teacher_profile,
-            section=section,
-        ).first()
-        is_class_teacher = section.class_teacher_id == teacher_profile.user_id or (
+        assignment = teacher_assignment_map.get(section.id)
+        class_teacher_assignment = class_teacher_assignment_map.get(section.id)
+        effective_class_teacher = section.class_teacher or (
+            class_teacher_assignment.teacher if class_teacher_assignment else None
+        )
+
+        is_class_teacher = (
+            bool(effective_class_teacher)
+            and effective_class_teacher.user_id == teacher_profile.user_id
+        ) or (
             assignment and assignment.is_class_teacher
         )
         if is_class_teacher:
@@ -1368,8 +1511,8 @@ def teacher_assigned_sections(request):
             role_label = "Visible by Access"
 
         class_teacher_name = (
-            section.class_teacher.user.get_full_name()
-            if section.class_teacher and section.class_teacher.user
+            effective_class_teacher.user.get_full_name()
+            if effective_class_teacher and effective_class_teacher.user
             else "Not Assigned"
         )
         section_rows.append(
@@ -1380,7 +1523,7 @@ def teacher_assigned_sections(request):
                 "is_class_teacher": is_class_teacher,
                 "is_assigned_teacher": bool(assignment) and not is_class_teacher,
                 "class_teacher_name": class_teacher_name,
-                "has_class_teacher": bool(section.class_teacher_id),
+                "has_class_teacher": bool(effective_class_teacher),
             }
         )
 
@@ -1418,8 +1561,8 @@ def upload_notes(request):
     if request.method == "POST":
         title = (request.POST.get("title") or "").strip()
         content = (request.POST.get("content") or "").strip()
-        section_id = request.POST.get("section_id")
-        subject_id = request.POST.get("subject_id")
+        section_id = (request.POST.get("section_id") or "").strip()
+        subject_id = (request.POST.get("subject_id") or "").strip()
         attachment = request.FILES.get("attachment")
 
         if not title:
@@ -1429,12 +1572,20 @@ def upload_notes(request):
             messages.error(request, "Add note content or upload a file.")
             return redirect("teacher_upload_notes")
 
-        section = None
-        if section_id:
-            section = sections.filter(id=section_id).first()
-        subject = None
-        if subject_id:
-            subject = subjects.filter(id=subject_id).first()
+        if not section_id:
+            messages.error(request, "Please select section.")
+            return redirect("teacher_upload_notes")
+        section = sections.filter(id=section_id).first()
+        if not section:
+            messages.error(request, "Invalid section selection.")
+            return redirect("teacher_upload_notes")
+        if not subject_id:
+            messages.error(request, "Please select subject.")
+            return redirect("teacher_upload_notes")
+        subject = subjects.filter(id=subject_id).first()
+        if not subject:
+            messages.error(request, "Invalid subject selection.")
+            return redirect("teacher_upload_notes")
 
         TeacherNote.objects.create(
             teacher=teacher_profile,
@@ -1443,6 +1594,18 @@ def upload_notes(request):
             title=title,
             content=content,
             attachment=attachment,
+            is_published=True,
+        )
+        if attachment and hasattr(attachment, "seek"):
+            attachment.seek(0)
+        SubjectResource.objects.create(
+            subject=subject,
+            section=section,
+            uploaded_by=teacher_profile,
+            resource_type=SubjectResource.TYPE_NOTE,
+            title=title,
+            description=content,
+            file=attachment,
             is_published=True,
         )
         messages.success(request, "Note uploaded successfully.")
@@ -1468,16 +1631,20 @@ def post_class_message(request):
     if request.method == "POST":
         title = (request.POST.get("title") or "").strip()
         message_text = (request.POST.get("message") or "").strip()
-        section_id = request.POST.get("section_id")
+        section_id = (request.POST.get("section_id") or "").strip()
         is_important = request.POST.get("is_important") == "on"
 
         if not title or not message_text:
             messages.error(request, "Both title and message are required.")
             return redirect("teacher_post_class_message")
 
-        section = None
-        if section_id:
-            section = sections.filter(id=section_id).first()
+        if not section_id:
+            messages.error(request, "Please select section.")
+            return redirect("teacher_post_class_message")
+        section = sections.filter(id=section_id).first()
+        if not section:
+            messages.error(request, "Invalid section selection.")
+            return redirect("teacher_post_class_message")
 
         TeacherClassMessage.objects.create(
             teacher=teacher_profile,
@@ -1571,12 +1738,17 @@ def attendance_marking(request):
         user=request.user,
         defaults={"aadhar_id": "Not Provided", "phone": "Not Provided"},
     )
-    homeroom_sections = Section.objects.filter(class_teacher=teacher_profile)
-    is_homeroom_teacher = homeroom_sections.exists() and request.user.role in {
+    homeroom_sections = Section.objects.filter(
+        Q(class_teacher=teacher_profile)
+        | Q(teacher_assignments__teacher=teacher_profile, teacher_assignments__is_class_teacher=True)
+    ).distinct()
+    is_teacher_role = request.user.role in {
         CustomUser.Role.TEACHER,
         CustomUser.Role.CLASS_TEACHER,
     }
-    if is_homeroom_teacher:
+    # Teacher-side attendance must be limited to sections where the teacher is
+    # explicitly assigned as class teacher.
+    if is_teacher_role:
         sections = homeroom_sections
     else:
         sections = get_accessible_sections(request.user)
@@ -1593,10 +1765,9 @@ def attendance_marking(request):
         selected_date_obj = today
     selected_date = selected_date_obj.isoformat()
 
-    if is_homeroom_teacher:
-        students = StudentProfile.objects.select_related("user", "section").filter(section__in=sections)
-    else:
-        students = get_accessible_students(request.user).select_related("user", "section")
+    students = get_accessible_students(request.user).select_related("user", "section")
+    if is_teacher_role:
+        students = students.filter(section__in=sections)
     allowed_section_ids = set(sections.values_list("id", flat=True))
     if selected_section_id and selected_section_id.isdigit() and int(selected_section_id) not in allowed_section_ids:
         selected_section_id = ""
@@ -1666,6 +1837,7 @@ def attendance_marking(request):
 def manage_subjects(request):
     """View and manage teacher's subjects and chapters."""
     teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
+    is_admin_role = request.user.role in {CustomUser.Role.ADMIN, CustomUser.Role.PRINCIPAL}
     subjects = get_accessible_subjects(request.user).prefetch_related('chapters')
 
     def _normalize_class_level(value):
@@ -1678,25 +1850,43 @@ def manage_subjects(request):
 
     subject_rows = []
     for subject in subjects:
-        all_assignments = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
+        assignment_qs = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
+        if not is_admin_role:
+            assignment_qs = assignment_qs.filter(teacher=teacher_profile)
+
         assignments = []
-        for assignment in all_assignments:
+        for assignment in assignment_qs:
             section_level = _normalize_class_level(assignment.section.class_level if assignment.section else "")
             subject_level = _normalize_class_level(assignment.subject.class_level if assignment.subject else "")
             if section_level and subject_level and section_level != subject_level:
                 continue
             assignments.append(assignment)
+
+        # For teacher/class-teacher view, hide subjects that are not assigned to them.
+        if not is_admin_role and not assignments:
+            continue
+
+        section_ids = [a.section_id for a in assignments if a.section_id]
+        if is_admin_role:
+            resources_count = SubjectResource.objects.filter(subject=subject).count()
+        else:
+            resources_count = SubjectResource.objects.filter(
+                subject=subject,
+                section_id__in=section_ids,
+            ).count()
+
         subject_rows.append(
             {
                 "subject": subject,
                 "assignments": assignments,
-                "resources_count": SubjectResource.objects.filter(subject=subject).count(),
+                "resources_count": resources_count,
             }
         )
     
     context = {
         'subjects': subjects,
         'subject_rows': subject_rows,
+        'can_create_subject': is_admin_role,
     }
     return render(request, 'teacher/manage_subjects.html', context)
 
@@ -1705,28 +1895,13 @@ def manage_subjects(request):
 def create_subject(request):
     """Create a new subject."""
     teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
-    homeroom_sections = Section.objects.filter(
-        Q(class_teacher=teacher_profile)
-        | Q(teacher_assignments__teacher=teacher_profile, teacher_assignments__is_class_teacher=True)
-    ).distinct()
-    is_homeroom_teacher = homeroom_sections.exists()
-    allowed_roles = {CustomUser.Role.CLASS_TEACHER, CustomUser.Role.ADMIN, CustomUser.Role.PRINCIPAL}
-    if request.user.role not in allowed_roles and not is_homeroom_teacher:
-        messages.error(request, "Only Class Teacher, Principal, or Admin can create section subjects.")
+    allowed_roles = {CustomUser.Role.ADMIN, CustomUser.Role.PRINCIPAL}
+    if request.user.role not in allowed_roles:
+        messages.error(request, "Only Principal/Admin can create section subjects.")
         return redirect("manage_subjects")
 
-    if is_homeroom_teacher:
-        sections = homeroom_sections
-    else:
-        sections = get_accessible_sections(request.user)
-    section_ids = list(sections.values_list("id", flat=True))
-    teacher_ids = list(TeacherSectionAssignment.objects.filter(section_id__in=section_ids).values_list("teacher_id", flat=True))
-    if is_homeroom_teacher:
-        teacher_ids.append(teacher_profile.user_id)
-    if teacher_ids:
-        available_teachers = TeacherProfile.objects.filter(user_id__in=set(teacher_ids)).select_related("user")
-    else:
-        available_teachers = TeacherProfile.objects.select_related("user")
+    sections = get_accessible_sections(request.user)
+    available_teachers = TeacherProfile.objects.select_related("user").order_by("user__full_name", "user__email")
 
     if request.method == 'POST':
         name = (request.POST.get('name') or '').strip()
@@ -1750,20 +1925,49 @@ def create_subject(request):
         if not assigned_teacher:
             messages.error(request, "Please select a valid assigned subject teacher.")
             return redirect('create_subject')
+
+        existing_assignment = (
+            SubjectTeacherAssignment.objects
+            .select_related("teacher__user", "subject")
+            .filter(
+                section=section,
+                subject__name__iexact=name,
+                subject__class_level=class_level,
+            )
+            .first()
+        )
+        if existing_assignment:
+            existing_teacher_name = (
+                existing_assignment.teacher.user.get_full_name()
+                or existing_assignment.teacher.user.email
+                or "another teacher"
+            )
+            messages.error(
+                request,
+                (
+                    f"{section} already has '{name}' assigned to {existing_teacher_name}. "
+                    "Only one teacher can be assigned per section-subject."
+                ),
+            )
+            return redirect("create_subject")
         
         try:
-            subject = Subject.objects.create(
-                teacher=teacher_profile,
-                name=name,
-                class_level=class_level,
-                description=description
-            )
-            SubjectTeacherAssignment.objects.create(
-                teacher=assigned_teacher,
-                subject=subject,
-                section=section,
-            )
+            with transaction.atomic():
+                subject = Subject.objects.create(
+                    teacher=teacher_profile,
+                    name=name,
+                    class_level=class_level,
+                    description=description
+                )
+                SubjectTeacherAssignment.objects.create(
+                    teacher=assigned_teacher,
+                    subject=subject,
+                    section=section,
+                )
             messages.success(request, f'Subject "{name}" created successfully!')
+        except ValidationError as e:
+            err = "; ".join(e.messages) if getattr(e, "messages", None) else str(e)
+            messages.error(request, f"Validation error: {err}")
         except Exception as e:
             messages.error(request, f'Error creating subject: {str(e)}')
         
@@ -1785,15 +1989,20 @@ def teacher_subject_resources(request, subject_id):
         messages.error(request, "Subject not found.")
         return redirect("manage_subjects")
 
-    is_assigned = SubjectTeacherAssignment.objects.filter(subject=subject, teacher=teacher_profile).exists()
-    is_creator = subject.teacher_id == teacher_profile.user_id
     is_admin_role = request.user.role in {CustomUser.Role.ADMIN, CustomUser.Role.PRINCIPAL}
-    if not (is_assigned or is_creator or is_admin_role):
-        messages.error(request, "You are not allowed to manage resources for this subject.")
+    if is_admin_role:
+        section_assignments = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
+    else:
+        section_assignments = SubjectTeacherAssignment.objects.filter(
+            subject=subject,
+            teacher=teacher_profile,
+        ).select_related("section", "teacher__user")
+
+    if not section_assignments.exists():
+        messages.error(request, "You are not assigned to this subject in any section.")
         return redirect("manage_subjects")
 
-    section_assignments = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
-    allowed_sections = [a.section for a in section_assignments]
+    allowed_sections = [a.section for a in section_assignments if a.section_id]
     allowed_section_ids = {s.id for s in allowed_sections if s}
 
     if request.method == "POST":
@@ -1801,6 +2010,7 @@ def teacher_subject_resources(request, subject_id):
         title = (request.POST.get("title") or "").strip()
         description = (request.POST.get("description") or "").strip()
         external_url = (request.POST.get("external_url") or "").strip()
+        chapter_id = (request.POST.get("chapter_id") or "").strip()
         section_id = request.POST.get("section_id")
         file_obj = request.FILES.get("file")
 
@@ -1810,17 +2020,68 @@ def teacher_subject_resources(request, subject_id):
         if not title:
             messages.error(request, "Title is required.")
             return redirect("teacher_subject_resources", subject_id=subject.id)
-        if not file_obj and not external_url:
+        if resource_type != SubjectResource.TYPE_QUIZ and not file_obj and not external_url:
             messages.error(request, "Upload file or provide URL.")
             return redirect("teacher_subject_resources", subject_id=subject.id)
 
-        section = None
-        if section_id and section_id.isdigit():
-            sid = int(section_id)
-            if sid not in allowed_section_ids:
-                messages.error(request, "Invalid section for this subject.")
+        if not section_id or not section_id.isdigit():
+            messages.error(request, "Please select your assigned section.")
+            return redirect("teacher_subject_resources", subject_id=subject.id)
+
+        sid = int(section_id)
+        if sid not in allowed_section_ids:
+            messages.error(request, "Invalid section for this subject.")
+            return redirect("teacher_subject_resources", subject_id=subject.id)
+        section = Section.objects.filter(id=sid).first()
+
+        if resource_type == SubjectResource.TYPE_QUIZ:
+            chapter = None
+            if chapter_id:
+                chapter = Chapter.objects.filter(id=chapter_id, subject=subject).first()
+            if not chapter:
+                messages.error(request, "Please select a valid syllabus chapter for quiz.")
                 return redirect("teacher_subject_resources", subject_id=subject.id)
-            section = Section.objects.filter(id=sid).first()
+
+            q_list = request.POST.getlist("quiz_question[]")
+            a_list = request.POST.getlist("option_a[]")
+            b_list = request.POST.getlist("option_b[]")
+            c_list = request.POST.getlist("option_c[]")
+            d_list = request.POST.getlist("option_d[]")
+            correct_list = request.POST.getlist("correct_option[]")
+
+            questions = []
+            total_rows = max(len(q_list), len(a_list), len(b_list), len(c_list), len(d_list), len(correct_list))
+            for idx in range(total_rows):
+                q_text = (q_list[idx] if idx < len(q_list) else "").strip()
+                a_opt = (a_list[idx] if idx < len(a_list) else "").strip()
+                b_opt = (b_list[idx] if idx < len(b_list) else "").strip()
+                c_opt = (c_list[idx] if idx < len(c_list) else "").strip()
+                d_opt = (d_list[idx] if idx < len(d_list) else "").strip()
+                correct = (correct_list[idx] if idx < len(correct_list) else "").strip().upper()
+                if not any([q_text, a_opt, b_opt, c_opt, d_opt, correct]):
+                    continue
+                if not (q_text and a_opt and b_opt and c_opt and d_opt and correct in {"A", "B", "C", "D"}):
+                    messages.error(request, f"MCQ #{idx + 1} is incomplete. Fill question, 4 options, and correct option.")
+                    return redirect("teacher_subject_resources", subject_id=subject.id)
+                questions.append(
+                    {
+                        "question": q_text,
+                        "options": {"A": a_opt, "B": b_opt, "C": c_opt, "D": d_opt},
+                        "correct_option": correct,
+                    }
+                )
+
+            if not questions:
+                messages.error(request, "Add at least one MCQ question for quiz.")
+                return redirect("teacher_subject_resources", subject_id=subject.id)
+
+            quiz_payload = {
+                "chapter_id": chapter.id,
+                "chapter_name": chapter.name,
+                "questions": questions,
+            }
+            description = QUIZ_JSON_PREFIX + json.dumps(quiz_payload, ensure_ascii=False)
+            file_obj = None
 
         SubjectResource.objects.create(
             subject=subject,
@@ -1837,6 +2098,22 @@ def teacher_subject_resources(request, subject_id):
         return redirect("teacher_subject_resources", subject_id=subject.id)
 
     resources = SubjectResource.objects.filter(subject=subject).select_related("uploaded_by__user", "section")
+    if not is_admin_role:
+        resources = resources.filter(section_id__in=allowed_section_ids)
+    chapters = Chapter.objects.filter(subject=subject).order_by("chapter_number", "name")
+
+    resource_rows = []
+    for item in resources:
+        row = {"resource": item, "quiz_meta": None}
+        if item.resource_type == SubjectResource.TYPE_QUIZ:
+            payload = _parse_quiz_description_blob(item.description)
+            if payload:
+                row["quiz_meta"] = {
+                    "chapter_name": str(payload.get("chapter_name") or "").strip(),
+                    "questions_count": len(payload.get("questions") or []),
+                }
+        resource_rows.append(row)
+
     counts = {
         "book": resources.filter(resource_type=SubjectResource.TYPE_BOOK).count(),
         "note": resources.filter(resource_type=SubjectResource.TYPE_NOTE).count(),
@@ -1848,8 +2125,10 @@ def teacher_subject_resources(request, subject_id):
         "subject": subject,
         "section_assignments": section_assignments,
         "resources": resources,
+        "resource_rows": resource_rows,
         "counts": counts,
         "resource_choices": SubjectResource.TYPE_CHOICES,
+        "chapters": chapters,
     }
     return render(request, "teacher/subject_resources.html", context)
 

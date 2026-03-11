@@ -1,18 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# Bengali translations for abacusmaster.
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: abacusmaster\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-24 03:49+0530\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2026-03-04 17:42+0530\n"
+"PO-Revision-Date: 2026-03-04 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: bn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -38,8 +33,10 @@ msgstr ""
 msgid "Blog"
 msgstr ""
 
-#: .\core\templates\base.html:59 .\core\templates\student\lecture_notes.html:4
-#: .\core\templates\student\lecture_notes.html:5
+#: .\core\templates\base.html:59
+#: .\core\templates\student\base_student.html:132
+#: .\core\templates\student\virtual_abacus.html:4
+#: .\core\templates\student\virtual_abacus.html:5
 msgid "Virtual Abacus"
 msgstr ""
 
@@ -48,8 +45,8 @@ msgid "Courses"
 msgstr ""
 
 #: .\core\templates\base.html:67
-#: .\core\templates\student\base_student.html:110
-#: .\core\templates\teacher\base_teacher.html:132
+#: .\core\templates\student\base_student.html:198
+#: .\core\templates\teacher\base_teacher.html:271
 msgid "Select language"
 msgstr ""
 
@@ -74,10 +71,426 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: .\core\templates\parent\base_parent.html:20
-#: .\core\templates\student\base_student.html:28
-#: .\core\templates\teacher\base_teacher.html:46
+#: .\core\templates\parent\base_parent.html:7
+#: .\core\templates\parent\base_parent.html:103
+#: .\core\templates\parent\parent_dashboard.html:4
+#: .\core\templates\parent\parent_dashboard.html:5
+msgid "Parent Dashboard"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:76
+msgid "Toggle sidebar"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:83
+#: .\core\templates\student\base_student.html:109
+#: .\core\templates\teacher\base_teacher.html:177
 msgid "Dashboard"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:88
+#: .\core\templates\parent\parent_children.html:3
+#: .\core\templates\parent\parent_children.html:4
+msgid "Children"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:89
+#: .\core\templates\parent\parent_assignments.html:3
+#: .\core\templates\parent\parent_assignments.html:4
+msgid "Assignments"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:90
+#: .\core\templates\parent\parent_messages.html:3
+#: .\core\templates\parent\parent_messages.html:4
+#: .\core\templates\student\base_student.html:136
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
+msgid "Messages"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:91
+#: .\core\templates\parent\parent_holidays.html:3
+#: .\core\templates\parent\parent_holidays.html:4
+#: .\core\templates\student\base_student.html:140
+#: .\core\templates\student\holiday_calendar.html:4
+#: .\core\templates\student\holiday_calendar.html:5
+msgid "Holiday Calendar"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:92
+msgid "Performance"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:93
+#: .\core\templates\parent\parent_exam_portion.html:3
+#: .\core\templates\parent\parent_exam_portion.html:4
+#: .\core\templates\student\base_student.html:152
+msgid "Exam Portion"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:96
+#: .\core\templates\parent\logout.html:22
+#: .\core\templates\parent\logout.html:25
+#: .\core\templates\student\base_student.html:179
+#: .\core\templates\student\logout.html:30
+#: .\core\templates\student\logout.html:36
+#: .\core\templates\student\logout.html:41
+#: .\core\templates\teacher\base_teacher.html:249
+msgid "Logout"
+msgstr ""
+
+#: .\core\templates\parent\base_parent.html:104
+msgid "Track your child's learning journey"
+msgstr ""
+
+#: .\core\templates\parent\logout.html:7
+msgid "Parent Logout"
+msgstr ""
+
+#: .\core\templates\parent\logout.html:21
+#: .\core\templates\student\logout.html:35
+msgid "Logout icon"
+msgstr ""
+
+#: .\core\templates\parent\logout.html:23
+#: .\core\templates\student\logout.html:37
+msgid "Are you sure you want to logout?"
+msgstr ""
+
+#: .\core\templates\parent\logout.html:26
+#: .\core\templates\student\logout.html:44
+msgid "Cancel"
+msgstr ""
+
+#: .\core\templates\parent\parent_assignments.html:5
+msgid "Child assignments and due dates"
+msgstr ""
+
+#: .\core\templates\parent\parent_assignments.html:9
+#: .\core\templates\parent\parent_dashboard.html:12
+#: .\core\templates\parent\parent_messages.html:9
+msgid "Child"
+msgstr ""
+
+#: .\core\templates\parent\parent_assignments.html:24
+#: .\core\templates\student\student_dashboard.html:91
+msgid "Assignment"
+msgstr ""
+
+#: .\core\templates\parent\parent_assignments.html:27
+#: .\core\templates\parent\parent_dashboard.html:67
+#: .\core\templates\parent\parent_dashboard.html:81
+#: .\core\templates\parent\parent_exam_portion.html:13
+#: .\core\templates\student\student_dashboard.html:99
+msgid "Due"
+msgstr ""
+
+#: .\core\templates\parent\parent_assignments.html:31
+msgid "No assignments available for this child."
+msgstr ""
+
+#: .\core\templates\parent\parent_children.html:5
+msgid "Linked student profiles"
+msgstr ""
+
+#: .\core\templates\parent\parent_children.html:19
+msgid "Roll"
+msgstr ""
+
+#: .\core\templates\parent\parent_children.html:23
+#: .\core\templates\parent\parent_notes.html:13
+msgid "No linked children found."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:6
+msgid "Track attendance, exams, assignments, messages, and announcements"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:27
+#: .\core\templates\student\student_attendance.html:168
+#: .\core\templates\student\student_attendance.html:195
+#, python-format
+msgid "Attendance %%"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:31
+msgid "Late Count"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:35
+#: .\core\templates\parent\parent_dashboard.html:75
+#: .\core\templates\student\student_dashboard.html:66
+msgid "Upcoming Exams"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:39
+#: .\core\templates\parent\parent_dashboard.html:62
+#: .\core\templates\student\base_student.html:124
+#: .\core\templates\student\student_dashboard.html:58
+msgid "Pending Assignments"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:46
+msgid "Monthly Summary"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:48
+#: .\core\templates\student\student_attendance.html:156
+#: .\core\templates\student\student_attendance.html:183
+#: .\core\templates\student\student_attendance.html:233
+msgid "Present"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:49
+#: .\core\templates\student\student_attendance.html:160
+#: .\core\templates\student\student_attendance.html:187
+#: .\core\templates\student\student_attendance.html:234
+msgid "Absent"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:50
+#: .\core\templates\student\student_attendance.html:164
+#: .\core\templates\student\student_attendance.html:191
+#: .\core\templates\student\student_attendance.html:235
+msgid "Late"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:51
+#: .\core\templates\student\student_attendance.html:236
+msgid "Total Days"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:55
+#: .\core\templates\student\base_student.html:148
+msgid "Performance Graph"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:70
+msgid "No pending assignments."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:84
+msgid "No upcoming exams."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:92
+msgid "Class Messages"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:98
+#: .\core\templates\parent\parent_messages.html:33
+msgid "From"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:101
+msgid "No class messages."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:106
+#: .\core\templates\parent\parent_messages.html:43
+msgid "General Announcements"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:112
+#: .\core\templates\parent\parent_messages.html:53
+msgid "By"
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:115
+msgid "No announcements."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:122
+msgid "No linked student found. Link a student profile from admin first."
+msgstr ""
+
+#: .\core\templates\parent\parent_dashboard.html:145
+#, python-format
+msgid "Performance %%"
+msgstr ""
+
+#: .\core\templates\parent\parent_exam_portion.html:5
+msgid "Upcoming and assigned exams"
+msgstr ""
+
+#: .\core\templates\parent\parent_exam_portion.html:12
+#: .\core\templates\student\student_attendance.html:204
+#: .\core\templates\teacher\manage_subjects.html:29
+msgid "Subject"
+msgstr ""
+
+#: .\core\templates\parent\parent_exam_portion.html:12
+msgid "Chapter"
+msgstr ""
+
+#: .\core\templates\parent\parent_exam_portion.html:16
+msgid "No exam portion records available."
+msgstr ""
+
+#: .\core\templates\parent\parent_holidays.html:5
+#: .\core\templates\student\holiday_calendar.html:6
+msgid "Academic and public holidays"
+msgstr ""
+
+#: .\core\templates\parent\parent_holidays.html:57
+msgid "Previous month"
+msgstr ""
+
+#: .\core\templates\parent\parent_holidays.html:58
+msgid "Next month"
+msgstr ""
+
+#: .\core\templates\parent\parent_holidays.html:73
+msgid "No holidays found."
+msgstr ""
+
+#: .\core\templates\parent\parent_holidays.html:155
+msgid "No holidays in this month."
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:7
+#: .\core\templates\parent\parent_login.html:25
+msgid "Parent Login"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:26
+msgid "Login to monitor your child's progress."
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:29
+#: .\core\templates\student\student_login.html:76
+msgid "Enter Email"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:30
+#: .\core\templates\student\student_login.html:85
+msgid "Password"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:34
+#: .\core\templates\student\student_login.html:111
+msgid "Keep me logged in"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:36
+#: .\core\templates\student\student_login.html:105
+msgid "Log in"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:39
+msgid "Don't have a parent account?"
+msgstr ""
+
+#: .\core\templates\parent\parent_login.html:40
+#: .\core\templates\student\student_login.html:118
+msgid "Create New Account"
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:5
+msgid "Class messages and announcements"
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:23
+msgid "Teacher/Class Messages"
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:25
+#: .\core\templates\parent\parent_messages.html:45
+#: .\venv\Lib\site-packages\django\forms\widgets.py:527
+msgid "Clear"
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:36
+#: .\core\templates\parent\parent_messages.html:103
+msgid "No teacher messages available."
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:56
+#: .\core\templates\parent\parent_messages.html:124
+msgid "No announcements available."
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:63
+msgid "System Notifications"
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:72
+msgid "No system notifications available."
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:102
+#: .\core\templates\parent\parent_messages.html:106
+msgid "Failed to clear teacher messages."
+msgstr ""
+
+#: .\core\templates\parent\parent_messages.html:123
+#: .\core\templates\parent\parent_messages.html:127
+msgid "Failed to clear announcements."
+msgstr ""
+
+#: .\core\templates\parent\parent_notes.html:3
+#: .\core\templates\parent\parent_notes.html:4
+#: .\core\templates\student\base_student.html:128
+#: .\core\templates\student\lecture_notes.html:4
+#: .\core\templates\student\lecture_notes.html:5
+msgid "Class Notes"
+msgstr ""
+
+#: .\core\templates\parent\parent_notes.html:5
+msgid "Notes and learning resources"
+msgstr ""
+
+#: .\core\templates\parent\parent_notes.html:8
+msgid "Class notes for linked children can be shared here by teachers."
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:7
+#: .\core\templates\parent\parent_signup.html:21
+msgid "Parent Sign Up"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:22
+msgid "Create your parent account."
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:36
+msgid "Full Name"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:37
+msgid "Email"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:38
+msgid "Phone"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:39
+#: .\core\templates\student\student_signup.html:97
+msgid "Create Password"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:40
+msgid "Student Email (required)"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:41
+msgid "Relation (Father/Mother/Guardian)"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:42
+#: .\core\templates\student\student_signup.html:118
+msgid "Sign Up"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:46
+#: .\core\templates\student\student_signup.html:146
+msgid "Already have an account?"
+msgstr ""
+
+#: .\core\templates\parent\parent_signup.html:47
+#: .\core\templates\student\student_signup.html:147
+msgid "Login here"
 msgstr ""
 
 #: .\core\templates\student\base_student.html:8
@@ -85,269 +498,237 @@ msgstr ""
 msgid "Student Dashboard"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:35
-#: .\core\templates\teacher\base_teacher.html:53
+#: .\core\templates\student\base_student.html:116
+#: .\core\templates\teacher\base_teacher.html:184
 msgid "Profile"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:39
+#: .\core\templates\student\base_student.html:120
 msgid "Subject Cards"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:43
-#: .\core\templates\student\student_dashboard.html:135
-msgid "Pending Assignments"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:47
-msgid "Class Notes"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:51
-#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
-msgid "Messages"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:55
-#: .\core\templates\student\holiday_calendar.html:4
-#: .\core\templates\student\holiday_calendar.html:5
-#: .\core\templates\student\holiday_calendar.html:10
-msgid "Holiday Calendar"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:59
+#: .\core\templates\student\base_student.html:144
 #: .\core\templates\student\student_attendance.html:4
 #: .\core\templates\student\student_attendance.html:5
-#: .\core\templates\student\student_attendance.html:103
+#: .\core\templates\student\student_attendance.html:130
 msgid "Attendance Details"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:63
-msgid "Performance Graph"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:67
-msgid "Exam Portion"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:71
-msgid "Language Switcher"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:75
-msgid "Competitions"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:79
+#: .\core\templates\student\base_student.html:167
 msgid "Raise Query"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:83
+#: .\core\templates\student\base_student.html:171
 msgid "Practice with AI"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:87
+#: .\core\templates\student\base_student.html:175
 msgid "View Remarks On Your Answers"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:91
-#: .\core\templates\teacher\base_teacher.html:114
-msgid "Logout"
-msgstr ""
-
-#: .\core\templates\student\base_student.html:103
-#: .\core\templates\teacher\base_teacher.html:125
+#: .\core\templates\student\base_student.html:191
+#: .\core\templates\teacher\base_teacher.html:264
 msgid "Welcome"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:104
+#: .\core\templates\student\base_student.html:192
 msgid "Manage your academic journey"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:133
-#: .\core\templates\teacher\base_teacher.html:155
+#: .\core\templates\student\base_student.html:221
+#: .\core\templates\teacher\base_teacher.html:294
 msgid "Notifications"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:134
-#: .\core\templates\teacher\base_teacher.html:156
+#: .\core\templates\student\base_student.html:222
+#: .\core\templates\teacher\base_teacher.html:295
 msgid "Mark all as read"
 msgstr ""
 
-#: .\core\templates\student\base_student.html:137
-#: .\core\templates\teacher\base_teacher.html:159
+#: .\core\templates\student\base_student.html:225
+#: .\core\templates\teacher\base_teacher.html:298
 msgid "Loading..."
 msgstr ""
 
-#: .\core\templates\student\base_student.html:142
-#: .\core\templates\teacher\base_teacher.html:164
+#: .\core\templates\student\base_student.html:230
+#: .\core\templates\teacher\base_teacher.html:303
 msgid "Settings"
 msgstr ""
 
-#: .\core\templates\student\holiday_calendar.html:6
-msgid "Academic and public holidays"
-msgstr ""
-
-#: .\core\templates\student\holiday_calendar.html:18
-msgid "No holidays found."
-msgstr ""
-
 #: .\core\templates\student\lecture_notes.html:6
-msgid "Practice mental math with the abacus."
+msgid "Notes uploaded by teachers for your section."
 msgstr ""
 
-#: .\core\templates\student\lecture_notes.html:19
-msgid "Mode:"
+#: .\core\templates\student\lecture_notes.html:11
+msgid "Teacher Notes"
 msgstr ""
 
-#: .\core\templates\student\lecture_notes.html:21
-msgid "Decimal (Base 10)"
-msgstr ""
-
-#: .\core\templates\student\lecture_notes.html:26
-msgid "Columns:"
-msgstr ""
-
-#: .\core\templates\student\lecture_notes.html:30
-msgid "Click beads to move them."
+#: .\core\templates\student\lecture_notes.html:14
+#: .\core\templates\student\student_attendance.html:90
+#: .\core\templates\teacher\create_subject.html:25
+#: .\core\templates\teacher\subject_resources.html:34
+msgid "Section"
 msgstr ""
 
 #: .\core\templates\student\lecture_notes.html:33
-msgid "Reset"
+#: .\core\templates\student\lecture_notes.html:69
+msgid "All Sections"
 msgstr ""
 
-#: .\core\templates\student\lecture_notes.html:34
-msgid "Random Number"
+#: .\core\templates\student\lecture_notes.html:38
+msgid "Open Attachment"
 msgstr ""
 
 #: .\core\templates\student\lecture_notes.html:44
-msgid "Value:"
+msgid "No class notes available yet for your section."
 msgstr ""
 
-#: .\core\templates\student\lecture_notes.html:48
-msgid ""
-"Tip: Rightmost column is the ones place, then tens, hundreds, and so on."
+#: .\core\templates\student\lecture_notes.html:51
+msgid "Class Resources"
+msgstr ""
+
+#: .\core\templates\student\lecture_notes.html:52
+msgid "Resources uploaded from teacher section for your class."
+msgstr ""
+
+#: .\core\templates\student\lecture_notes.html:74
+msgid "Open File"
+msgstr ""
+
+#: .\core\templates\student\lecture_notes.html:76
+msgid "Open Link"
+msgstr ""
+
+#: .\core\templates\student\lecture_notes.html:78
+msgid "No file/link attached"
+msgstr ""
+
+#: .\core\templates\student\lecture_notes.html:84
+msgid "No class resources available yet for your section."
+msgstr ""
+
+#: .\core\templates\student\profile_missing.html:10
+msgid "Student Profile Not Found"
+msgstr ""
+
+#: .\core\templates\student\profile_missing.html:15
+msgid "Back to Dashboard"
 msgstr ""
 
 #: .\core\templates\student\student_attendance.html:6
 msgid "View attendance marked by teachers"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:51
+#: .\core\templates\student\student_attendance.html:78
 msgid "Student Details"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:57
+#: .\core\templates\student\student_attendance.html:84
 msgid "Student Name"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:59
+#: .\core\templates\student\student_attendance.html:86
 msgid "Roll No."
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:61
+#: .\core\templates\student\student_attendance.html:88
 #: .\core\templates\teacher\manage_subjects.html:30
 msgid "Class"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:63
-#: .\core\templates\teacher\create_subject.html:25
-#: .\core\templates\teacher\subject_resources.html:34
-msgid "Section"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:69
+#: .\core\templates\student\student_attendance.html:96
 msgid "Student Photo"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:72
+#: .\core\templates\student\student_attendance.html:99
 msgid "No Photo"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:79
+#: .\core\templates\student\student_attendance.html:106
 msgid "Select Year & Session"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:83
+#: .\core\templates\student\student_attendance.html:110
 msgid "Year"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:85
+#: .\core\templates\student\student_attendance.html:112
 msgid "All"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:92
+#: .\core\templates\student\student_attendance.html:119
 msgid "Session"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:94
+#: .\core\templates\student\student_attendance.html:121
 msgid "All Sessions"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:95
+#: .\core\templates\student\student_attendance.html:122
 msgid "Odd (Jul-Dec)"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:96
+#: .\core\templates\student\student_attendance.html:123
 msgid "Even (Jan-Jun)"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:99
+#: .\core\templates\student\student_attendance.html:126
 msgid "Submit"
 msgstr ""
 
-#: .\core\templates\student\student_attendance.html:108
-#: .\core\templates\student\student_dashboard.html:23
-#: .\core\templates\teacher\manage_subjects.html:29
-msgid "Subject"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:109
-msgid "No. of Absent"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:110
-msgid "Faculty Name"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:111
-msgid "Total Percentage"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:112
-msgid "Total No. of Days"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:113
-msgid "No. of Present"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:114
-msgid "No. of Excuses"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:130
-msgid "No attendance records found for selected filters."
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:136
-msgid "Overall"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:137
-msgid "Present"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:138
-msgid "Absent"
-msgstr ""
-
-#: .\core\templates\student\student_attendance.html:139
-msgid "Late"
+#: .\core\templates\student\student_attendance.html:134
+msgid ""
+"Class teacher is not assigned for your section yet. Attendance will appear "
+"here only after class teacher marks it."
 msgstr ""
 
 #: .\core\templates\student\student_attendance.html:140
-msgid "Total Days"
+msgid "Marked By Class Teacher"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:145
+msgid "Last Updated"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:152
+#: .\core\templates\student\student_attendance.html:179
+msgid "Total Classes"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:175
+msgid "Cumulative Report Till"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:205
+msgid "No. of Absent"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:206
+msgid "Faculty Name"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:207
+msgid "Total Percentage"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:208
+msgid "Total No. of Days"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:209
+msgid "No. of Present"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:210
+msgid "No. of Excuses"
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:226
+msgid "No attendance records found for selected filters."
+msgstr ""
+
+#: .\core\templates\student\student_attendance.html:232
+msgid "Overall"
 msgstr ""
 
 #: .\core\templates\student\student_dashboard.html:4
@@ -358,172 +739,369 @@ msgstr ""
 msgid "Manage your educational activities efficiently"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:9
-msgid "Quick Overview"
+#: .\core\templates\student\student_dashboard.html:47
+msgid "Learning Command Center"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:11
-msgid ""
-"Access all your educational tools from the central board, view your "
-"assignments, track your progress, and manage your queries efficiently."
+#: .\core\templates\student\student_dashboard.html:48
+msgid "Use quick actions and live streams to stay ahead today."
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:17
-msgid "My Subjects"
+#: .\core\templates\student\student_dashboard.html:51
+msgid "Active Modules"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:28
+#: .\core\templates\student\student_dashboard.html:62
+msgid "Pending Queries"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:70
+msgid "Recently Graded"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:78
+msgid "Assignment Radar"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:79
+msgid "Open All"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:93
+msgid "Due Soon"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:95
+msgid "No Due Date"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:102
+msgid "No pending assignments right now."
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:108
+msgid "Quick Actions"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:110
+msgid "Submit Assignment"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:111
+msgid "Attempt Exam"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:112
+msgid "Ask Teacher"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:113
+msgid "Open Class Notes"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:114
+msgid "Check Attendance"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:121
+msgid "Live Inbox Stream"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:122
+msgid "View Messages"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:132
+msgid "No recent notifications."
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:139
+msgid "Subject Explorer"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:140
+msgid "Open Subjects"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:146
+msgid "Teacher"
+msgstr ""
+
+#: .\core\templates\student\student_dashboard.html:148
+#: .\core\templates\student\subject_list.html:21
 #: .\core\templates\teacher\subject_resources.html:68
 msgid "Notes"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:32
-msgid "Assignments"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:36
-msgid "Teacher"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:45
-msgid "School Performance Summary"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:48
-msgid "Overall Percentage"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:52
-msgid "Subjects"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:56
-msgid "Strong Subjects"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:60
-msgid "Needs Improvement"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:86
-msgid "Topic Performance Analysis"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:110
-msgid "Needs more attention!"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:112
-msgid "Study NCERT Chapter"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:116
-msgid "Great job! Keep it up."
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:129
-msgid "Total Assignments"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:141
-msgid "Pending Queries"
-msgstr ""
-
-#: .\core\templates\student\student_dashboard.html:147
-msgid "Upcoming Tests"
+#: .\core\templates\student\student_dashboard.html:149
+msgid "Tasks"
 msgstr ""
 
 #: .\core\templates\student\student_dashboard.html:153
-msgid "My Enrolled Courses"
+msgid "No subjects available yet."
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:160
-msgid "Active"
+#: .\core\templates\student\student_login.html:66
+msgid "Student Login"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:165
-msgid "Course Files"
+#: .\core\templates\student\student_login.html:67
+msgid "Please login to continue to your account."
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:176
-msgid "Enrolled:"
+#: .\core\templates\student\student_login.html:90
+msgid "Toggle password visibility"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:183
-msgid "Start Learning Today"
+#: .\core\templates\student\student_login.html:98
+msgid "Forgot Password?"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:184
-msgid "Explore our range of courses designed to boost your skills."
+#: .\core\templates\student\student_login.html:116
+msgid "Don't Have an Account?"
 msgstr ""
 
-#: .\core\templates\student\student_dashboard.html:186
-msgid "Browse Courses"
+#: .\core\templates\student\student_signup.html:54
+msgid "Student Sign Up"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:55
+msgid "Enter your details to create an account."
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:76
+msgid "Enter Your Name"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:83
+msgid "Enter Your Email"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:90
+msgid "Enter Your Phone"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:104
+msgid "Class (10-A)"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:124
+#: .\venv\Lib\site-packages\django\utils\text.py:288
+msgid "or"
+msgstr ""
+
+#: .\core\templates\student\student_signup.html:141
+msgid "Sign in with Google"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:3
+#: .\core\templates\student\subject_list.html:4
+msgid "My Subjects"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:5
+msgid "Select a subject to view chapters and performance"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:8
+msgid "Explore this subject"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:18
+msgid "Assigned Teacher"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:20
+#: .\core\templates\teacher\subject_resources.html:67
+msgid "Books"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:22
+msgid "Video"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:23
+#: .\core\templates\teacher\subject_resources.html:70
+msgid "Quiz"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:24
+#: .\core\templates\teacher\subject_resources.html:71
+msgid "Practice Worksheet"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:27
+msgid "Open Subject"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:39
+msgid "No subjects assigned yet"
+msgstr ""
+
+#: .\core\templates\student\subject_list.html:40
+msgid "Check back later or contact your teacher."
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:6
+msgid "Practice mental math with the abacus."
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:19
+msgid "Mode:"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:21
+msgid "Decimal (Base 10)"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:26
+msgid "Columns:"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:30
+msgid "Click beads to move them."
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:33
+msgid "Reset"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:34
+msgid "Random Number"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:44
+msgid "Value:"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:48
+msgid ""
+"Tip: Rightmost column is the ones place, then tens, hundreds, and so on."
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:59
+msgid "AI Abacus Tutor"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:60
+msgid "Ask AI to explain abacus concepts in simple school-level language."
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:62
+msgid "Interactive Learning"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:67
+msgid "Topic"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:69
+msgid "Number representation"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:70
+msgid "Place value"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:71
+msgid "Addition"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:72
+msgid "Subtraction"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:73
+msgid "Complement method"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:74
+msgid "Mental math"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:78
+msgid "Language"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:88
+msgid "Explain Concept"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:94
+msgid "Student Question (optional)"
+msgstr ""
+
+#: .\core\templates\student\virtual_abacus.html:100
+msgid "AI Tutor Response"
 msgstr ""
 
 #: .\core\templates\teacher\base_teacher.html:7
 msgid "EMESYS"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:57
+#: .\core\templates\teacher\base_teacher.html:188
 msgid "Teacher Section"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:61
+#: .\core\templates\teacher\base_teacher.html:192
 msgid "Teacher Dashboard"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:65
+#: .\core\templates\teacher\base_teacher.html:196
 msgid "Assigned Section"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:69
+#: .\core\templates\teacher\base_teacher.html:200
 msgid "Upload Notes"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:73
+#: .\core\templates\teacher\base_teacher.html:204
 msgid "Assign Homework"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:77
+#: .\core\templates\teacher\base_teacher.html:208
 msgid "Upload Results"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:81
+#: .\core\templates\teacher\base_teacher.html:212
 msgid "Post Class Message"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:85
+#: .\core\templates\teacher\base_teacher.html:216
+msgid "Add Holiday"
+msgstr ""
+
+#: .\core\templates\teacher\base_teacher.html:220
 msgid "View Student List"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:89
+#: .\core\templates\teacher\base_teacher.html:224
 #: .\core\templates\teacher\manage_subjects.html:4
 #: .\core\templates\teacher\manage_subjects.html:5
 msgid "Manage Subjects"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:93
+#: .\core\templates\teacher\base_teacher.html:228
 msgid "Attendance Marking"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:98
+#: .\core\templates\teacher\base_teacher.html:233
 msgid "Respond to Queries"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:102
+#: .\core\templates\teacher\base_teacher.html:237
 msgid "Give Remarks to Answers and Tests/Exams"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:106
+#: .\core\templates\teacher\base_teacher.html:241
 msgid "Take Test & Exam"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:110
+#: .\core\templates\teacher\base_teacher.html:245
 msgid "Search"
 msgstr ""
 
-#: .\core\templates\teacher\base_teacher.html:126
+#: .\core\templates\teacher\base_teacher.html:265
 msgid "Manage your dashboard"
 msgstr ""
 
@@ -642,20 +1220,8 @@ msgstr ""
 msgid "Resource Counts"
 msgstr ""
 
-#: .\core\templates\teacher\subject_resources.html:67
-msgid "Books"
-msgstr ""
-
 #: .\core\templates\teacher\subject_resources.html:69
 msgid "Video Lessons"
-msgstr ""
-
-#: .\core\templates\teacher\subject_resources.html:70
-msgid "Quiz"
-msgstr ""
-
-#: .\core\templates\teacher\subject_resources.html:71
-msgid "Practice Worksheet"
 msgstr ""
 
 #: .\core\templates\teacher\subject_resources.html:74
@@ -1297,10 +1863,6 @@ msgid ""
 "may be ambiguous or it may not exist."
 msgstr ""
 
-#: .\venv\Lib\site-packages\django\forms\widgets.py:527
-msgid "Clear"
-msgstr ""
-
 #: .\venv\Lib\site-packages\django\forms\widgets.py:528
 msgid "Currently"
 msgstr ""
@@ -1663,10 +2225,6 @@ msgstr ""
 #, python-format
 msgctxt "String to return when truncating text"
 msgid "%(truncated_text)s…"
-msgstr ""
-
-#: .\venv\Lib\site-packages\django\utils\text.py:288
-msgid "or"
 msgstr ""
 
 #. Translators: This string is used as a separator between list elements

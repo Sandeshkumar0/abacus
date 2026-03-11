@@ -11,10 +11,16 @@ from accounts.models import StudentProfile, CustomUser, ParentStudentRelation
 
 @receiver(post_save, sender=Question, dispatch_uid="notify_students_new_test_unique")
 def notify_students_new_test(sender, instance, created, **kwargs):
-    """Send notification to all students when a new test/question is assigned"""
+    """Send notification only to target section students for a new test/question."""
     if created:  # Only for newly created questions
-        # Get all students
-        students = CustomUser.objects.filter(is_student=True)
+        # Strict targeting: do not broadcast when section is missing.
+        if not instance.section_id:
+            return
+
+        students = CustomUser.objects.filter(
+            is_student=True,
+            student_profile__section_id=instance.section_id,
+        ).distinct()
         
         channel_layer = get_channel_layer()
         
@@ -51,10 +57,7 @@ def notify_students_new_test(sender, instance, created, **kwargs):
             )
 
         # Notify linked parents for affected students
-        if instance.section_id:
-            target_students = StudentProfile.objects.filter(section=instance.section).select_related("user")
-        else:
-            target_students = StudentProfile.objects.all().select_related("user")
+        target_students = StudentProfile.objects.filter(section=instance.section).select_related("user")
 
         for student_profile in target_students:
             parent_links = ParentStudentRelation.objects.filter(student=student_profile).select_related("parent__user")
@@ -94,10 +97,16 @@ def notify_students_new_test(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Exam, dispatch_uid="notify_students_new_exam_unique")
 def notify_students_new_exam(sender, instance, created, **kwargs):
-    """Send notification to all students when a new exam is assigned"""
+    """Send notification only to target section students for a new exam."""
     if created:  # Only for newly created exams
-        # Get all students
-        students = CustomUser.objects.filter(is_student=True)
+        # Strict targeting: do not broadcast when section is missing.
+        if not instance.section_id:
+            return
+
+        students = CustomUser.objects.filter(
+            is_student=True,
+            student_profile__section_id=instance.section_id,
+        ).distinct()
         
         channel_layer = get_channel_layer()
         

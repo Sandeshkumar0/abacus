@@ -56,23 +56,26 @@
 
       <div id="explain-result-box-{{ ans.id }}" class="mt-3 p-3 rounded-lg border border-blue-200 bg-blue-50">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-1">
-          <p class="text-xs uppercase tracking-wide text-blue-700">AI Summary</p>
+          <p class="text-xs uppercase tracking-wide text-blue-700">Parent-Friendly Review</p>
           <div class="flex items-center gap-2">
             <label for="explain-language-{{ ans.id }}" class="text-sm text-gray-700">Language</label>
             <select id="explain-language-{{ ans.id }}" class="border border-gray-300 rounded-md px-2 py-1 text-sm bg-white">
               <option value="english">English</option>
               <option value="hindi">Hindi</option>
               <option value="odia">Odia</option>
+              <option value="tamil">Tamil</option>
+              <option value="punjabi">Punjabi</option>
+              <option value="bengali">Bengali</option>
             </select>
             <button
               type="button"
               onclick="explainAssignmentResult({{ ans.id }})"
               class="inline-flex items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-semibold px-3 py-1.5 hover:bg-blue-700">
-              Explain Result
+              Generate Review
             </button>
           </div>
         </div>
-        <p id="explain-result-text-{{ ans.id }}" class="text-sm text-blue-900">Click "Explain Result" to generate summary.</p>
+        <p id="explain-result-text-{{ ans.id }}" class="text-sm text-blue-900 whitespace-pre-line">Click "Generate Review" for simple parent feedback.</p>
       </div>
 
       <div id="simplified-remark-box-{{ ans.id }}" class="mt-3 p-3 rounded-lg border border-violet-200 bg-violet-50">
@@ -84,6 +87,9 @@
               <option value="english">English</option>
               <option value="hindi">Hindi</option>
               <option value="odia">Odia</option>
+              <option value="tamil">Tamil</option>
+              <option value="punjabi">Punjabi</option>
+              <option value="bengali">Bengali</option>
             </select>
             <button
               type="button"
@@ -93,7 +99,7 @@
             </button>
           </div>
         </div>
-        <p id="simplified-remark-text-{{ ans.id }}" class="text-sm text-violet-900">Choose language and click "Simplify Remark".</p>
+        <p id="simplified-remark-text-{{ ans.id }}" class="text-sm text-violet-900 whitespace-pre-line">Choose language and click "Simplify Remark" for easy wording.</p>
       </div>
 
       {% if ans.answer_text or ans.answer_file %}
@@ -134,7 +140,7 @@
     if (!box || !text) return;
 
     box.classList.remove('hidden');
-    text.textContent = 'Generating summary...';
+    text.textContent = 'Generating parent-friendly review...';
 
     try {
       const res = await fetch("{% url 'parent_assignment_explain' %}", {

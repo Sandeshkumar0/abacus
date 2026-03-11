@@ -103,7 +103,7 @@
     </div>
   </div>
 
-  <div class="att-section-title">{% trans "Select Year & Session" %}</div>
+  <div class="att-section-title">{% trans "Select Year" %}</div>
   <div class="att-panel">
     <form method="get" class="flex flex-wrap items-end gap-3">
       <div>
@@ -113,14 +113,6 @@
           {% for year in available_year_values %}
           <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
           {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label for="session" class="block text-sm font-semibold">{% trans "Session" %}:</label>
-        <select id="session" name="session" class="border border-[#8fa4b8] bg-white px-2 py-1 min-w-[160px]">
-          <option value="">{% trans "All Sessions" %}</option>
-          <option value="odd" {% if selected_session == 'odd' %}selected{% endif %}>{% trans "Odd (Jul-Dec)" %}</option>
-          <option value="even" {% if selected_session == 'even' %}selected{% endif %}>{% trans "Even (Jan-Jun)" %}</option>
         </select>
       </div>
       <button type="submit" class="bg-[#f3d97b] border border-[#7f6d3a] px-4 py-1 font-semibold">{% trans "Submit" %}</button>

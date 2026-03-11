@@ -31,6 +31,15 @@ def _get_parent_profile(user):
         return None
 
 
+def _normalize_class_level(value):
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    for token in ("class", "grade", "std"):
+        text = text.replace(token, "")
+    return text.replace(" ", "").replace("-", "")
+
+
 def get_accessible_sections(user):
     if not user.is_authenticated:
         return Section.objects.none()
@@ -96,26 +105,20 @@ def get_accessible_subjects(user):
         teacher = _get_teacher_profile(user)
         if not teacher:
             return Subject.objects.none()
-        assigned_subject_ids = SubjectTeacherAssignment.objects.filter(
+        assigned_subject_ids = []
+        assignment_qs = SubjectTeacherAssignment.objects.filter(
             teacher=teacher
-        ).values_list("subject_id", flat=True)
-
-        # Also allow class-wide subjects for the sections this teacher can access.
-        section_class_levels = [
-            str(level).strip()
-            for level in get_accessible_sections(user).values_list("class_level", flat=True)
-            if str(level).strip()
-        ]
-        class_level_filters = Q()
-        for level in set(section_class_levels):
-            class_level_filters |= Q(class_level=level) | Q(class_level=f"Class {level}")
-
-        qs = Subject.objects.filter(Q(id__in=assigned_subject_ids) | Q(teacher=teacher))
-        if class_level_filters:
-            qs = Subject.objects.filter(
-                Q(id__in=assigned_subject_ids) | Q(teacher=teacher) | class_level_filters
-            )
-        return qs.distinct()
+        ).select_related("section", "subject")
+        for assignment in assignment_qs:
+            section_level = _normalize_class_level(assignment.section.class_level if assignment.section else "")
+            subject_level = _normalize_class_level(assignment.subject.class_level if assignment.subject else "")
+            if section_level and subject_level and section_level != subject_level:
+                continue
+            assigned_subject_ids.append(assignment.subject_id)
+        # Teacher sees only explicitly assigned subjects (plus own created subjects).
+        return Subject.objects.filter(
+            Q(id__in=assigned_subject_ids) | Q(teacher=teacher)
+        ).distinct()
     if user.role == CustomUser.Role.STUDENT:
         student = StudentProfile.objects.select_related("section").filter(user=user).first()
         if not student:

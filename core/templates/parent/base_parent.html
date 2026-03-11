@@ -4,13 +4,100 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Parent Dashboard{% endblock %}</title>
+  <title>{% block title %}{% trans "Parent Dashboard" %}{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{% static 'portal/css/student_dashboard.css' %}" />
   {% block extra_css %}{% endblock %}
 </head>
 <body class="min-h-screen bg-white flex">
   <style>
+    body {
+      background: #f1f5f9;
+      color: #0f172a;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    body.app-dark {
+      background: #0b1220 !important;
+      color: #e2e8f0 !important;
+    }
+
+    body.app-dark .sidebar,
+    body.app-dark header,
+    body.app-dark main {
+      background: #111827 !important;
+      color: #e2e8f0 !important;
+    }
+
+    .topbar-menu-panel {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      width: 240px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+      z-index: 60;
+      display: none;
+    }
+
+    .topbar-menu-panel.show {
+      display: block;
+    }
+
+    body.app-dark .topbar-menu-panel {
+      background: #111827;
+      border-color: #334155;
+    }
+
+    .menu-card-title {
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .menu-card-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    body.app-dark .menu-card-title {
+      color: #94a3b8;
+    }
+
+    body.app-dark .menu-card-value {
+      color: #e2e8f0;
+    }
+
+    .menu-panel-btn {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8fafc;
+      color: #0f172a;
+      text-align: left;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+    }
+
+    .menu-panel-btn + .menu-panel-btn {
+      margin-top: 8px;
+    }
+
+    body.app-dark .menu-panel-btn {
+      background: #1f2937;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+
     #parent-sidebar {
       width: 320px;
       transition: width 0.25s ease;
@@ -22,41 +109,6 @@
       transition: margin-left 0.25s ease;
     }
 
-    .sidebar-toggle-wrap {
-      padding: 0 24px 10px;
-    }
-
-    .sidebar-toggle-btn {
-      width: 38px;
-      height: 38px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      background: #fff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #334155;
-      cursor: pointer;
-    }
-
-    .sidebar-toggle-icon {
-      width: 18px;
-      height: 14px;
-      display: grid;
-      gap: 3px;
-    }
-
-    .sidebar-toggle-icon span {
-      display: block;
-      height: 2px;
-      border-radius: 2px;
-      background: currentColor;
-    }
-
-    #parent-sidebar.sidebar-collapsed {
-      width: 220px !important;
-    }
-
     @media (max-width: 600px) {
       #parent-sidebar {
         display: none;
@@ -65,17 +117,49 @@
         margin-left: 0 !important;
       }
     }
+
+    .digital-clock-footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.28);
+      background: transparent;
+      padding: 10px 24px 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .digital-clock-box {
+      font-family: "Courier New", monospace;
+      background: transparent;
+      color: #64748b;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 12px;
+      min-width: 0;
+      justify-content: flex-end;
+      letter-spacing: 0.5px;
+    }
+
+    .digital-clock-time {
+      font-size: 20px;
+      letter-spacing: 1.2px;
+      font-weight: 700;
+      color: #334155;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .digital-clock-date {
+      font-size: 14px;
+      color: #64748b;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
   <div id="parent-sidebar" class="sidebar bg-white flex flex-col min-h-screen overflow-y-auto">
     <div class="sidebar-logo p-6 flex justify-center">
       <a href="{% url 'portal-landing' %}">
         <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/cef2b2c7204fa5a2b59ca47c30c035bf78bd37ce" alt="EMESYS Logo" />
       </a>
-    </div>
-    <div class="sidebar-toggle-wrap">
-      <button type="button" id="parent-sidebar-toggle" class="sidebar-toggle-btn" aria-label="Toggle sidebar">
-        <span class="sidebar-toggle-icon"><span></span><span></span><span></span></span>
-      </button>
     </div>
     <div class="sidebar-dashboard mt-2 px-6">
       <a href="{% url 'parent_dashboard' %}">
@@ -85,65 +169,177 @@
       </a>
     </div>
     <div class="sidebar-menu px-6 flex-1">
-      <a href="{% url 'parent_children' %}" class="menu-item"><span>Children</span></a>
-      <a href="{% url 'parent_assignments' %}" class="menu-item"><span>Assignments</span></a>
-      <a href="{% url 'parent_messages' %}" class="menu-item"><span>Messages</span></a>
-      <a href="{% url 'parent_holidays' %}" class="menu-item"><span>Holiday Calendar</span></a>
-      <a href="{% url 'parent_performance' %}" class="menu-item"><span>Performance</span></a>
-      <a href="{% url 'parent_exam_portion' %}" class="menu-item"><span>Exam Portion</span></a>
+      <a href="{% url 'parent_children' %}" class="menu-item"><span>{% trans "Children" %}</span></a>
+      <a href="{% url 'parent_assignments' %}" class="menu-item"><span>{% trans "Assignments" %}</span></a>
+      <a href="{% url 'parent_messages' %}" class="menu-item"><span>{% trans "Messages" %}</span></a>
+      <a href="{% url 'parent_holidays' %}" class="menu-item"><span>{% trans "Holiday Calendar" %}</span></a>
+      <a href="{% url 'parent_performance' %}" class="menu-item"><span>{% trans "Performance" %}</span></a>
+      <a href="{% url 'parent_exam_portion' %}" class="menu-item"><span>{% trans "Exam Portion" %}</span></a>
       <form method="post" action="{% url 'parent_logout' %}">
         {% csrf_token %}
-        <button type="submit" class="menu-item w-full text-left"><span>Logout</span></button>
+        <button type="submit" class="menu-item w-full text-left"><span>{% trans "Logout" %}</span></button>
       </form>
     </div>
   </div>
 
   <div id="parent-main-content" class="flex-1 flex flex-col">
     <header class="bg-white border-b border-gray-200 px-6 py-8">
-      <h1 class="text-3xl font-semibold text-blue-600">{% block header %}Parent Dashboard{% endblock %}</h1>
-      <p class="text-sm text-gray-600 mt-1">{% block subtitle %}Track your child's learning journey{% endblock %}</p>
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-semibold text-blue-600">{% block header %}{% trans "Parent Dashboard" %}{% endblock %}</h1>
+          <p class="text-sm text-gray-600 mt-1">{% block subtitle %}{% trans "Track your child's learning journey" %}{% endblock %}</p>
+        </div>
+        <div class="relative">
+          <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <label for="parent-language-select" class="sr-only">{% trans "Select language" %}</label>
+            <select id="parent-language-select" name="language" onchange="this.form.submit()"
+                    class="text-sm text-gray-700 border border-gray-300 rounded-md p-1 bg-white">
+              {% get_current_language as CURRENT_LANG %}
+              {% get_available_languages as AVAILABLE_LANGUAGES %}
+              {% for code, name in AVAILABLE_LANGUAGES %}
+              <option value="{{ code }}" {% if code == CURRENT_LANG %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+          <div class="flex items-center justify-end gap-2 mt-2 text-gray-400">
+            <button type="button" id="parent-settings-btn" class="p-2 text-gray-400 hover:text-gray-600" title="{% trans 'Settings' %}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15-.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+            <button type="button" id="parent-profile-btn" class="p-2 text-gray-400 hover:text-gray-600">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </button>
+          </div>
+          <div id="parent-settings-panel" class="topbar-menu-panel">
+            <div class="menu-card-title">Appearance</div>
+            <button type="button" id="parent-theme-toggle" class="menu-panel-btn">Switch to Dark Mode</button>
+          </div>
+          <div id="parent-profile-panel" class="topbar-menu-panel" style="right: 4px;">
+            <div class="menu-card-title">Name</div>
+            <div class="menu-card-value">{{ request.user.get_full_name|default:request.user.email }}</div>
+            <div class="menu-card-title">Section</div>
+            <div class="menu-card-value">Linked Child Section</div>
+            <form method="post" action="{% url 'parent_logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="menu-panel-btn">Logout</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </header>
     <main class="flex-1 px-6 py-6">
       {% block content %}{% endblock %}
     </main>
+    <footer class="digital-clock-footer" data-no-runtime-translate="1">
+      <div class="digital-clock-box" aria-label="Current date and time">
+        <span id="parent-digital-clock-time" class="digital-clock-time">--:--:--</span>
+        <span id="parent-digital-clock-date" class="digital-clock-date">---</span>
+      </div>
+    </footer>
   </div>
   <script>
     function syncParentMainOffset() {
       const sidebar = document.getElementById('parent-sidebar');
       const main = document.getElementById('parent-main-content');
       if (!sidebar || !main) return;
+      sidebar.classList.remove('sidebar-collapsed');
       if (window.innerWidth <= 600) {
         main.style.marginLeft = '0px';
         return;
       }
-      const width = Math.round(sidebar.getBoundingClientRect().width || 0);
-      main.style.marginLeft = width > 0 ? `${width}px` : '0px';
+      main.style.marginLeft = '320px';
     }
 
     function setParentSidebarCollapsed(collapsed) {
-      const sidebar = document.getElementById('parent-sidebar');
-      if (!sidebar) return;
-      sidebar.classList.toggle('sidebar-collapsed', !!collapsed);
-      try { localStorage.setItem('parentSidebarCollapsed', collapsed ? '1' : '0'); } catch (e) {}
+      // Sidebar collapse is disabled for fixed layout.
       syncParentMainOffset();
     }
 
     function initParentSidebarToggle() {
-      const sidebar = document.getElementById('parent-sidebar');
-      const toggleBtn = document.getElementById('parent-sidebar-toggle');
-      if (!sidebar || !toggleBtn) return;
-      let collapsed = false;
-      try { collapsed = localStorage.getItem('parentSidebarCollapsed') === '1'; } catch (e) {}
-      setParentSidebarCollapsed(collapsed);
-      toggleBtn.addEventListener('click', function () {
-        setParentSidebarCollapsed(!sidebar.classList.contains('sidebar-collapsed'));
+      // No-op: toggle removed to avoid sidebar movement.
+      syncParentMainOffset();
+    }
+
+    function updateParentDigitalClock() {
+      const timeEl = document.getElementById('parent-digital-clock-time');
+      const dateEl = document.getElementById('parent-digital-clock-date');
+      if (!timeEl || !dateEl) return;
+      const now = new Date();
+      timeEl.textContent = now.toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      dateEl.textContent = now.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function setAppTheme(mode) {
+      const dark = mode === 'dark';
+      document.body.classList.toggle('app-dark', dark);
+      try { localStorage.setItem('dashboardTheme', dark ? 'dark' : 'light'); } catch (e) {}
+      const btn = document.getElementById('parent-theme-toggle');
+      if (btn) btn.textContent = dark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+
+    function initParentTopbarMenus() {
+      const settingsBtn = document.getElementById('parent-settings-btn');
+      const profileBtn = document.getElementById('parent-profile-btn');
+      const settingsPanel = document.getElementById('parent-settings-panel');
+      const profilePanel = document.getElementById('parent-profile-panel');
+      const themeBtn = document.getElementById('parent-theme-toggle');
+      if (!settingsBtn || !profileBtn || !settingsPanel || !profilePanel || !themeBtn) return;
+
+      settingsBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profilePanel.classList.remove('show');
+        settingsPanel.classList.toggle('show');
+      });
+
+      profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        settingsPanel.classList.remove('show');
+        profilePanel.classList.toggle('show');
+      });
+
+      themeBtn.addEventListener('click', function () {
+        const isDark = document.body.classList.contains('app-dark');
+        setAppTheme(isDark ? 'light' : 'dark');
       });
     }
 
     window.addEventListener('resize', syncParentMainOffset);
+    document.addEventListener('click', function (event) {
+      const settingsPanel = document.getElementById('parent-settings-panel');
+      const profilePanel = document.getElementById('parent-profile-panel');
+      if (settingsPanel && !settingsPanel.contains(event.target) && event.target.id !== 'parent-settings-btn') {
+        settingsPanel.classList.remove('show');
+      }
+      if (profilePanel && !profilePanel.contains(event.target) && event.target.id !== 'parent-profile-btn') {
+        profilePanel.classList.remove('show');
+      }
+    });
     document.addEventListener('DOMContentLoaded', function () {
+      let savedTheme = 'light';
+      try { savedTheme = localStorage.getItem('dashboardTheme') || 'light'; } catch (e) {}
+      setAppTheme(savedTheme);
+      initParentTopbarMenus();
       initParentSidebarToggle();
       syncParentMainOffset();
+      updateParentDigitalClock();
+      setInterval(updateParentDigitalClock, 1000);
     });
   </script>
 </body>

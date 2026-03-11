@@ -33,6 +33,46 @@ from ..models import (
 from ..services.dashboard_metrics import get_student_metrics
 
 
+def _normalize_class_level(value):
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    for token in ("class", "grade", "std"):
+        text = text.replace(token, "")
+    return text.replace(" ", "").replace("-", "")
+
+
+def _teacher_display_name(teacher_profile):
+    if not teacher_profile or not getattr(teacher_profile, "user", None):
+        return ""
+    full_name = (teacher_profile.user.get_full_name() or "").strip()
+    if full_name:
+        return full_name
+    return (teacher_profile.user.email or "").strip()
+
+
+def _section_teacher_names_by_subject(section, subject_ids):
+    if not section or not subject_ids:
+        return {}
+    mapping = {}
+    section_level = _normalize_class_level(section.class_level)
+    assignments = SubjectTeacherAssignment.objects.filter(
+        section=section,
+        subject_id__in=subject_ids,
+    ).select_related("teacher__user", "subject", "section")
+    for assignment in assignments:
+        subject_level = _normalize_class_level(assignment.subject.class_level if assignment.subject else "")
+        if section_level and subject_level and section_level != subject_level:
+            continue
+        teacher_name = _teacher_display_name(assignment.teacher)
+        if not teacher_name:
+            continue
+        names = mapping.setdefault(assignment.subject_id, [])
+        if teacher_name not in names:
+            names.append(teacher_name)
+    return mapping
+
+
 @login_required(login_url='student_login')
 def student_dashboard(request):
     """Main dashboard view for students with real statistics."""
@@ -83,19 +123,11 @@ def student_dashboard(request):
     subjects = list(accessible_subjects_qs[:8])
     section = student_profile.section
     language = getattr(request, "LANGUAGE_CODE", "en")
+    section_teacher_map = _section_teacher_names_by_subject(section, [subject.id for subject in subjects])
     subject_cards = []
     for subject in subjects:
-        teacher_assignment = None
-        if section:
-            teacher_assignment = SubjectTeacherAssignment.objects.filter(
-                subject=subject,
-                section=section,
-            ).select_related("teacher__user").first()
-        teacher_name = ""
-        if teacher_assignment and teacher_assignment.teacher and teacher_assignment.teacher.user:
-            teacher_name = teacher_assignment.teacher.user.get_full_name()
-        elif subject.teacher and subject.teacher.user:
-            teacher_name = subject.teacher.user.get_full_name()
+        teacher_names = section_teacher_map.get(subject.id, [])
+        teacher_name = ", ".join(teacher_names) if teacher_names else "Not Assigned"
 
         notes_qs = TeacherNote.objects.filter(subject=subject, is_published=True)
         if section:
@@ -132,7 +164,7 @@ def student_dashboard(request):
         subject_cards.append(
             {
                 "subject": subject,
-                "teacher_name": teacher_name or "Not Assigned",
+                "teacher_name": teacher_name,
                 "notes_count": notes_count,
                 "assignments_count": assignments_count,
                 "intro_text": intro_text,
@@ -1373,20 +1405,12 @@ def subject_list(request):
     subjects = list(get_accessible_subjects(request.user))
     student = StudentProfile.objects.filter(user=request.user).select_related("section").first()
     section = student.section if student else None
+    section_teacher_map = _section_teacher_names_by_subject(section, [subject.id for subject in subjects])
 
     subject_cards = []
     for subject in subjects:
-        assignment = None
-        if section:
-            assignment = SubjectTeacherAssignment.objects.filter(
-                subject=subject,
-                section=section,
-            ).select_related("teacher__user").first()
-        assigned_teacher_name = "Not Assigned"
-        if assignment and assignment.teacher and assignment.teacher.user:
-            assigned_teacher_name = assignment.teacher.user.get_full_name()
-        elif subject.teacher and subject.teacher.user:
-            assigned_teacher_name = subject.teacher.user.get_full_name()
+        teacher_names = section_teacher_map.get(subject.id, [])
+        assigned_teacher_name = ", ".join(teacher_names) if teacher_names else "Not Assigned"
 
         resource_qs = SubjectResource.objects.filter(subject=subject, is_published=True)
         if section:

@@ -13,6 +13,7 @@ from dashboard.models import (
     AttendanceRecord,
     Exam,
     ExamAnswer,
+    Holiday,
     Notification,
     ParentMessageClearState,
     Question,
@@ -627,13 +628,20 @@ def parent_holidays(request):
     parent_profile = _parent_guard(request)
     if not isinstance(parent_profile, ParentProfile):
         return parent_profile
+    children = _linked_children(parent_profile)
+    section_ids = children.exclude(section_id__isnull=True).values_list("section_id", flat=True).distinct()
+    holidays_qs = Holiday.objects.filter(
+        Q(holiday_type=Holiday.TYPE_GENERAL)
+        | Q(holiday_type=Holiday.TYPE_SECTION, section_id__in=section_ids)
+    )
     holidays = [
-        {"name": "Republic Day", "date": "2026-01-26"},
-        {"name": "Holi", "date": "2026-03-04"},
-        {"name": "Independence Day", "date": "2026-08-15"},
-        {"name": "Gandhi Jayanti", "date": "2026-10-02"},
-        {"name": "Diwali", "date": "2026-11-08"},
-        {"name": "Christmas", "date": "2026-12-25"},
+        {
+            "name": item.title,
+            "date": item.date.isoformat(),
+            "description": item.description or "",
+            "type": item.holiday_type,
+        }
+        for item in holidays_qs.order_by("date", "title")
     ]
     return render(request, "parent/parent_holidays.html", {"holidays": holidays})
 

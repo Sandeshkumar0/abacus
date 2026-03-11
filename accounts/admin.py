@@ -47,6 +47,7 @@ class TeacherSectionAssignmentAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
         section = cleaned_data.get("section")
         sections = cleaned_data.get("sections")
+        subjects = list(cleaned_data.get("subjects") or [])
         teacher = cleaned_data.get("teacher")
         is_class_teacher = cleaned_data.get("is_class_teacher")
 
@@ -69,6 +70,29 @@ class TeacherSectionAssignmentAdminForm(forms.ModelForm):
 
         if not teacher:
             raise forms.ValidationError("Teacher is required.")
+
+        def normalize_class_level(value):
+            text = str(value or "").strip().lower()
+            if not text:
+                return ""
+            for token in ("class", "grade", "std"):
+                text = text.replace(token, "")
+            return text.replace(" ", "").replace("-", "")
+
+        mismatches = []
+        for selected_section in selected_sections:
+            section_level = normalize_class_level(selected_section.class_level)
+            for subject in subjects:
+                subject_level = normalize_class_level(subject.class_level)
+                if section_level and subject_level and section_level != subject_level:
+                    mismatches.append(
+                        f"{subject.name} ({subject.class_level}) cannot be assigned to {selected_section}."
+                    )
+        if mismatches:
+            preview = "; ".join(mismatches[:4])
+            if len(mismatches) > 4:
+                preview += "; ..."
+            raise forms.ValidationError(preview)
 
         return cleaned_data
 

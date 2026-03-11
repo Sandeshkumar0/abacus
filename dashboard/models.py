@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from accounts.models import StudentProfile, TeacherProfile, CustomUser, Section, ParentProfile
 from django.utils import timezone
 
@@ -272,6 +273,38 @@ class SubjectTeacherAssignment(models.Model):
 
     def __str__(self):
         return f"{self.teacher.user.email} -> {self.subject.name} ({self.section})"
+
+    @staticmethod
+    def _normalize_class_level(value):
+        text = str(value or "").strip().lower()
+        if not text:
+            return ""
+        for token in ("class", "grade", "std"):
+            text = text.replace(token, "")
+        return text.replace(" ", "").replace("-", "")
+
+    def clean(self):
+        super().clean()
+        if not self.section_id or not self.subject_id:
+            return
+
+        section_level = self._normalize_class_level(self.section.class_level)
+        subject_level = self._normalize_class_level(self.subject.class_level)
+
+        # Enforce class-level compatibility (e.g. section 10A can only map to class 10 subjects).
+        if section_level and subject_level and section_level != subject_level:
+            raise ValidationError(
+                {
+                    "subject": (
+                        f"Subject class '{self.subject.class_level}' does not match "
+                        f"section class '{self.section.class_level}'."
+                    )
+                }
+            )
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
 
 class Chapter(models.Model):

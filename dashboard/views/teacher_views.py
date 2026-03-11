@@ -1327,8 +1327,21 @@ def teacher_assigned_sections(request):
         section_id__in=section_ids,
     ).select_related("subject")
 
+    def _normalize_class_level(value):
+        text = str(value or "").strip().lower()
+        if not text:
+            return ""
+        for token in ("class", "grade", "std"):
+            text = text.replace(token, "")
+        return text.replace(" ", "").replace("-", "")
+
     assigned_subjects_by_section = {}
     for item in assignment_qs:
+        section_level = _normalize_class_level(item.section.class_level if item.section else "")
+        subject_level = _normalize_class_level(item.subject.class_level if item.subject else "")
+        # Hide legacy invalid mappings where section class and subject class differ.
+        if section_level and subject_level and section_level != subject_level:
+            continue
         names = assigned_subjects_by_section.setdefault(item.section_id, [])
         if item.subject and item.subject.name not in names:
             names.append(item.subject.name)
@@ -1654,9 +1667,25 @@ def manage_subjects(request):
     """View and manage teacher's subjects and chapters."""
     teacher_profile, _ = TeacherProfile.objects.get_or_create(user=request.user)
     subjects = get_accessible_subjects(request.user).prefetch_related('chapters')
+
+    def _normalize_class_level(value):
+        text = str(value or "").strip().lower()
+        if not text:
+            return ""
+        for token in ("class", "grade", "std"):
+            text = text.replace(token, "")
+        return text.replace(" ", "").replace("-", "")
+
     subject_rows = []
     for subject in subjects:
-        assignments = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
+        all_assignments = SubjectTeacherAssignment.objects.filter(subject=subject).select_related("section", "teacher__user")
+        assignments = []
+        for assignment in all_assignments:
+            section_level = _normalize_class_level(assignment.section.class_level if assignment.section else "")
+            subject_level = _normalize_class_level(assignment.subject.class_level if assignment.subject else "")
+            if section_level and subject_level and section_level != subject_level:
+                continue
+            assignments.append(assignment)
         subject_rows.append(
             {
                 "subject": subject,

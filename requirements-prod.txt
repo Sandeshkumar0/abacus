@@ -1,0 +1,2 @@
+channels-redis>=4.1.0
+django-redis>=5.4.0

@@ -11,8 +11,11 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-zuv%+p=w_3sq*&xb5w!%a#&&b6z-*%php9p)d@7@re_lmgswok"
-DEBUG = True
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-zuv%+p=w_3sq*&xb5w!%a#&&b6z-*%php9p)d@7@re_lmgswok",
+)
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
@@ -68,7 +71,7 @@ SESSION_COOKIE_SECURE = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_NAME = "sessionid"
-SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 
 # Email settings
@@ -122,11 +125,22 @@ WSGI_APPLICATION = "abacus_site.wsgi.application"
 ASGI_APPLICATION = "abacus_site.asgi.application"
 
 
-# Channels (in-memory for local/dev)
+# Channels — InMemory by default (dev); set CHANNEL_LAYER_BACKEND env var to
+# channels_redis.core.RedisChannelLayer for production Redis-backed layer.
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    }
+        "BACKEND": os.environ.get(
+            "CHANNEL_LAYER_BACKEND",
+            "channels.layers.InMemoryChannelLayer",
+        ),
+        "CONFIG": {
+            "hosts": [(os.environ.get("REDIS_HOST", "127.0.0.1"), int(os.environ.get("REDIS_PORT", 6379)))],
+            "capacity": 1500,
+            "expiry": 10,
+        }
+        if "redis" in os.environ.get("CHANNEL_LAYER_BACKEND", "")
+        else {},
+    },
 }
 
 
@@ -138,6 +152,20 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": os.environ.get("DB_HOST", "localhost"),
         "PORT": os.environ.get("DB_PORT", "5432"),
+    }
+}
+DATABASES["default"]["CONN_MAX_AGE"] = int(os.environ.get("DB_CONN_MAX_AGE", "60"))
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        "TIMEOUT": 300,
+        "OPTIONS": {
+            "MAX_ENTRIES": 5000,
+        },
     }
 }
 

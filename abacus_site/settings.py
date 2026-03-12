@@ -158,16 +158,26 @@ DATABASES["default"]["CONN_MAX_AGE"] = int(os.environ.get("DB_CONN_MAX_AGE", "60
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
-        "TIMEOUT": 300,
-        "OPTIONS": {
-            "MAX_ENTRIES": 5000,
-        },
+USE_REDIS_CACHE = os.environ.get("USE_REDIS_CACHE", "False").lower() in ("true", "1", "yes")
+
+if USE_REDIS_CACHE:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
+            "TIMEOUT": 300,
+            "OPTIONS": {},
+        }
     }
-}
+else:
+    # Safe local default for development when Redis service is not running.
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "abacusmaster-local-cache",
+            "TIMEOUT": 300,
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [

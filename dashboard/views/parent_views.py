@@ -19,6 +19,7 @@ from dashboard.models import (
     ParentMessageClearState,
     Question,
     StudentAnswer,
+    TimetableEntry,
     TeacherClassMessage,
 )
 
@@ -353,6 +354,39 @@ def _message_feeds_for_student(student):
     return teacher_feed, ann_feed
 
 
+def _resolve_selected_day(request):
+    raw = (request.GET.get("day") or "").strip()
+    if raw.isdigit():
+        value = int(raw)
+        if 1 <= value <= 7:
+            return value
+    return timezone.localdate().isoweekday()
+
+
+def _timetable_for_student_day(student, day_of_week):
+    if not student or not student.section_id:
+        return []
+    rows = (
+        TimetableEntry.objects.filter(section=student.section, day_of_week=day_of_week)
+        .select_related("subject", "teacher__user")
+        .order_by("start_time", "period_label")
+    )
+    return [
+        {
+            "period": row.period_label,
+            "subject": row.subject.name if row.subject_id else "-",
+            "start": row.start_time.strftime("%I:%M %p"),
+            "end": row.end_time.strftime("%I:%M %p"),
+            "teacher": (
+                row.teacher.user.get_full_name()
+                if row.teacher_id and row.teacher and row.teacher.user
+                else "-"
+            ),
+        }
+        for row in rows
+    ]
+
+
 @login_required(login_url="parent_login")
 def parent_dashboard(request):
     parent_profile = _parent_guard(request)
@@ -361,11 +395,25 @@ def parent_dashboard(request):
 
     children = _linked_children(parent_profile)
     selected_child, selected_child_id = _select_child(request, children)
+    selected_day = _resolve_selected_day(request)
+    day_options = [
+        {"value": 1, "label": "Monday"},
+        {"value": 2, "label": "Tuesday"},
+        {"value": 3, "label": "Wednesday"},
+        {"value": 4, "label": "Thursday"},
+        {"value": 5, "label": "Friday"},
+        {"value": 6, "label": "Saturday"},
+        {"value": 7, "label": "Sunday"},
+    ]
+    day_labels = {item["value"]: item["label"] for item in day_options}
+    prev_day = 7 if selected_day == 1 else selected_day - 1
+    next_day = 1 if selected_day == 7 else selected_day + 1
     attendance_stats = _attendance_snapshot(selected_child)
 
     pending_assignments = Question.objects.none()
     upcoming_exams = Exam.objects.none()
     teacher_messages_feed, announcements_feed = ([], [])
+    day_timetable = []
 
     if selected_child and selected_child.section_id:
         answered_q_ids = StudentAnswer.objects.filter(student=selected_child).values_list("question_id", flat=True)
@@ -382,6 +430,7 @@ def parent_dashboard(request):
         )
 
         teacher_messages_feed, announcements_feed = _message_feeds_for_student(selected_child)
+        day_timetable = _timetable_for_student_day(selected_child, selected_day)
 
     performance_graph = _performance_graph_data(selected_child)
     notifications_feed = Notification.objects.filter(recipient=request.user).order_by("-created_at")[:6]
@@ -401,6 +450,12 @@ def parent_dashboard(request):
         "upcoming_exams_count": upcoming_exams.count(),
         "teacher_messages_feed": teacher_messages_feed,
         "announcements_feed": announcements_feed,
+        "today_timetable": day_timetable,
+        "selected_day": selected_day,
+        "selected_day_label": day_labels.get(selected_day, "Monday"),
+        "day_options": day_options,
+        "prev_day": prev_day,
+        "next_day": next_day,
         "notifications_feed": notifications_feed,
         "performance_graph_labels": performance_graph["labels"],
         "performance_graph_values": performance_graph["values"],

@@ -10,6 +10,7 @@
   <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
     <form method="get" class="flex items-center gap-2">
       <label class="text-sm font-semibold text-gray-700" for="child_id">{% trans "Child" %}</label>
+      <input type="hidden" name="day" value="{{ selected_day }}">
       <select id="child_id" name="child_id" class="border rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
         {% for child in children %}
         <option value="{{ child.pk }}" {% if selected_child and child.pk == selected_child.pk %}selected{% endif %}>
@@ -22,6 +23,41 @@
 </div>
 
 {% if selected_child %}
+<div class="bg-white border rounded-xl p-6 mb-6">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+    <div>
+      <h3 class="text-lg font-semibold text-blue-600">{% trans "Timetable" %} - {{ selected_day_label }}</h3>
+      <p class="text-xs text-gray-500">{{ selected_child.section|default:"-" }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="?child_id={{ selected_child_id }}&day={{ prev_day }}" class="px-3 py-2 rounded-lg border text-sm bg-slate-50 hover:bg-slate-100" aria-label="{% trans 'Previous day' %}">&larr;</a>
+      <form method="get" class="flex items-center gap-2">
+        <input type="hidden" name="child_id" value="{{ selected_child_id }}">
+        <label for="day" class="text-xs text-gray-600">{% trans "Select Day" %}</label>
+        <select id="day" name="day" class="border rounded-lg px-2 py-2 text-sm" onchange="this.form.submit()">
+          {% for day in day_options %}
+          <option value="{{ day.value }}" {% if day.value == selected_day %}selected{% endif %}>{{ day.label }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <a href="?child_id={{ selected_child_id }}&day={{ next_day }}" class="px-3 py-2 rounded-lg border text-sm bg-slate-50 hover:bg-slate-100" aria-label="{% trans 'Next day' %}">&rarr;</a>
+    </div>
+  </div>
+  <div class="space-y-2">
+    {% for row in today_timetable %}
+    <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+        <p class="text-sm font-semibold text-slate-800">{{ row.period }} - {{ row.subject }}</p>
+        <p class="text-xs text-slate-600">{{ row.start }} - {{ row.end }}</p>
+      </div>
+      <p class="text-xs text-slate-500 mt-1">{% trans "Teacher" %}: {{ row.teacher }}</p>
+    </div>
+    {% empty %}
+    <p class="text-gray-500 text-sm">{% trans "No timetable entries found for selected day." %}</p>
+    {% endfor %}
+  </div>
+</div>
+
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
   <div class="bg-white border rounded-xl p-4">
     <p class="text-sm text-gray-500">{% trans "Attendance %" %}</p>
@@ -87,36 +123,6 @@
   </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "Class Messages" %}</h3>
-    <div class="space-y-2">
-      {% for item in teacher_messages_feed %}
-      <div class="p-3 rounded-lg bg-yellow-50">
-        <p class="font-semibold">{{ item.title }}</p>
-        <p class="text-sm text-gray-700">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">{% trans "From" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
-      </div>
-      {% empty %}
-      <p class="text-gray-500">{% trans "No class messages." %}</p>
-      {% endfor %}
-    </div>
-  </div>
-  <div class="bg-white border rounded-xl p-6">
-    <h3 class="text-lg font-semibold text-blue-600 mb-4">{% trans "General Announcements" %}</h3>
-    <div class="space-y-2">
-      {% for item in announcements_feed %}
-      <div class="p-3 rounded-lg bg-green-50">
-        <p class="font-semibold">{{ item.title }}</p>
-        <p class="text-sm text-gray-700">{{ item.body }}</p>
-        <p class="text-xs text-gray-500 mt-1">{% trans "By" %} {{ item.sender }} | {{ item.section }} | {{ item.created_at|date:"d M Y, h:i A" }}</p>
-      </div>
-      {% empty %}
-      <p class="text-gray-500">{% trans "No announcements." %}</p>
-      {% endfor %}
-    </div>
-  </div>
-</div>
 {% else %}
 <div class="bg-white border rounded-xl p-6 text-gray-600">
   {% trans "No linked student found. Link a student profile from admin first." %}

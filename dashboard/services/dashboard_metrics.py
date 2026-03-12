@@ -37,12 +37,17 @@ def get_student_metrics(user):
     now = timezone.now()
     week_ago = now - timezone.timedelta(days=7)
 
-    submitted_question_ids = StudentAnswer.objects.filter(
-        student=student_profile
-    ).values_list("question_id", flat=True)
+    from django.db.models import Exists, OuterRef
 
     total_assignments = Question.objects.count()
-    pending_assignments = Question.objects.exclude(id__in=submitted_question_ids).count()
+    pending_assignments = Question.objects.exclude(
+        Exists(
+            StudentAnswer.objects.filter(
+                question=OuterRef('pk'),
+                student=student_profile
+            )
+        )
+    ).count()
     pending_queries = Query.objects.filter(student=student_profile).filter(
         Q(response__isnull=True) | Q(response="")
     ).count()

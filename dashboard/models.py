@@ -50,6 +50,12 @@ class StudentAnswer(models.Model):
     remarks = models.TextField(blank=True, null=True)
     time_taken_seconds = models.PositiveIntegerField(default=0, help_text="Time taken to answer in seconds")
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['-submitted_at'], name='sa_submitted_desc'),
+            models.Index(fields=['student', '-submitted_at'], name='sa_student_submitted'),
+            models.Index(fields=['student', 'question'], name='sa_student_question'),
+        ]
 
     def __str__(self):
         return f"Answer by {self.student_name.email} for Q-{self.question.id}"
@@ -63,6 +69,12 @@ class Query(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     response = models.TextField(blank=True, null=True)
     responded_by = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['student', '-submitted_at'], name='q_student_submitted'),
+        ]
+        verbose_name_plural = "Queries"
 
     def __str__(self):
         return f"Query by {self.student_name.email} ({self.student_roll.roll_number})"
@@ -85,6 +97,11 @@ class Exam(models.Model):
         related_name="exams",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['-due_date'], name='exam_due_date_desc'),
+        ]
 
     def __str__(self):
         return f"{self.title} (Due {self.due_date.date()})"
@@ -164,6 +181,9 @@ class Notification(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read', '-created_at'], name='notif_recipient_read'),
+        ]
     
     def __str__(self):
         return f"{self.notification_type} for {self.recipient.email} - {self.title}"

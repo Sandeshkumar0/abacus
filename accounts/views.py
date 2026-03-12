@@ -1,4 +1,5 @@
 import random
+import uuid
 
 from django.conf import settings
 from django.contrib import messages
@@ -18,6 +19,17 @@ from .models import (
     TeacherProfile,
     TeacherSectionAssignment,
 )
+
+
+def _get_default_teacher():
+    """Cache the default teacher assignment to avoid repeated DB hits."""
+    from django.core.cache import cache
+    teacher = cache.get("_default_teacher_profile")
+    if teacher is None:
+        teacher = TeacherProfile.objects.first()
+        if teacher:
+            cache.set("_default_teacher_profile", teacher, timeout=300)
+    return teacher
 
 
 def _set_session_expiry(request, remember_me):
@@ -49,17 +61,14 @@ def student_login(request):
                 user.save(update_fields=["role", "is_student", "is_teacher"])
             # Ensure student profile exists; some accounts may be created from admin only.
             if not StudentProfile.objects.filter(user=user).exists():
-                while True:
-                    roll = str(random.randint(10000000, 99999999))
-                    if not StudentProfile.objects.filter(roll_number=roll).exists():
-                        break
+                roll = str(uuid.uuid4().int)[:8]
                 StudentProfile.objects.create(
                     user=user,
                     phone="0000000000",
                     student_class="Unknown",
                     dob=timezone.now().date(),
                     roll_number=roll,
-                    assigned_teacher=TeacherProfile.objects.first(),
+                    assigned_teacher=_get_default_teacher(),
                 )
             login(request, user)
             _set_session_expiry(request, remember_me)
@@ -87,12 +96,9 @@ def student_signup(request):
         dob = (request.POST.get("dob") or "").strip()
 
         def generate_unique_roll_number():
-            while True:
-                roll = str(random.randint(10000000, 99999999))
-                if not StudentProfile.objects.filter(roll_number=roll).exists():
-                    return roll
+            return str(uuid.uuid4().int)[:8]
 
-        assigned_teacher = TeacherProfile.objects.first()
+        assigned_teacher = _get_default_teacher()
         parsed_dob = parse_date(dob)
 
         existing_user = CustomUser.objects.filter(email__iexact=email).first()
